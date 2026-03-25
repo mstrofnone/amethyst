@@ -36,6 +36,7 @@ import com.vitorpamplona.amethyst.model.LocalCache
 import com.vitorpamplona.amethyst.model.User
 import com.vitorpamplona.amethyst.service.relayClient.searchCommand.SearchQueryState
 import com.vitorpamplona.amethyst.ui.dal.DefaultFeedOrder
+import com.vitorpamplona.amethyst.ui.note.creators.userSuggestions.NamecoinResolutionState
 import com.vitorpamplona.amethyst.ui.note.creators.userSuggestions.userUriPrefixes
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.relays.common.relaySetupInfoBuilder
 import com.vitorpamplona.quartz.nip01Core.core.toHexKey
@@ -43,6 +44,7 @@ import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.normalizeRelayUrlOrNull
 import com.vitorpamplona.quartz.nip05DnsIdentifiers.INip05Client
 import com.vitorpamplona.quartz.nip05DnsIdentifiers.Nip05Id
+import com.vitorpamplona.quartz.nip05DnsIdentifiers.namecoin.NamecoinResolveOutcome
 import com.vitorpamplona.quartz.nip10Notes.content.findHashtags
 import com.vitorpamplona.quartz.nip19Bech32.Nip19Parser
 import com.vitorpamplona.quartz.nip19Bech32.entities.NProfile
@@ -66,6 +68,14 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
+private fun isNamecoinInput(term: String): Boolean {
+    val lower = term.lowercase()
+    return lower.endsWith(".bit") ||
+        lower.startsWith("d/") ||
+        lower.startsWith("id/") ||
+        (lower.contains('@') && lower.endsWith(".bit"))
+}
+
 @Stable
 @OptIn(FlowPreview::class)
 class SearchBarViewModel(
@@ -78,6 +88,9 @@ class SearchBarViewModel(
 
     val invalidations = MutableStateFlow(0)
     val searchValueFlow = MutableStateFlow("")
+
+    /** Tracks Namecoin resolution status for the UI. */
+    val namecoinState = MutableStateFlow<NamecoinResolutionState>(NamecoinResolutionState.Idle)
 
     val searchTerm =
         searchValueFlow
@@ -95,7 +108,10 @@ class SearchBarViewModel(
         searchTerm
             .debounce(400)
             .mapLatest { term ->
-                if (term.contains('@')) {
+                if (isNamecoinInput(term)) {
+                    resolveNamecoin(term)
+                } else if (term.contains('@')) {
+                    namecoinState.emit(NamecoinResolutionState.Idle)
                     runCatching {
                         Nip05Id.parse(term)?.let { nip05 ->
                             nip05Client.get(nip05)?.let { info ->
@@ -112,6 +128,7 @@ class SearchBarViewModel(
                         }
                     }.getOrNull()
                 } else if (term.startsWithAny(userUriPrefixes)) {
+                    namecoinState.emit(NamecoinResolutionState.Idle)
                     runCatching {
                         Nip19Parser.uriToRoute(term)?.entity?.let { parsed ->
                             when (parsed) {
@@ -138,11 +155,121 @@ class SearchBarViewModel(
                         }
                     }.getOrNull()
                 } else if (term.length == 64 && Hex.isHex64(term)) {
+                    namecoinState.emit(NamecoinResolutionState.Idle)
                     account.cache.getOrCreateUser(term)
                 } else {
+                    namecoinState.emit(NamecoinResolutionState.Idle)
                     null
                 }
             }.flowOn(Dispatchers.IO)
+
+    private suspend fun resolveNamecoin(term: String): User? {
+        namecoinState.emit(NamecoinResolutionState.Resolving)
+
+        val identifier =
+            if (term.contains('@')) {
+                term
+            } else if (term.endsWith(".bit", ignoreCase = true)) {
+                "_@$term"
+            } else {
+                term
+            }
+
+        return try {
+            val resolver =
+                (nip05Client as? com.vitorpamplona.quartz.nip05DnsIdentifiers.Nip05Client)?.namecoinResolver
+            if (resolver != null) {
+                val outcome = resolver.resolveDetailed(identifier)
+                when (outcome) {
+                    is NamecoinResolveOutcome.Success -> {
+                        val user = account.cache.checkGetOrCreateUser(outcome.result.pubkey)
+                        if (user != null) {
+                            outcome.result.relays.forEach {
+                                it.normalizeRelayUrlOrNull()?.let { relay ->
+                                    account.cache.relayHints.addKey(user.pubkey(), relay)
+                                }
+                            }
+                            namecoinState.emit(
+                                NamecoinResolutionState.Resolved(user, outcome.result.namecoinName),
+                            )
+                        } else {
+                            namecoinState.emit(
+                                NamecoinResolutionState.Error("Could not create user from resolved pubkey"),
+                            )
+                        }
+                        user
+                    }
+
+                    is NamecoinResolveOutcome.NameNotFound -> {
+                        namecoinState.emit(
+                            NamecoinResolutionState.Error("Name \"${outcome.name}\" not found on Namecoin blockchain"),
+                        )
+                        null
+                    }
+
+                    is NamecoinResolveOutcome.NoNostrField -> {
+                        namecoinState.emit(
+                            NamecoinResolutionState.Error("Name \"${outcome.name}\" exists but has no Nostr identity"),
+                        )
+                        null
+                    }
+
+                    is NamecoinResolveOutcome.ServersUnreachable -> {
+                        namecoinState.emit(
+                            NamecoinResolutionState.Error("ElectrumX servers unreachable: ${outcome.message}"),
+                        )
+                        null
+                    }
+
+                    is NamecoinResolveOutcome.InvalidIdentifier -> {
+                        namecoinState.emit(
+                            NamecoinResolutionState.Error("Invalid Namecoin identifier: ${outcome.identifier}"),
+                        )
+                        null
+                    }
+
+                    is NamecoinResolveOutcome.Timeout -> {
+                        namecoinState.emit(NamecoinResolutionState.Error("Namecoin resolution timed out"))
+                        null
+                    }
+                }
+            } else {
+                // Fallback without detailed errors
+                val nip05 =
+                    if (term.contains('@')) {
+                        Nip05Id.parse(term)
+                    } else if (term.endsWith(".bit", ignoreCase = true)) {
+                        Nip05Id("_", term.lowercase().removeSuffix(".bit"))
+                    } else {
+                        null
+                    }
+                val user =
+                    nip05?.let {
+                        nip05Client.get(it)?.let { info ->
+                            val u = account.cache.checkGetOrCreateUser(info.pubkey)
+                            if (u != null) {
+                                info.relays.forEach {
+                                    it.normalizeRelayUrlOrNull()?.let { relay ->
+                                        account.cache.relayHints.addKey(u.pubkey(), relay)
+                                    }
+                                }
+                                namecoinState.emit(NamecoinResolutionState.Resolved(u, term))
+                            }
+                            u
+                        }
+                    }
+                if (user == null) {
+                    namecoinState.emit(NamecoinResolutionState.Error("Namecoin resolution failed"))
+                }
+                user
+            }
+        } catch (e: Exception) {
+            namecoinState.emit(
+                NamecoinResolutionState.Error("Namecoin resolution failed: ${e.message ?: "unknown error"}"),
+            )
+            null
+        }
+    }
 
     val searchResultsUsers =
         combine(
