@@ -68,6 +68,8 @@ import com.vitorpamplona.amethyst.commons.viewmodels.SearchBarState
 import com.vitorpamplona.amethyst.ios.cache.IosLocalCache
 import com.vitorpamplona.amethyst.ios.feeds.IosHashtagFeedFilter
 import com.vitorpamplona.amethyst.ios.feeds.IosSearchFeedFilter
+import com.vitorpamplona.amethyst.ios.namecoin.IosNamecoinNameService
+import com.vitorpamplona.amethyst.ios.namecoin.NamecoinResolveState
 import com.vitorpamplona.amethyst.ios.network.IosRelayConnectionManager
 import com.vitorpamplona.amethyst.ios.subscriptions.FilterBuilders
 import com.vitorpamplona.amethyst.ios.subscriptions.IosSubscriptionsCoordinator
@@ -78,6 +80,8 @@ import com.vitorpamplona.amethyst.ios.ui.note.NoteCard
 import com.vitorpamplona.amethyst.ios.ui.toNoteDisplayData
 import com.vitorpamplona.amethyst.ios.viewmodels.IosFeedViewModel
 import com.vitorpamplona.quartz.nip01Core.metadata.MetadataEvent
+import com.vitorpamplona.quartz.nip05DnsIdentifiers.namecoin.NamecoinNameResolver
+import kotlinx.coroutines.launch
 
 /**
  * iOS Search screen with user search, hashtag search, and NIP-50 relay search.
@@ -103,15 +107,23 @@ fun IosSearchScreen(
 ) {
     val scope = rememberCoroutineScope()
     val searchBarState = remember { SearchBarState(localCache, scope) }
+    val namecoinService = remember { IosNamecoinNameService() }
 
     val searchText by searchBarState.searchText.collectAsState()
     val bech32Results by searchBarState.bech32Results.collectAsState()
     val cachedUserResults by searchBarState.cachedUserResults.collectAsState()
     val relaySearchResults by searchBarState.relaySearchResults.collectAsState()
     val isSearchingRelays by searchBarState.isSearchingRelays.collectAsState()
+    val namecoinState by namecoinService.resolveState.collectAsState()
 
     val relayStatuses by relayManager.relayStatuses.collectAsState()
     val allRelayUrls = remember(relayStatuses) { relayStatuses.keys }
+
+    // Detect Namecoin .bit query
+    val isNamecoinQuery =
+        remember(searchText) {
+            searchText.isNotBlank() && NamecoinNameResolver.isNamecoinIdentifier(searchText.trim())
+        }
 
     // Detect hashtag query
     val isHashtagQuery = searchText.startsWith("#") && searchText.length > 1
@@ -208,7 +220,10 @@ fun IosSearchScreen(
         // Search bar
         OutlinedTextField(
             value = searchText,
-            onValueChange = { searchBarState.updateSearchText(it) },
+            onValueChange = {
+                searchBarState.updateSearchText(it)
+                namecoinService.resetState()
+            },
             placeholder = { Text("Search users, #hashtags, npub...") },
             leadingIcon = {
                 Icon(
@@ -235,6 +250,32 @@ fun IosSearchScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
         )
+
+        // Namecoin .bit resolution card
+        if (isNamecoinQuery) {
+            NamecoinResolutionCard(
+                searchText = searchText.trim(),
+                resolveState = namecoinState,
+                onResolve = {
+                    scope.launch {
+                        val result = namecoinService.resolve(searchText.trim())
+                        if (result != null) {
+                            onNavigateToProfile(result.pubkey)
+                        }
+                    }
+                },
+                onRetry = {
+                    namecoinService.resetState()
+                    scope.launch {
+                        val result = namecoinService.resolve(searchText.trim())
+                        if (result != null) {
+                            onNavigateToProfile(result.pubkey)
+                        }
+                    }
+                },
+                onNavigateToProfile = onNavigateToProfile,
+            )
+        }
 
         if (searchText.isBlank()) {
             SearchEmptyState()
@@ -715,4 +756,104 @@ private fun NoteCardItem(
         onLike = onLike,
         onZap = onZap,
     )
+}
+
+@Composable
+private fun NamecoinResolutionCard(
+    searchText: String,
+    resolveState: NamecoinResolveState,
+    onResolve: () -> Unit,
+    onRetry: () -> Unit,
+    onNavigateToProfile: (String) -> Unit,
+) {
+    Card(
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            ),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    "\u2115",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Spacer(Modifier.width(8.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Namecoin name detected",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Text(
+                        searchText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            when (resolveState) {
+                is NamecoinResolveState.Idle -> {
+                    androidx.compose.material3.TextButton(onClick = onResolve) {
+                        Text("Resolve via Namecoin blockchain")
+                    }
+                }
+
+                is NamecoinResolveState.Resolving -> {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Resolving via ElectrumX\u2026",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                    }
+                }
+
+                is NamecoinResolveState.Resolved -> {
+                    val pubkey = resolveState.result.pubkey
+                    Text(
+                        "\u2713 Found: ${pubkey.take(16)}\u2026",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(8.dp),
+                    )
+                    androidx.compose.material3.TextButton(
+                        onClick = { onNavigateToProfile(pubkey) },
+                    ) {
+                        Text("View Profile")
+                    }
+                }
+
+                is NamecoinResolveState.Error -> {
+                    Text(
+                        "\u2717 ${resolveState.message}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(8.dp),
+                    )
+                    androidx.compose.material3.TextButton(onClick = onRetry) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
+    }
 }
