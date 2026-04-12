@@ -18,7 +18,15 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.vitorpamplona.amethyst.ui.screen.loggedIn.profile.pinnedNotes.dal
+package com.vitorpamplona.amethyst.commons.viewmodels
 
-// Re-export from commons for backwards compatibility
-typealias UserProfilePinnedNotesFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.UserProfilePinnedNotesFeedFilter
+import com.vitorpamplona.amethyst.commons.model.IAccount
+import com.vitorpamplona.amethyst.commons.model.User
+import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
+import com.vitorpamplona.amethyst.commons.ui.feeds.UserProfileBookmarksFeedFilter
+
+open class UserProfileBookmarksFeedViewModel(
+    val user: User,
+    val account: IAccount,
+    cacheProvider: ICacheProvider,
+) : FeedViewModel(UserProfileBookmarksFeedFilter(user, account, cacheProvider), cacheProvider)

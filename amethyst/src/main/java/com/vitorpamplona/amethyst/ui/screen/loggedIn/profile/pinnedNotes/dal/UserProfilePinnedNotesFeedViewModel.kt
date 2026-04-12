@@ -26,13 +26,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.model.LocalCache
 import com.vitorpamplona.amethyst.model.User
-import com.vitorpamplona.amethyst.ui.screen.AndroidFeedViewModel
 
 @Stable
 class UserProfilePinnedNotesFeedViewModel(
-    val user: User,
-    val account: Account,
-) : AndroidFeedViewModel(UserProfilePinnedNotesFeedFilter(user, account, LocalCache)) {
+    user: User,
+    account: Account,
+) : com.vitorpamplona.amethyst.commons.viewmodels.UserProfilePinnedNotesFeedViewModel(user, account, LocalCache) {
     class Factory(
         val user: User,
         val account: Account,
