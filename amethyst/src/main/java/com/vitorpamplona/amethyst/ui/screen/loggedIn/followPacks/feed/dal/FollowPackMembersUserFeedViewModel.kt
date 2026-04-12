@@ -29,7 +29,7 @@ import com.vitorpamplona.amethyst.ui.screen.UserFeedViewModel
 class FollowPackMembersUserFeedViewModel(
     val followPackNote: AddressableNote,
     val account: Account,
-) : UserFeedViewModel(FollowPackMembersFeedFilter(followPackNote, account)) {
+) : UserFeedViewModel(FollowPackMembersFeedFilter(followPackNote, account, account.cache)) {
     class Factory(
         val followPackNote: AddressableNote,
         val account: Account,

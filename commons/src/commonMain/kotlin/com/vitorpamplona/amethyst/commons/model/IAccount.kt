@@ -142,14 +142,17 @@ interface IAccount {
     /** Marmot MLS group chat list */
     val marmotGroupList: MarmotGroupList
 
-    /** Bookmark list state (NIP-51 kind 10003) */
-    val bookmarkState: BookmarkListState
+    /** Current hidden users state (live, from flows) */
+    val liveHiddenUsers: LiveHiddenUsers
 
-    /** Old bookmark list state (NIP-51 kind 30001) */
-    val oldBookmarkState: OldBookmarkListState
+    /** Whether the given user is known (followed) by this account */
+    fun isKnown(user: User): Boolean
 
-    /** Pin list state (NIP-51) */
-    val pinState: PinListState
+    /** Whether the given hex key is known (followed) by this account */
+    fun isKnown(user: String): Boolean
+
+    /** Currently pinned notes list */
+    fun pinnedNotesList(): List<Note>
 
     /** Whether a note is acceptable (not hidden, not blocked, etc.) */
     fun isAcceptable(note: Note): Boolean

@@ -21,4 +21,4 @@
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.settings.dal
 
 // Re-export from commons for backwards compatibility
-typealias HiddenAccountsFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.HiddenAccountsFeedFilter
+typealias HiddenAccountsFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.dal.HiddenAccountsFeedFilter
