@@ -54,7 +54,7 @@ import com.vitorpamplona.amethyst.R
 import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.ui.actions.CrossfadeIfEnabled
-import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
+import com.vitorpamplona.amethyst.ui.stringRes
 import com.vitorpamplona.amethyst.ui.theme.ButtonBorder
 import com.vitorpamplona.amethyst.ui.theme.ButtonPadding
 import com.vitorpamplona.amethyst.ui.theme.PaddingHorizontal12Modifier
@@ -70,8 +70,6 @@ fun SensitivityWarning(
     accountViewModel: IAccountViewModel,
     content: @Composable () -> Unit,
 ) {
-    @Suppress("NAME_SHADOWING")
-    val accountViewModel = accountViewModel as AccountViewModel
     note.event?.let { SensitivityWarning(it, accountViewModel, content) }
 }
 
@@ -81,8 +79,6 @@ fun SensitivityWarning(
     accountViewModel: IAccountViewModel,
     content: @Composable () -> Unit,
 ) {
-    @Suppress("NAME_SHADOWING")
-    val accountViewModel = accountViewModel as AccountViewModel
     val hasSensitiveContent = remember(event) { event.isSensitiveOrNSFW() }
 
     if (hasSensitiveContent) {
@@ -99,8 +95,6 @@ fun SensitivityWarning(
     accountViewModel: IAccountViewModel,
     content: @Composable () -> Unit,
 ) {
-    @Suppress("NAME_SHADOWING")
-    val accountViewModel = accountViewModel as AccountViewModel
     if (reason != null) {
         ObserveSensitivityWarning(reason, accountViewModel, content)
     } else {
@@ -114,8 +108,6 @@ fun ObserveSensitivityWarning(
     accountViewModel: IAccountViewModel,
     content: @Composable () -> Unit,
 ) {
-    @Suppress("NAME_SHADOWING")
-    val accountViewModel = accountViewModel as AccountViewModel
     val accountState = accountViewModel.showSensitiveContent().collectAsStateWithLifecycle()
 
     var showContentWarningNote by remember(accountState) { mutableStateOf(accountState.value != true) }

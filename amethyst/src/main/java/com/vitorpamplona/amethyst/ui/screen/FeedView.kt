@@ -38,7 +38,6 @@ import com.vitorpamplona.amethyst.ui.feeds.FeedLoaded
 import com.vitorpamplona.amethyst.ui.feeds.LoadingFeed
 import com.vitorpamplona.amethyst.ui.feeds.WatchScrollToTop
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
-import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 
 @Composable
 fun RefresheableFeedView(
@@ -49,8 +48,6 @@ fun RefresheableFeedView(
     accountViewModel: IAccountViewModel,
     nav: INav,
 ) {
-    @Suppress("NAME_SHADOWING")
-    val accountViewModel = accountViewModel as AccountViewModel
     RefresheableBox(viewModel, enablePullRefresh) {
         SaveableFeedState(viewModel.feedState, scrollStateKey) { listState ->
             RenderFeedState(viewModel, accountViewModel, listState, nav, routeForLastRead)
@@ -108,8 +105,6 @@ fun RenderFeedState(
     onError: @Composable (String) -> Unit = { FeedError(it) { viewModel.invalidateData() } },
     onLoading: @Composable () -> Unit = { LoadingFeed() },
 ) {
-    @Suppress("NAME_SHADOWING")
-    val accountViewModel = accountViewModel as AccountViewModel
     val feedState by viewModel.feedState.feedContent.collectAsStateWithLifecycle()
 
     CrossfadeIfEnabled(
