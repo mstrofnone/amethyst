@@ -164,23 +164,6 @@ kotlin {
             }
         }
 
-        val iosMain =
-            create("iosMain") {
-                dependsOn(commonMain.get())
-                dependencies {
-                    // Coil Ktor network backend for iOS
-                    implementation(libs.coil.ktor)
-                }
-            }
-
-        getByName("iosArm64Main") {
-            dependsOn(iosMain)
-        }
-
-        getByName("iosSimulatorArm64Main") {
-            dependsOn(iosMain)
-        }
-
         getByName("androidHostTest") {
             dependencies {
                 implementation(libs.junit)
@@ -197,18 +180,6 @@ kotlin {
             }
         }
 
-        // iOS source sets
-        val iosMain = create("iosMain") {
-            dependsOn(commonMain.get())
-            dependencies {
-                // Image loading via Ktor for iOS
-                implementation("io.coil-kt.coil3:coil-network-ktor3:${libs.versions.coil.get()}")
-                implementation("io.ktor:ktor-client-darwin:3.1.3")
-            }
-        }
-
-        val iosArm64Main by getting { dependsOn(iosMain) }
-        val iosSimulatorArm64Main by getting { dependsOn(iosMain) }
     }
 }
 
