@@ -20,14 +20,4 @@
  */
 package com.vitorpamplona.amethyst.ui.actions.uploads
 
-import com.vitorpamplona.amethyst.R
-
-enum class VoicePreset(
-    val pitchFactor: Double,
-    val labelRes: Int,
-) {
-    NONE(1.0, R.string.voice_preset_none),
-    DEEP(1.4, R.string.voice_preset_deep),
-    HIGH(0.75, R.string.voice_preset_high),
-    NEUTRAL(1.1, R.string.voice_preset_neutral),
-}
+typealias VoicePreset = com.vitorpamplona.amethyst.commons.ui.actions.uploads.VoicePreset
