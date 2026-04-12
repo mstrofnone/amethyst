@@ -50,11 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.vitorpamplona.amethyst.commons.model.EmptyTagList
 import com.vitorpamplona.amethyst.commons.model.ImmutableListOfLists
 import com.vitorpamplona.amethyst.commons.model.toImmutableListOfLists
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.changed_chat_profile_to
-import com.vitorpamplona.amethyst.commons.resources.channel_image
-import com.vitorpamplona.amethyst.commons.resources.public_chat_relays_title
-import com.vitorpamplona.amethyst.commons.resources.relay_info
+import com.vitorpamplona.amethyst.commons.navigation.routes.Route
 import com.vitorpamplona.amethyst.model.Constants
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.model.nip11RelayInfo.loadRelayInfo
@@ -64,7 +60,6 @@ import com.vitorpamplona.amethyst.ui.components.TranslatableRichTextViewer
 import com.vitorpamplona.amethyst.ui.components.util.setText
 import com.vitorpamplona.amethyst.ui.navigation.navs.EmptyNav
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
-import com.vitorpamplona.amethyst.ui.navigation.routes.Route
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.mockAccountViewModel
 import com.vitorpamplona.amethyst.ui.theme.RelayIconFilter

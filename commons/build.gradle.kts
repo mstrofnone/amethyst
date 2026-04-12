@@ -53,6 +53,9 @@ kotlin {
                 implementation(project(":quartz"))
                 implementation(libs.kotlinx.serialization.json)
 
+                // Serialization
+                implementation(libs.kotlinx.serialization.json)
+
                 // Compose Multiplatform
                 implementation(libs.jetbrains.compose.ui)
                 implementation(libs.jetbrains.compose.foundation)

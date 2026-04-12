@@ -58,15 +58,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.back
-import com.vitorpamplona.amethyst.commons.resources.wallet
-import com.vitorpamplona.amethyst.commons.resources.wallet_receive
-import com.vitorpamplona.amethyst.commons.resources.wallet_sats
-import com.vitorpamplona.amethyst.commons.resources.wallet_send
-import com.vitorpamplona.amethyst.commons.resources.wallet_transactions
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.navigation.routes.Route
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
-import com.vitorpamplona.amethyst.ui.navigation.routes.Route
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 import org.jetbrains.compose.resources.stringResource
 import java.text.NumberFormat

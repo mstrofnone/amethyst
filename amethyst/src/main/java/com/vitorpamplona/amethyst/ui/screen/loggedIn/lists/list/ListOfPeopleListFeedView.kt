@@ -38,14 +38,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.discover_follows
-import com.vitorpamplona.amethyst.commons.resources.discover_follows_explainer
-import com.vitorpamplona.amethyst.commons.resources.feed_is_empty
-import com.vitorpamplona.amethyst.commons.resources.follow_sets
-import com.vitorpamplona.amethyst.commons.resources.follow_sets_explainer
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.navigation.routes.Route
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
-import com.vitorpamplona.amethyst.ui.navigation.routes.Route
+import com.vitorpamplona.amethyst.ui.stringRes
 import com.vitorpamplona.amethyst.ui.theme.DividerThickness
 import com.vitorpamplona.amethyst.ui.theme.FeedPadding
 import com.vitorpamplona.amethyst.ui.theme.MaxWidthWithHorzPadding

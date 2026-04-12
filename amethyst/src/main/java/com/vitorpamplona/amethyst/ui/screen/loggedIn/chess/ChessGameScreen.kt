@@ -68,16 +68,8 @@ import com.vitorpamplona.amethyst.commons.chess.ChessBroadcastBanner
 import com.vitorpamplona.amethyst.commons.chess.ChessBroadcastStatus
 import com.vitorpamplona.amethyst.commons.chess.ChessSyncBanner
 import com.vitorpamplona.amethyst.commons.chess.LiveChessGameScreen
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.back
-import com.vitorpamplona.amethyst.commons.resources.chess_game_id
-import com.vitorpamplona.amethyst.commons.resources.chess_game_not_found
-import com.vitorpamplona.amethyst.commons.resources.chess_game_waiting
-import com.vitorpamplona.amethyst.commons.resources.chess_loading_game
-import com.vitorpamplona.amethyst.commons.resources.go_back
-import com.vitorpamplona.amethyst.commons.resources.relay_settings
+import com.vitorpamplona.amethyst.commons.navigation.routes.Route
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
-import com.vitorpamplona.amethyst.ui.navigation.routes.Route
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.chess.datasource.ChessSubscription
 import com.vitorpamplona.amethyst.ui.theme.Height4dpModifier

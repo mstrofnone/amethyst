@@ -23,13 +23,7 @@ package com.vitorpamplona.amethyst.ui.navigation.bottombars
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.Modifier
 import com.vitorpamplona.amethyst.R
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.ic_dm
-import com.vitorpamplona.amethyst.commons.resources.ic_home
-import com.vitorpamplona.amethyst.commons.resources.ic_notifications
-import com.vitorpamplona.amethyst.commons.resources.ic_sensors
-import com.vitorpamplona.amethyst.commons.resources.ic_video
-import com.vitorpamplona.amethyst.ui.navigation.routes.Route
+import com.vitorpamplona.amethyst.commons.navigation.routes.Route
 import com.vitorpamplona.amethyst.ui.theme.Size20dp
 import com.vitorpamplona.amethyst.ui.theme.Size23dp
 import com.vitorpamplona.amethyst.ui.theme.Size24dp

@@ -44,12 +44,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.vitorpamplona.amethyst.BuildConfig
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.brought_to_you_by
-import com.vitorpamplona.amethyst.commons.resources.this_version_brought_to_you_by
-import com.vitorpamplona.amethyst.commons.resources.version_name
-import com.vitorpamplona.amethyst.commons.resources.zap_the_devs_description
-import com.vitorpamplona.amethyst.commons.resources.zap_the_devs_title
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.navigation.routes.Route
 import com.vitorpamplona.amethyst.model.LocalCache
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.service.relayClient.reqCommand.event.observeNote
@@ -59,7 +55,6 @@ import com.vitorpamplona.amethyst.ui.components.ZapButtonConfig
 import com.vitorpamplona.amethyst.ui.components.appendLink
 import com.vitorpamplona.amethyst.ui.navigation.navs.EmptyNav
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
-import com.vitorpamplona.amethyst.ui.navigation.routes.Route
 import com.vitorpamplona.amethyst.ui.navigation.routes.routeFor
 import com.vitorpamplona.amethyst.ui.note.CloseIcon
 import com.vitorpamplona.amethyst.ui.note.creators.zapsplits.DisplayZapSplits
