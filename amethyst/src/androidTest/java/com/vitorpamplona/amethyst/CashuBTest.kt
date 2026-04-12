@@ -21,7 +21,7 @@
 package com.vitorpamplona.amethyst
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.vitorpamplona.amethyst.commons.ui.components.GenericLoadable
+import com.vitorpamplona.amethyst.commons.ui.GenericLoadable
 import com.vitorpamplona.amethyst.service.cashu.CashuParser
 import com.vitorpamplona.amethyst.service.cashu.CashuToken
 import kotlinx.collections.immutable.ImmutableList

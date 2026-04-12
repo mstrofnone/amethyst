@@ -20,7 +20,7 @@
  */
 package com.vitorpamplona.amethyst.service.cashu.v4
 
-import com.vitorpamplona.amethyst.commons.ui.components.GenericLoadable
+import com.vitorpamplona.amethyst.commons.ui.GenericLoadable
 import com.vitorpamplona.amethyst.service.cashu.CashuToken
 import com.vitorpamplona.amethyst.service.cashu.Proof
 import com.vitorpamplona.quartz.nip01Core.core.toHexKey

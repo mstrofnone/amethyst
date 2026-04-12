@@ -20,12 +20,5 @@
  */
 package com.vitorpamplona.amethyst.commons.model.nip51Lists.relayLists
 
-import androidx.compose.runtime.Immutable
-import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
-
-@Immutable
-data class RelayListCard(
-    val relays: List<NormalizedRelayUrl>,
-)
-
-val EmptyRelayListCard = RelayListCard(emptyList())
+// Re-export from commons for backwards compatibility
+typealias GenericLoadable<T> = com.vitorpamplona.amethyst.commons.ui.GenericLoadable<T>
