@@ -20,11 +20,10 @@
  */
 package com.vitorpamplona.amethyst.commons.model
 
-import com.vitorpamplona.amethyst.commons.marmot.MarmotManager
+import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
 import com.vitorpamplona.amethyst.commons.model.marmotGroups.MarmotGroupList
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.BookmarkListState
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.OldBookmarkListState
-import com.vitorpamplona.amethyst.commons.model.nip51Lists.PinListState
 import com.vitorpamplona.amethyst.commons.model.privateChats.ChatroomList
 import com.vitorpamplona.amethyst.commons.model.topNavFeeds.IFeedTopNavFilter
 import com.vitorpamplona.quartz.nip01Core.core.Address
@@ -155,35 +154,17 @@ interface IAccount {
     /** Whether a note is acceptable (not hidden, not blocked, etc.) */
     fun isAcceptable(note: Note): Boolean
 
-    // ---- Reactive state flows for DAL filter migration ----
+    /** Bookmark list state (NIP-51 bookmark lists) */
+    val bookmarkState: BookmarkListState
 
-    /** Live hidden users state (from HiddenUsersState.flow) */
-    val liveHiddenUsersFlow: StateFlow<LiveHiddenUsers>
+    /** Old bookmark list state (legacy NIP-51 bookmarks) */
+    val oldBookmarkState: OldBookmarkListState
 
-    /** Top navigation follow list filters per feed type (from topNavFilterFlow) */
-    val liveHomeFollowLists: StateFlow<IFeedTopNavFilter>
-    val liveStoriesFollowLists: StateFlow<IFeedTopNavFilter>
-    val liveDiscoveryFollowLists: StateFlow<IFeedTopNavFilter>
-    val liveNotificationFollowLists: StateFlow<IFeedTopNavFilter>
-    val livePollsFollowLists: StateFlow<IFeedTopNavFilter>
-    val livePicturesFollowLists: StateFlow<IFeedTopNavFilter>
-    val liveShortsFollowLists: StateFlow<IFeedTopNavFilter>
-    val liveLongsFollowLists: StateFlow<IFeedTopNavFilter>
+    /** Set of transiently-hidden (spammer) user pubkeys */
+    val transientHiddenUsers: Set<String>
 
-    /** Block list address for the current user */
-    fun getBlockListAddress(): Address
-
-    /** Bookmark list flow (from BookmarkListState.bookmarks) */
-    val liveBookmarks: StateFlow<BookmarkListState.BookmarkList>
-
-    /** Old bookmark list flow (from OldBookmarkListState.bookmarks) */
-    val liveOldBookmarks: StateFlow<OldBookmarkListState.BookmarkList>
-
-    /** Proxy relay list flow (from ProxyRelayListState.flow) */
-    val liveProxyRelayList: StateFlow<Set<NormalizedRelayUrl>>
-
-    /** Default home follow list name for feed key generation */
-    val defaultHomeFollowListFlow: StateFlow<String>
+    /** Cache provider for resolving notes/users */
+    val cacheProvider: ICacheProvider
 
     /** Send a NIP-04 encrypted direct message */
     suspend fun sendNip04PrivateMessage(eventTemplate: EventTemplate<PrivateDmEvent>)

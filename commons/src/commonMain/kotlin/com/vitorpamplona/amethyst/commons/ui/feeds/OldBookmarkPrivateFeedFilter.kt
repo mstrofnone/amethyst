@@ -27,9 +27,9 @@ class OldBookmarkPrivateFeedFilter(
     val account: IAccount,
 ) : FeedFilter<Note>() {
     override fun feedKey(): String =
-        account.liveOldBookmarks.value
+        account.oldBookmarkState.bookmarks.value
             .hashCode()
             .toString()
 
-    override fun feed(): List<Note> = account.liveOldBookmarks.value.private
+    override fun feed(): List<Note> = account.oldBookmarkState.bookmarks.value.private
 }
