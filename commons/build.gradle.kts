@@ -69,7 +69,7 @@ kotlin {
                 api(libs.kotlinx.collections.immutable)
 
                 // Compose Multiplatform Resources
-                implementation(libs.jetbrains.compose.components.resources)
+                api(libs.jetbrains.compose.components.resources)
 
                 // Markdown rendering — JitPack libs are JVM-only, moved to jvmAndroid
             }
