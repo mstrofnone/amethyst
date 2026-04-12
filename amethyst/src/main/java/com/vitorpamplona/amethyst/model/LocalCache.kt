@@ -236,6 +236,7 @@ import com.vitorpamplona.quartz.utils.DualCase
 import com.vitorpamplona.quartz.utils.Hex
 import com.vitorpamplona.quartz.utils.Log
 import com.vitorpamplona.quartz.utils.TimeUtils
+import com.vitorpamplona.quartz.utils.cache.CacheCollectors
 import com.vitorpamplona.quartz.utils.cache.LargeCache
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -2427,6 +2428,16 @@ object LocalCache : ILocalCache, ICacheProvider {
     }
 
     override fun justConsumeMyOwnEvent(event: Event) = justConsumeAndUpdateIndexes(event, null, true)
+
+    override fun <R> mapFlattenNotesIntoSet(consumer: CacheCollectors.BiMapper<HexKey, Note, Collection<R>?>): Set<R> = notes.mapFlattenIntoSet(consumer)
+
+    override fun filterNotesIntoSet(consumer: CacheCollectors.BiFilter<HexKey, Note>): Set<Note> = notes.filterIntoSet(consumer)
+
+    override fun filterAddressablesIntoSet(
+        kind: Int,
+        pubKey: HexKey,
+        consumer: CacheCollectors.BiFilter<Address, AddressableNote>,
+    ): Set<AddressableNote> = addressables.filterIntoSet(kind, pubKey, consumer)
 
     fun justConsume(
         event: Event,

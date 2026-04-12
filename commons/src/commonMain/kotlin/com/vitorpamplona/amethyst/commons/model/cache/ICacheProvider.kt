@@ -28,11 +28,7 @@ import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChann
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
-import com.vitorpamplona.quartz.nip01Core.hints.HintIndexer
-import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.map
+import com.vitorpamplona.quartz.utils.cache.CacheCollectors
 
 /**
  * Cache provider interface for accessing cached Notes, Users, and Channels.
@@ -147,11 +143,25 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Gets a PublicChatChannel by key if it exists.
-     * Used by ParticipantListBuilder to find channel participants.
-     *
-     * @param key The channel's key (note id hex)
-     * @return The PublicChatChannel if found, null otherwise
+     * Iterates all notes, applying a mapper that returns a collection per note,
+     * and flattens results into a set.
+     * Used by community feed filters to gather approved/pending posts.
      */
-    fun getPublicChatChannelIfExists(key: String): PublicChatChannel? = null
+    fun <R> mapFlattenNotesIntoSet(consumer: CacheCollectors.BiMapper<HexKey, Note, Collection<R>?>): Set<R>
+
+    /**
+     * Filters all notes into a set using the given predicate.
+     * Used by feed filters that scan the full note cache.
+     */
+    fun filterNotesIntoSet(consumer: CacheCollectors.BiFilter<HexKey, Note>): Set<Note>
+
+    /**
+     * Filters addressable notes by kind and pubkey into a set.
+     * Used by draft and other addressable feed filters.
+     */
+    fun filterAddressablesIntoSet(
+        kind: Int,
+        pubKey: HexKey,
+        consumer: CacheCollectors.BiFilter<Address, AddressableNote>,
+    ): Set<AddressableNote>
 }
