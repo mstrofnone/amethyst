@@ -25,10 +25,11 @@ import com.vitorpamplona.amethyst.model.User
 import com.vitorpamplona.amethyst.ui.components.toasts.ToastMsg
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import org.jetbrains.compose.resources.StringResource
 
 @Immutable
 class MultiErrorToastMsg(
-    val titleResId: Int,
+    val titleRes: StringResource,
 ) : ToastMsg() {
     val errors = MutableStateFlow<List<UserBasedErrorMessage>>(emptyList())
 

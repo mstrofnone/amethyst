@@ -50,6 +50,8 @@ import com.vitorpamplona.amethyst.commons.model.location.LocationResult
 import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChannel
 import com.vitorpamplona.amethyst.commons.model.nip53LiveActivities.LiveActivitiesChannel
 import com.vitorpamplona.amethyst.commons.model.observables.CreatedAtComparator
+import com.vitorpamplona.amethyst.commons.resources.Res
+import com.vitorpamplona.amethyst.commons.resources.failed_to_save_the_video
 import com.vitorpamplona.amethyst.commons.ui.feeds.FeedState
 import com.vitorpamplona.amethyst.commons.ui.notifications.CardFeedState
 import com.vitorpamplona.amethyst.logTime
@@ -1871,7 +1873,7 @@ class AccountViewModel(
                     }
                 },
                 onError = {
-                    toastManager.toast(R.string.failed_to_save_the_video, null, it)
+                    toastManager.toast(Res.string.failed_to_save_the_video, null, it)
                 },
             )
         }
