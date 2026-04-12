@@ -20,4 +20,39 @@
  */
 package com.vitorpamplona.amethyst.model.topNavFeeds.global
 
-typealias GlobalTopNavFilter = com.vitorpamplona.amethyst.commons.model.topNavFeeds.global.GlobalTopNavFilter
+import androidx.compose.runtime.Immutable
+import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
+import com.vitorpamplona.amethyst.model.topNavFeeds.IFeedTopNavFilter
+import com.vitorpamplona.quartz.nip01Core.core.Event
+import com.vitorpamplona.quartz.nip01Core.core.HexKey
+import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+
+@Immutable
+class GlobalTopNavFilter(
+    val outboxRelays: StateFlow<Set<NormalizedRelayUrl>>,
+    val proxyRelays: StateFlow<Set<NormalizedRelayUrl>>,
+    val relayFeeds: StateFlow<Set<NormalizedRelayUrl>>,
+) : IFeedTopNavFilter {
+    override fun matchAuthor(pubkey: HexKey): Boolean = true
+
+    override fun match(noteEvent: Event) = true
+
+    override fun toPerRelayFlow(cache: ICacheProvider): Flow<GlobalTopNavPerRelayFilterSet> =
+        combine(outboxRelays, proxyRelays, relayFeeds) { outboxRelays, proxyRelays, relayFeeds ->
+            if (proxyRelays.isNotEmpty()) {
+                GlobalTopNavPerRelayFilterSet(proxyRelays.associateWith { GlobalTopNavPerRelayFilter })
+            } else {
+                GlobalTopNavPerRelayFilterSet((relayFeeds + outboxRelays).associateWith { GlobalTopNavPerRelayFilter })
+            }
+        }
+
+    override fun startValue(cache: ICacheProvider): GlobalTopNavPerRelayFilterSet =
+        if (proxyRelays.value.isNotEmpty()) {
+            GlobalTopNavPerRelayFilterSet(proxyRelays.value.associateWith { GlobalTopNavPerRelayFilter })
+        } else {
+            GlobalTopNavPerRelayFilterSet((relayFeeds.value + outboxRelays.value).associateWith { GlobalTopNavPerRelayFilter })
+        }
+}

@@ -20,5 +20,4 @@
  */
 package com.vitorpamplona.amethyst.model.topNavFeeds
 
-// Re-export from commons for backwards compatibility
 typealias IFeedTopNavPerRelayFilter = com.vitorpamplona.amethyst.commons.model.topNavFeeds.IFeedTopNavPerRelayFilter

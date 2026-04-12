@@ -20,4 +20,101 @@
  */
 package com.vitorpamplona.amethyst.model.topNavFeeds.noteBased.community
 
-typealias SingleCommunityTopNavFilter = com.vitorpamplona.amethyst.commons.model.topNavFeeds.noteBased.community.SingleCommunityTopNavFilter
+import androidx.compose.runtime.Immutable
+import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
+import com.vitorpamplona.amethyst.model.LocalCache
+import com.vitorpamplona.amethyst.model.topNavFeeds.IFeedTopNavFilter
+import com.vitorpamplona.amethyst.model.topNavFeeds.OutboxRelayLoader
+import com.vitorpamplona.quartz.nip01Core.core.Event
+import com.vitorpamplona.quartz.nip01Core.core.HexKey
+import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.quartz.nip01Core.tags.aTag.isTaggedAddressableNote
+import com.vitorpamplona.quartz.nip22Comments.CommentEvent
+import com.vitorpamplona.quartz.nip53LiveActivities.streaming.LiveActivitiesEvent
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+
+@Immutable
+class SingleCommunityTopNavFilter(
+    val community: String,
+    val authors: Set<String>?,
+    val relays: Set<NormalizedRelayUrl>,
+    val blockedRelays: StateFlow<Set<NormalizedRelayUrl>>,
+) : IFeedTopNavFilter {
+    override fun matchAuthor(pubkey: HexKey) = authors == null || pubkey in authors
+
+    override fun match(noteEvent: Event): Boolean =
+        if (noteEvent is LiveActivitiesEvent) {
+            (authors != null && noteEvent.participantsIntersect(authors)) || noteEvent.isTaggedAddressableNote(community)
+        } else if (noteEvent is CommentEvent) {
+            (authors != null && noteEvent.pubKey in authors) || noteEvent.isTaggedAddressableNote(community)
+        } else {
+            (authors != null && noteEvent.pubKey in authors) || noteEvent.isTaggedAddressableNote(community)
+        }
+
+    override fun toPerRelayFlow(cache: ICacheProvider): Flow<SingleCommunityTopNavPerRelayFilterSet> {
+        // relay field takes priority
+        if (relays.isNotEmpty()) {
+            return blockedRelays.map { blocked ->
+                SingleCommunityTopNavPerRelayFilterSet(
+                    relays.minus(blocked).associateWith {
+                        SingleCommunityTopNavPerRelayFilter(community, authors)
+                    },
+                )
+            }
+        }
+
+        if (authors != null) {
+            // go by authors
+            val authorsPerRelay = OutboxRelayLoader().toAuthorsPerRelayFlow(authors, cache as LocalCache) { it }
+
+            return combine(authorsPerRelay, blockedRelays) { authorsPerRelay, blocked ->
+                SingleCommunityTopNavPerRelayFilterSet(
+                    authorsPerRelay.minus(blocked).mapValues {
+                        SingleCommunityTopNavPerRelayFilter(community, it.value)
+                    },
+                )
+            }
+        }
+
+        // go by hints
+        return blockedRelays.map { blocked ->
+            SingleCommunityTopNavPerRelayFilterSet(
+                (cache as LocalCache).relayHints.hintsForAddress(community).minus(blocked).associateWith {
+                    SingleCommunityTopNavPerRelayFilter(community, authors)
+                },
+            )
+        }
+    }
+
+    override fun startValue(cache: ICacheProvider): SingleCommunityTopNavPerRelayFilterSet {
+        // relay field takes priority
+        if (relays.isNotEmpty()) {
+            return SingleCommunityTopNavPerRelayFilterSet(
+                relays.minus(blockedRelays.value).associateWith {
+                    SingleCommunityTopNavPerRelayFilter(community, authors)
+                },
+            )
+        }
+
+        if (authors != null) {
+            // go by authors
+            val authorsPerRelay = OutboxRelayLoader().authorsPerRelaySnapshot(authors, cache as LocalCache) { it }
+
+            return SingleCommunityTopNavPerRelayFilterSet(
+                authorsPerRelay.minus(blockedRelays.value).mapValues {
+                    SingleCommunityTopNavPerRelayFilter(community, it.value)
+                },
+            )
+        }
+
+        // go by hints
+        return SingleCommunityTopNavPerRelayFilterSet(
+            (cache as LocalCache).relayHints.hintsForAddress(community).minus(blockedRelays.value).associateWith {
+                SingleCommunityTopNavPerRelayFilter(community, authors)
+            },
+        )
+    }
+}

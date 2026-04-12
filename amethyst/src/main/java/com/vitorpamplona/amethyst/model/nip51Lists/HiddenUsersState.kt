@@ -46,7 +46,7 @@ class HiddenUsersState(
     val scope: CoroutineScope,
     val settings: AccountSettings,
 ) : IHiddenUsersState {
-    override var transientHiddenUsers: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
+    var transientHiddenUsers: MutableStateFlow<Set<String>> = MutableStateFlow(setOf())
 
     fun assembleLiveHiddenUsers(
         blockList: List<MuteTag>,

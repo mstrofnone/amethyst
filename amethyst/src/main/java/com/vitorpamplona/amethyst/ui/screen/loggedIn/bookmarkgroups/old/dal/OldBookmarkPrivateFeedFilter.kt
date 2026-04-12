@@ -20,17 +20,5 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.bookmarkgroups.old.dal
 
-import com.vitorpamplona.amethyst.model.Account
-import com.vitorpamplona.amethyst.model.Note
-import com.vitorpamplona.amethyst.ui.dal.FeedFilter
-
-class OldBookmarkPrivateFeedFilter(
-    val account: Account,
-) : FeedFilter<Note>() {
-    override fun feedKey(): String =
-        account.oldBookmarkState.bookmarks.value
-            .hashCode()
-            .toString()
-
-    override fun feed(): List<Note> = account.oldBookmarkState.bookmarks.value.private
-}
+// Re-export from commons for backwards compatibility
+typealias OldBookmarkPrivateFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.OldBookmarkPrivateFeedFilter

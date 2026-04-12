@@ -62,12 +62,6 @@ import com.vitorpamplona.amethyst.commons.model.nip53LiveActivities.LiveActiviti
 import com.vitorpamplona.amethyst.commons.ui.feeds.ChannelFeedState
 import com.vitorpamplona.amethyst.commons.ui.feeds.FeedContentState
 import com.vitorpamplona.amethyst.commons.ui.feeds.FeedState
-import com.vitorpamplona.amethyst.commons.ui.feeds.PagerStateKeys
-import com.vitorpamplona.amethyst.commons.ui.feeds.RefresheableBox
-import com.vitorpamplona.amethyst.commons.ui.feeds.ScrollStateKeys
-import com.vitorpamplona.amethyst.commons.ui.feeds.WatchLifecycleAndUpdateModel
-import com.vitorpamplona.amethyst.commons.ui.feeds.rememberForeverPagerState
-import com.vitorpamplona.amethyst.model.TopFilter
 import com.vitorpamplona.amethyst.service.OnlineChecker
 import com.vitorpamplona.amethyst.ui.actions.CrossfadeIfEnabled
 import com.vitorpamplona.amethyst.ui.feeds.ChannelFeedContentState

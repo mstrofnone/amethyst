@@ -23,14 +23,11 @@ package com.vitorpamplona.amethyst.commons.model
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Interface for hidden-users state.
- * Provides a reactive flow of the combined hidden/muted user lists and
- * a separate flow of transiently-hidden (spammer) users.
+ * Interface for hidden users state, abstracting Android-specific HiddenUsersState
+ * for use in commons DAL filters.
+ *
+ * DAL filters access [flow] to get the current [LiveHiddenUsers] for content filtering.
  */
 interface IHiddenUsersState {
-    /** Combined hidden-user and mute-list state */
     val flow: StateFlow<LiveHiddenUsers>
-
-    /** Set of transiently hidden (spammer) user pubkeys */
-    val transientHiddenUsers: StateFlow<Set<String>>
 }
