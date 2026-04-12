@@ -85,12 +85,8 @@ import com.halilibo.richtext.ui.RichTextStyle
 import com.halilibo.richtext.ui.material3.RichText
 import com.halilibo.richtext.ui.resolveDefaults
 import com.vitorpamplona.amethyst.R
-import com.vitorpamplona.amethyst.commons.platform.StringResolver
 import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.copy_my_secret_key
-import com.vitorpamplona.amethyst.commons.resources.failed_to_encrypt_key
-import com.vitorpamplona.amethyst.commons.resources.password_is_required
-import com.vitorpamplona.amethyst.commons.resources.secret_key_copied_to_clipboard
+import com.vitorpamplona.amethyst.commons.resources.ic_qrcode
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.ui.components.util.setText
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
@@ -462,7 +458,7 @@ private fun QrCodeButtonBase(
         },
     ) {
         Icon(
-            painter = painterRes(R.drawable.ic_qrcode, 4),
+            painter = painterRes(Res.drawable.ic_qrcode, 4),
             contentDescription = stringRes(id = contentDescription),
             modifier = Modifier.size(24.dp),
             tint = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.grayText,

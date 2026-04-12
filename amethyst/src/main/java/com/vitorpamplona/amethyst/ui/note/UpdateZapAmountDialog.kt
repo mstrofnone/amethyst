@@ -102,15 +102,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitorpamplona.amethyst.R
-import com.vitorpamplona.amethyst.commons.platform.StringResolver
 import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.app_name
-import com.vitorpamplona.amethyst.commons.resources.biometric_authentication_failed
-import com.vitorpamplona.amethyst.commons.resources.biometric_authentication_failed_explainer
-import com.vitorpamplona.amethyst.commons.resources.biometric_authentication_failed_explainer_with_error
-import com.vitorpamplona.amethyst.commons.resources.error_parsing_nip47
-import com.vitorpamplona.amethyst.commons.resources.error_parsing_nip47_no_error
-import com.vitorpamplona.amethyst.commons.resources.error_parsing_nip47_title
+import com.vitorpamplona.amethyst.commons.resources.ic_qrcode
 import com.vitorpamplona.amethyst.ui.components.TextSpinner
 import com.vitorpamplona.amethyst.ui.components.TitleExplainer
 import com.vitorpamplona.amethyst.ui.components.util.getText
@@ -483,7 +476,7 @@ fun UpdateZapAmountContent(
             // QR code scanner
             IconButton(onClick = { qrScanning = true }) {
                 Icon(
-                    painter = painterRes(R.drawable.ic_qrcode, 3),
+                    painter = painterRes(Res.drawable.ic_qrcode, 3),
                     contentDescription = stringRes(id = R.string.accessibility_scan_qr_code),
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary,

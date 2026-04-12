@@ -69,17 +69,14 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.core.graphics.ColorUtils
 import com.vitorpamplona.amethyst.R
-import com.vitorpamplona.amethyst.commons.platform.StringResolver
 import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.quick_action_share
-import com.vitorpamplona.amethyst.commons.resources.quick_action_share_browser_link
+import com.vitorpamplona.amethyst.commons.resources.relays
 import com.vitorpamplona.amethyst.model.AddressableNote
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.model.User
@@ -378,7 +375,9 @@ fun CardBody(
 
             VerticalDivider(color = primaryLight)
             NoteQuickActionItem(
-                icon = ImageVector.vectorResource(id = R.drawable.relays),
+                icon =
+                    org.jetbrains.compose.resources
+                        .vectorResource(Res.drawable.relays),
                 label = stringRes(R.string.broadcast),
             ) {
                 accountViewModel.broadcast(note)
