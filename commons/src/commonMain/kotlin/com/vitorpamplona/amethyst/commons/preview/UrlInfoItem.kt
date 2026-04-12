@@ -21,6 +21,7 @@
 package com.vitorpamplona.amethyst.commons.preview
 
 import androidx.compose.runtime.Immutable
+import com.vitorpamplona.amethyst.commons.platform.parseUrl
 
 @Immutable
 class UrlInfoItem(
@@ -30,19 +31,10 @@ class UrlInfoItem(
     val image: String = "",
     val mimeType: String,
 ) {
-    val verifiedUrl = url.takeIf { it.startsWith("http://") || it.startsWith("https://") }
+    val verifiedUrl = parseUrl(url)
     val imageUrlFullPath =
         if (image.startsWith("/")) {
-            verifiedUrl?.let { baseUrl ->
-                val schemeEnd = baseUrl.indexOf("://")
-                if (schemeEnd >= 0) {
-                    val pathStart = baseUrl.indexOf('/', schemeEnd + 3)
-                    val base = if (pathStart >= 0) baseUrl.substring(0, pathStart) else baseUrl
-                    base + image
-                } else {
-                    image
-                }
-            } ?: image
+            verifiedUrl?.resolve(image) ?: image
         } else {
             image
         }

@@ -20,6 +20,7 @@
  */
 package com.vitorpamplona.amethyst.commons.utils
 
-import platform.Foundation.NSProcessInfo
+import kotlin.experimental.ExperimentalNativeApi
 
-actual val isDebug: Boolean = NSProcessInfo.processInfo.environment["AMETHYST_DEBUG"] == "true"
+@OptIn(ExperimentalNativeApi::class)
+actual val isDebug: Boolean = Platform.isDebugBinary

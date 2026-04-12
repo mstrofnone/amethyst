@@ -22,14 +22,14 @@ package com.vitorpamplona.amethyst.commons.model
 
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
-import platform.Foundation.NSTimeZone
 import platform.Foundation.dateWithTimeIntervalSince1970
-import platform.Foundation.systemTimeZone
 
-actual fun formattedDateTime(timestamp: Long): String {
-    val formatter = NSDateFormatter()
-    formatter.dateFormat = "yyyy-MM-dd-HH:mm:ss"
-    formatter.timeZone = NSTimeZone.systemTimeZone
-    val date = NSDate.dateWithTimeIntervalSince1970(timestamp.toDouble())
-    return formatter.stringFromDate(date)
-}
+private val levelFormatter =
+    NSDateFormatter().apply {
+        dateFormat = "yyyy-MM-dd-HH:mm:ss"
+    }
+
+actual fun formattedDateTime(timestamp: Long): String =
+    levelFormatter.stringFromDate(
+        NSDate.dateWithTimeIntervalSince1970(timestamp.toDouble()),
+    )

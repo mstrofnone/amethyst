@@ -22,7 +22,7 @@ package com.vitorpamplona.amethyst.commons.richtext
 
 import com.vitorpamplona.amethyst.commons.emojicoder.EmojiCoder
 import com.vitorpamplona.amethyst.commons.model.ImmutableListOfLists
-import com.vitorpamplona.amethyst.commons.platformcompat.isValidUrl
+import com.vitorpamplona.amethyst.commons.platform.parseUrl
 import com.vitorpamplona.quartz.experimental.inlineMetadata.Nip54InlineMetadata
 import com.vitorpamplona.quartz.nip30CustomEmoji.CustomEmoji
 import com.vitorpamplona.quartz.nip31Alts.AltTag
@@ -419,16 +419,7 @@ class RichTextParser {
             return videoExtensions.any { removedParamsFromUrl.endsWith(it) }
         }
 
-        fun isValidURL(url: String?): Boolean =
-            try {
-                if (url != null) {
-                    url.startsWith("http://") || url.startsWith("https://")
-                } else {
-                    false
-                }
-            } catch (e: IllegalArgumentException) {
-                false
-            }
+        fun isValidURL(url: String?): Boolean = url != null && parseUrl(url) != null
 
         fun parseImageOrVideo(fullUrl: String): BaseMediaContent {
             val removedParamsFromUrl = removeQueryParamsForExtensionComparison(fullUrl)

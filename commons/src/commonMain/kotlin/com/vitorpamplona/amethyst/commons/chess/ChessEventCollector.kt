@@ -20,8 +20,8 @@
  */
 package com.vitorpamplona.amethyst.commons.chess
 
-import com.vitorpamplona.amethyst.commons.platformcompat.PlatformConcurrentHashMap
-import com.vitorpamplona.amethyst.commons.platformcompat.platformConcurrentKeySet
+import com.vitorpamplona.amethyst.commons.concurrency.concurrentMutableMapOf
+import com.vitorpamplona.amethyst.commons.concurrency.concurrentMutableSetOf
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip64Chess.jester.JesterEvent
 import com.vitorpamplona.quartz.nip64Chess.jester.JesterGameEvents
@@ -69,10 +69,10 @@ class ChessEventCollector(
     val startEvent: StateFlow<JesterEvent?> = _startEvent.asStateFlow()
 
     // Move events (deduplicated by event ID)
-    private val moves = HashMap<String, JesterEvent>()
+    private val moves = concurrentMutableMapOf<String, JesterEvent>()
 
     // Track all processed event IDs for fast deduplication
-    private val processedEventIds = mutableSetOf<String>()
+    private val processedEventIds = concurrentMutableSetOf<String>()
 
     // Flow that emits when any event is added (for reactive updates)
     private val _eventCount = MutableStateFlow(0)
@@ -154,7 +154,7 @@ class ChessEventCollector(
         if (!event.isMoveEvent()) return false
         if (event.startEventId() != startEventId) return false
 
-        if (!moves.containsKey(event.id)) {
+        if (event.id !in moves) {
             moves[event.id] = event
             processedEventIds.add(event.id)
             incrementEventCount()
@@ -220,7 +220,7 @@ class ChessEventCollector(
  * such as in a chess lobby or when spectating multiple games.
  */
 class ChessEventCollectorManager {
-    private val collectors = HashMap<String, ChessEventCollector>()
+    private val collectors = concurrentMutableMapOf<String, ChessEventCollector>()
 
     /**
      * Get or create a collector for a game.

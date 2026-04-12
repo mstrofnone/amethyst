@@ -20,7 +20,7 @@
  */
 package com.vitorpamplona.amethyst.commons.search
 
-import com.vitorpamplona.quartz.utils.kmpSynchronized
+import com.vitorpamplona.amethyst.commons.concurrency.kmpSynchronized
 
 class EventDeduplicator {
     private val lock = Any()

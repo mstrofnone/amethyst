@@ -20,6 +20,7 @@
  */
 package com.vitorpamplona.amethyst.commons.model.observables
 
+import com.vitorpamplona.amethyst.commons.concurrency.concurrentSortedSetOf
 import com.vitorpamplona.amethyst.commons.model.AddressableNote
 import com.vitorpamplona.amethyst.commons.model.Note
 import com.vitorpamplona.amethyst.commons.platformcompat.platformConcurrentSortedSet
@@ -34,11 +35,11 @@ import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
  */
 class EventListMatchingFilter<T : Event>(
     private val filter: Filter,
-    private val atOnce: (filter: Filter) -> Set<Note>,
+    private val atOnce: (filter: Filter) -> Collection<Note>,
     private val update: (List<T>) -> Unit,
 ) : Observable {
     // Keeping this here blocks it from being cleared from memory
-    var currentResults: MutableSet<Note> = mutableListOf<Note>().also { it.sortWith(CreatedAtIdHexComparator) }.toMutableSet()
+    var currentResults: MutableSet<Note> = concurrentSortedSetOf(CreatedAtIdHexComparator)
 
     @Suppress("UNCHECKED_CAST")
     override fun new(
@@ -73,7 +74,7 @@ class EventListMatchingFilter<T : Event>(
 
     @Suppress("UNCHECKED_CAST")
     fun init() {
-        currentResults = atOnce(filter).sortedWith(CreatedAtIdHexComparator).toMutableSet()
+        currentResults = concurrentSortedSetOf(CreatedAtIdHexComparator).also { it.addAll(atOnce(filter)) }
         update(currentResults.mapNotNull { it.event as? T })
     }
 }

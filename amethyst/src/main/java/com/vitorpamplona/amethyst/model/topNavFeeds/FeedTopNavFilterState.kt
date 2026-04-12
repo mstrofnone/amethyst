@@ -20,9 +20,9 @@
  */
 package com.vitorpamplona.amethyst.model.topNavFeeds
 
+import com.vitorpamplona.amethyst.commons.model.TopFilter
+import com.vitorpamplona.amethyst.commons.model.nip02FollowLists.Kind3FollowListState
 import com.vitorpamplona.amethyst.model.LocalCache
-import com.vitorpamplona.amethyst.model.TopFilter
-import com.vitorpamplona.amethyst.model.nip02FollowLists.Kind3FollowListState
 import com.vitorpamplona.amethyst.model.serverList.MergedFollowListsState
 import com.vitorpamplona.amethyst.model.topNavFeeds.allFollows.AllFollowsFeedFlow
 import com.vitorpamplona.amethyst.model.topNavFeeds.allUserFollows.AllUserFollowsFeedFlow
@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.transformLatest
 class FeedTopNavFilterState(
     val feedFilterListName: MutableStateFlow<TopFilter>,
     val kind3Follows: StateFlow<Kind3FollowListState.Kind3Follows>,
-    val allFollows: StateFlow<MergedFollowListsState.AllFollows>,
+    val allFollows: StateFlow<com.vitorpamplona.amethyst.commons.model.serverList.MergedFollowListsState.AllFollows>,
     val locationFlow: () -> StateFlow<LocationState.LocationResult>,
     val followsRelays: StateFlow<Set<NormalizedRelayUrl>>,
     val blockedRelays: StateFlow<Set<NormalizedRelayUrl>>,

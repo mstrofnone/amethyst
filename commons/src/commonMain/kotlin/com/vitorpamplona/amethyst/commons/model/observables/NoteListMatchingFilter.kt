@@ -20,6 +20,7 @@
  */
 package com.vitorpamplona.amethyst.commons.model.observables
 
+import com.vitorpamplona.amethyst.commons.concurrency.concurrentSortedSetOf
 import com.vitorpamplona.amethyst.commons.model.AddressableNote
 import com.vitorpamplona.amethyst.commons.model.Note
 import com.vitorpamplona.amethyst.commons.platformcompat.platformConcurrentSortedSet
@@ -35,10 +36,10 @@ import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
  */
 class NoteListMatchingFilter(
     private val filter: Filter,
-    private val atOnce: (filter: Filter) -> Set<Note>,
+    private val atOnce: (filter: Filter) -> Collection<Note>,
     private val update: (List<Note>) -> Unit,
 ) : Observable {
-    var currentResults: MutableSet<Note> = mutableListOf<Note>().also { it.sortWith(CreatedAtIdHexComparator) }.toMutableSet()
+    var currentResults: MutableSet<Note> = concurrentSortedSetOf(CreatedAtIdHexComparator)
 
     override fun new(
         event: Event,
@@ -65,7 +66,7 @@ class NoteListMatchingFilter(
     }
 
     fun init() {
-        currentResults = atOnce(filter).sortedWith(CreatedAtIdHexComparator).toMutableSet()
+        currentResults = concurrentSortedSetOf(CreatedAtIdHexComparator).also { it.addAll(atOnce(filter)) }
         update(currentResults.toList())
     }
 }

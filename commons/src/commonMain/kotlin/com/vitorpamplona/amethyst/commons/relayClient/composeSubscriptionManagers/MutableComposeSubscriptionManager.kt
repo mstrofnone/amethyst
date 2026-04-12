@@ -21,7 +21,7 @@
 package com.vitorpamplona.amethyst.commons.relayClient.composeSubscriptionManagers
 
 import androidx.compose.runtime.Stable
-import com.vitorpamplona.amethyst.commons.platformcompat.PlatformConcurrentHashMap
+import com.vitorpamplona.amethyst.commons.concurrency.concurrentMutableMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 abstract class MutableComposeSubscriptionManager<T : MutableQueryState>(
     val scope: CoroutineScope,
 ) : ComposeSubscriptionManagerControls {
-    private var composeSubscriptions: HashMap<T, Job?> = HashMap()
+    private var composeSubscriptions: MutableMap<T, Job?> = concurrentMutableMapOf()
 
     // This is called by main. Keep it really fast.
     fun subscribe(query: T?) {

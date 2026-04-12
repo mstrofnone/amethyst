@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.jetbrainsComposeCompiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.serialization)
 }
 
 kotlin {
@@ -50,6 +51,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":quartz"))
+                implementation(libs.kotlinx.serialization.json)
 
                 // Compose Multiplatform
                 implementation(libs.jetbrains.compose.ui)
@@ -68,10 +70,11 @@ kotlin {
                 // Immutable collections
                 api(libs.kotlinx.collections.immutable)
 
-                // Compose Multiplatform Resources
-                api(libs.jetbrains.compose.components.resources)
+                // Atomic operations (KMP-compatible)
+                implementation(libs.kotlinx.atomicfu)
 
-                // Markdown rendering — JitPack libs are JVM-only, moved to jvmAndroid
+                // Compose Multiplatform Resources
+                implementation(libs.jetbrains.compose.components.resources)
             }
         }
 
@@ -87,19 +90,32 @@ kotlin {
             create("jvmAndroid") {
                 dependsOn(commonMain.get())
                 dependencies {
-                    // Lifecycle ViewModel (Android/JVM only via Google artifact)
+                    // AndroidX Lifecycle (no native/iOS variants)
                     implementation(libs.androidx.lifecycle.viewmodel.compose)
                     implementation(libs.androidx.lifecycle.runtime.compose)
 
-                    // Image loading via OkHttp (JVM-only)
+                    // JVM-only: OkHttp image loader
                     implementation(libs.coil.okhttp)
 
-                    // Markdown rendering (richtext-commonmark) — JitPack, JVM-only
+                    // JVM-only: Markdown rendering (richtext-commonmark)
                     implementation(libs.markdown.commonmark)
                     implementation(libs.markdown.ui)
                     implementation(libs.markdown.ui.material3)
                 }
             }
+
+        val iosMain =
+            create("iosMain") {
+                dependsOn(commonMain.get())
+            }
+
+        val iosArm64Main by getting {
+            dependsOn(iosMain)
+        }
+
+        val iosSimulatorArm64Main by getting {
+            dependsOn(iosMain)
+        }
 
         jvmMain {
             dependsOn(jvmAndroid)

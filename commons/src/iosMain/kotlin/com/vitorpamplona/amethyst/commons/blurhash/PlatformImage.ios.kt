@@ -20,13 +20,10 @@
  */
 package com.vitorpamplona.amethyst.commons.blurhash
 
-import kotlinx.cinterop.ExperimentalForeignApi
-
 /**
- * iOS implementation of PlatformImage backed by an IntArray of ARGB pixels.
- * Uses CoreGraphics for scaling operations.
+ * iOS implementation of PlatformImage using raw ARGB pixel arrays.
+ * No platform image dependency needed — blurhash operates on pixel data directly.
  */
-@OptIn(ExperimentalForeignApi::class)
 actual class PlatformImage(
     private val pixels: IntArray,
     actual val width: Int,
@@ -42,9 +39,10 @@ actual class PlatformImage(
         height: Int,
     ) {
         for (row in 0 until height) {
-            val srcStart = (y + row) * this.width + x
-            val dstStart = offset + row * stride
-            this.pixels.copyInto(pixels, dstStart, srcStart, srcStart + width)
+            for (col in 0 until width) {
+                pixels[offset + row * stride + col] =
+                    this.pixels[(y + row) * this.width + (x + col)]
+            }
         }
     }
 
@@ -52,16 +50,14 @@ actual class PlatformImage(
         width: Int,
         height: Int,
     ): PlatformImage {
-        // Simple nearest-neighbor scaling
         val scaled = IntArray(width * height)
         val xRatio = this.width.toFloat() / width
         val yRatio = this.height.toFloat() / height
-
-        for (y in 0 until height) {
-            val srcY = (y * yRatio).toInt().coerceIn(0, this.height - 1)
-            for (x in 0 until width) {
-                val srcX = (x * xRatio).toInt().coerceIn(0, this.width - 1)
-                scaled[y * width + x] = pixels[srcY * this.width + srcX]
+        for (row in 0 until height) {
+            for (col in 0 until width) {
+                val srcX = (col * xRatio).toInt().coerceIn(0, this.width - 1)
+                val srcY = (row * yRatio).toInt().coerceIn(0, this.height - 1)
+                scaled[row * width + col] = pixels[srcY * this.width + srcX]
             }
         }
         return PlatformImage(scaled, width, height)
@@ -72,6 +68,6 @@ actual class PlatformImage(
             pixels: IntArray,
             width: Int,
             height: Int,
-        ): PlatformImage = PlatformImage(pixels.copyOf(), width, height)
+        ): PlatformImage = PlatformImage(pixels, width, height)
     }
 }

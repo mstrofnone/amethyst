@@ -20,8 +20,8 @@
  */
 package com.vitorpamplona.amethyst.commons.chess
 
-import com.vitorpamplona.amethyst.commons.platformcompat.PlatformConcurrentHashMap
-import com.vitorpamplona.amethyst.commons.platformcompat.platformConcurrentKeySet
+import com.vitorpamplona.amethyst.commons.concurrency.concurrentMutableMapOf
+import com.vitorpamplona.amethyst.commons.concurrency.concurrentMutableSetOf
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
 import com.vitorpamplona.quartz.nip01Core.relay.client.reqs.SubscriptionListener
@@ -75,10 +75,10 @@ class ChessRelayFetchHelper(
     ): List<Event> {
         if (filters.isEmpty()) return emptyList()
 
-        val events = HashMap<String, Event>()
+        val events = concurrentMutableMapOf<String, Event>()
         val relayCount = filters.keys.size
-        val eoseReceived = mutableSetOf<NormalizedRelayUrl>()
-        val relayEventCounts = HashMap<NormalizedRelayUrl, Int>()
+        val eoseReceived = concurrentMutableSetOf<NormalizedRelayUrl>()
+        val relayEventCounts = concurrentMutableMapOf<NormalizedRelayUrl, Int>()
         val allEose = CompletableDeferred<Unit>()
         val subId = newSubId()
 

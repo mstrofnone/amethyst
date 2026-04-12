@@ -23,9 +23,8 @@ package com.vitorpamplona.amethyst.ui.screen.loggedIn.discover
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.select_list_to_filter
-import com.vitorpamplona.amethyst.model.TopFilter
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.model.TopFilter
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
 import com.vitorpamplona.amethyst.ui.navigation.topbars.FeedFilterSpinner
 import com.vitorpamplona.amethyst.ui.navigation.topbars.UserDrawerSearchTopBar
@@ -47,7 +46,7 @@ fun DiscoveryTopBar(
             followListsModel = accountViewModel.feedStates.feedListOptions,
             listName = list,
             accountViewModel = accountViewModel,
-            onChange = accountViewModel.account.settings::changeDefaultDiscoveryFollowList,
+            onChange = { accountViewModel.account.settings.changeDefaultDiscoveryFollowList(it.code) },
         )
     }
 }

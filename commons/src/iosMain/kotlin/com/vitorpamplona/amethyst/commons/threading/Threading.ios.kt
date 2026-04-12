@@ -22,12 +22,8 @@ package com.vitorpamplona.amethyst.commons.threading
 
 import platform.Foundation.NSThread
 
-/**
- * iOS implementation of checkNotInMainThread.
- * Checks NSThread.isMainThread.
- */
 actual fun checkNotInMainThread() {
     if (NSThread.isMainThread) {
-        throw OnMainThreadException("This function should not be called from the main thread")
+        throw OnMainThreadException("Should not be on the main thread")
     }
 }

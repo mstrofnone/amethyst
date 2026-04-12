@@ -21,6 +21,7 @@
 package com.vitorpamplona.amethyst.commons.model.privateChats
 
 import androidx.compose.runtime.Stable
+import com.vitorpamplona.amethyst.commons.concurrency.WeakRef
 import com.vitorpamplona.amethyst.commons.model.Channel.Companion.DefaultFeedOrder
 import com.vitorpamplona.amethyst.commons.model.ListChange
 import com.vitorpamplona.amethyst.commons.model.Note
@@ -44,13 +45,13 @@ class Chatroom : NotesGatherer {
     var ownerSentMessage: Boolean = false
     var newestMessage: Note? = null
 
-    private var changesFlow: MutableSharedFlow<ListChange<Note>>? = null
+    private var changesFlow: WeakRef<MutableSharedFlow<ListChange<Note>>>? = null
 
     fun changesFlow(): MutableSharedFlow<ListChange<Note>> {
-        val current = changesFlow
+        val current = changesFlow?.get()
         if (current != null) return current
         val new = MutableSharedFlow<ListChange<Note>>(0, 100, BufferOverflow.DROP_OLDEST)
-        changesFlow = new
+        changesFlow = WeakRef(new)
         return new
     }
 
@@ -81,7 +82,7 @@ class Chatroom : NotesGatherer {
                 subjectCreatedAt = msg.createdAt()
             }
 
-            changesFlow?.tryEmit(ListChange.Addition(msg))
+            changesFlow?.get()?.tryEmit(ListChange.Addition(msg))
 
             return true
         }
@@ -112,7 +113,7 @@ class Chatroom : NotesGatherer {
                     }
             }
 
-            changesFlow?.tryEmit(ListChange.Deletion(msg))
+            changesFlow?.get()?.tryEmit(ListChange.Deletion(msg))
 
             return true
         }
@@ -136,7 +137,7 @@ class Chatroom : NotesGatherer {
         val toRemove = messages.minus(toKeep)
         messages = toKeep
 
-        changesFlow?.tryEmit(ListChange.SetDeletion<Note>(toRemove))
+        changesFlow?.get()?.tryEmit(ListChange.SetDeletion<Note>(toRemove))
 
         return toRemove
     }

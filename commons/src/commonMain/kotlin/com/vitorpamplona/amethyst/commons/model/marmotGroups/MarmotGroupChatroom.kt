@@ -21,6 +21,7 @@
 package com.vitorpamplona.amethyst.commons.model.marmotGroups
 
 import androidx.compose.runtime.Stable
+import com.vitorpamplona.amethyst.commons.concurrency.WeakRef
 import com.vitorpamplona.amethyst.commons.model.Channel.Companion.DefaultFeedOrder
 import com.vitorpamplona.amethyst.commons.model.ListChange
 import com.vitorpamplona.amethyst.commons.model.Note
@@ -49,13 +50,13 @@ class MarmotGroupChatroom(
     var newestMessage: Note? = null
     val unreadCount = MutableStateFlow(0)
 
-    private var changesFlow: MutableSharedFlow<ListChange<Note>>? = null
+    private var changesFlow: WeakRef<MutableSharedFlow<ListChange<Note>>>? = null
 
     fun changesFlow(): MutableSharedFlow<ListChange<Note>> {
-        val current = changesFlow
+        val current = changesFlow?.get()
         if (current != null) return current
         val new = MutableSharedFlow<ListChange<Note>>(0, 100, BufferOverflow.DROP_OLDEST)
-        changesFlow = new
+        changesFlow = WeakRef(new)
         return new
     }
 
@@ -74,7 +75,7 @@ class MarmotGroupChatroom(
             }
 
             unreadCount.value += 1
-            changesFlow?.tryEmit(ListChange.Addition(msg))
+            changesFlow?.get()?.tryEmit(ListChange.Addition(msg))
             return true
         }
         return false
@@ -89,7 +90,7 @@ class MarmotGroupChatroom(
                 newestMessage = messages.maxByOrNull { it.createdAt() ?: 0L }
             }
 
-            changesFlow?.tryEmit(ListChange.Deletion(msg))
+            changesFlow?.get()?.tryEmit(ListChange.Deletion(msg))
             return true
         }
         return false
@@ -108,7 +109,7 @@ class MarmotGroupChatroom(
         val toRemove = messages.minus(toKeep)
         messages = toKeep
 
-        changesFlow?.tryEmit(ListChange.SetDeletion<Note>(toRemove))
+        changesFlow?.get()?.tryEmit(ListChange.SetDeletion<Note>(toRemove))
         return toRemove
     }
 }

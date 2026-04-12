@@ -84,7 +84,7 @@ object CommitOrdering {
      * to determine which commit wins for each (group, epoch).
      */
     class EpochCommitTracker {
-        private val lock = Any()
+        private val lock = kotlinx.atomicfu.locks.SynchronizedObject()
         private val pendingByGroupEpoch = mutableMapOf<GroupEpochKey, MutableList<GroupEvent>>()
 
         companion object {
@@ -103,7 +103,7 @@ object CommitOrdering {
             groupId: String,
             epoch: Long,
             commit: GroupEvent,
-        ) = kmpSynchronized(lock) {
+        ) = kotlinx.atomicfu.locks.synchronized(lock) {
             val key = GroupEpochKey(groupId, epoch)
             pendingByGroupEpoch.getOrPut(key) { mutableListOf() }.add(commit)
 
@@ -126,7 +126,7 @@ object CommitOrdering {
             groupId: String,
             epoch: Long,
         ): List<GroupEvent> =
-            kmpSynchronized(lock) {
+            kotlinx.atomicfu.locks.synchronized(lock) {
                 pendingByGroupEpoch[GroupEpochKey(groupId, epoch)]?.toList() ?: emptyList()
             }
 
@@ -141,7 +141,7 @@ object CommitOrdering {
             groupId: String,
             epoch: Long,
         ): GroupEvent? =
-            kmpSynchronized(lock) {
+            kotlinx.atomicfu.locks.synchronized(lock) {
                 selectWinner(pendingByGroupEpoch[GroupEpochKey(groupId, epoch)] ?: emptyList())
             }
 
@@ -151,7 +151,7 @@ object CommitOrdering {
         fun clearEpoch(
             groupId: String,
             epoch: Long,
-        ) = kmpSynchronized(lock) {
+        ) = kotlinx.atomicfu.locks.synchronized(lock) {
             pendingByGroupEpoch.remove(GroupEpochKey(groupId, epoch))
         }
 
@@ -159,7 +159,7 @@ object CommitOrdering {
          * Returns all (group, epoch) keys that have pending commits.
          */
         fun pendingGroupEpochs(): Set<GroupEpochKey> =
-            kmpSynchronized(lock) {
+            kotlinx.atomicfu.locks.synchronized(lock) {
                 pendingByGroupEpoch.keys.toSet()
             }
 
@@ -167,7 +167,7 @@ object CommitOrdering {
          * Clears all pending state.
          */
         fun clear() =
-            kmpSynchronized(lock) {
+            kotlinx.atomicfu.locks.synchronized(lock) {
                 pendingByGroupEpoch.clear()
             }
     }

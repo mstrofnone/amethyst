@@ -25,6 +25,7 @@ import com.vitorpamplona.amethyst.commons.platformcompat.PlatformAtomicLong
 import com.vitorpamplona.quartz.nip64Chess.Color
 import com.vitorpamplona.quartz.nip64Chess.GameStatus
 import com.vitorpamplona.quartz.nip64Chess.LiveChessGameState
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -247,8 +248,7 @@ class ChessLobbyState(
 
     // State version counter - increments on every game state update
     // UI can observe this to force recomposition when internal state changes
-
-    private var stateVersionCounter = 0L
+    private val stateVersionCounter = atomic(0L)
     private val _stateVersion = MutableStateFlow(0L)
     val stateVersion: StateFlow<Long> = _stateVersion.asStateFlow()
 

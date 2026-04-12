@@ -24,7 +24,7 @@ import platform.Foundation.NSNumber
 import platform.Foundation.NSNumberFormatter
 import platform.Foundation.NSNumberFormatterDecimalStyle
 
-actual class PlatformNumberFormatter {
+actual class PlatformNumberFormatter actual constructor() {
     private val formatter =
         NSNumberFormatter().apply {
             numberStyle = NSNumberFormatterDecimalStyle
