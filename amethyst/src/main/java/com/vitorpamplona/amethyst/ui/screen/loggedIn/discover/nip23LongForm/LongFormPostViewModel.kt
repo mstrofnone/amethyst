@@ -320,9 +320,7 @@ class LongFormPostViewModel :
             accountViewModel.account.signAndComputeBroadcast(template, emptyList())
         }
 
-        accountViewModel.launchSigner {
-            accountViewModel.account.deleteDraftIgnoreErrors(version)
-        }
+        accountViewModel.deleteDraftIgnoreErrors(version)
     }
 
     suspend fun sendDraftSync() {

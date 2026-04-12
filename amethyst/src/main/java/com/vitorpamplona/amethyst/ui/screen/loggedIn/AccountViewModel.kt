@@ -145,8 +145,10 @@ import com.vitorpamplona.quartz.nip57Zaps.LnZapRequestEvent
 import com.vitorpamplona.quartz.nip57Zaps.zapraiser.zapraiserAmount
 import com.vitorpamplona.quartz.nip59Giftwrap.seals.SealedRumorEvent
 import com.vitorpamplona.quartz.nip59Giftwrap.wraps.GiftWrapEvent
+import com.vitorpamplona.quartz.nip88Polls.poll.PollEvent
 import com.vitorpamplona.quartz.nip90Dvms.contentDiscoveryResponse.NIP90ContentDiscoveryResponseEvent
 import com.vitorpamplona.quartz.nip94FileMetadata.tags.DimensionTag
+import com.vitorpamplona.quartz.nipB0WebBookmarks.WebBookmarkEvent
 import com.vitorpamplona.quartz.utils.Hex
 import com.vitorpamplona.quartz.utils.Log
 import com.vitorpamplona.quartz.utils.TimeUtils
@@ -1009,7 +1011,35 @@ class AccountViewModel(
         }
     }
 
-    override fun broadcast(note: Note) = launchSigner { account.broadcast(note) }
+    fun addBookmark(
+        note: Note,
+        isPrivate: Boolean,
+    ) = if (isPrivate) addPrivateBookmark(note) else addPublicBookmark(note)
+
+    fun removeBookmark(note: Note) {
+        removePrivateBookmark(note)
+        removePublicBookmark(note)
+    }
+
+    fun pollRespond(
+        event: PollEvent,
+        responses: Set<String>,
+    ) = launchSigner { account.pollRespond(event, responses) }
+
+    fun deleteDraftIgnoreErrors(draftTag: String) = launchSigner { account.deleteDraftIgnoreErrors(draftTag) }
+
+    fun sendWebBookmark(
+        url: String,
+        title: String?,
+        description: String,
+        tags: List<String> = emptyList(),
+    ) = launchSigner { account.sendWebBookmark(url, title, description, tags) }
+
+    fun deleteWebBookmark(event: WebBookmarkEvent) = launchSigner { account.deleteWebBookmark(event) }
+
+    fun migrateOldBookmarksToNew() = launchSigner { account.migrateOldBookmarksToNew() }
+
+    fun broadcast(note: Note) = launchSigner { account.broadcast(note) }
 
     fun timestamp(note: Note) = launchSigner { account.otsState.timestamp(note) }
 

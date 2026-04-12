@@ -119,9 +119,7 @@ private fun RenderWebBookmarksScreen(
             accountViewModel = accountViewModel,
             onDismiss = { showAddDialog = false },
             onSave = { url, title, description, tags ->
-                accountViewModel.launchSigner {
-                    accountViewModel.account.sendWebBookmark(url, title, description, tags)
-                }
+                accountViewModel.sendWebBookmark(url, title, description, tags)
                 showAddDialog = false
             },
         )
@@ -215,9 +213,7 @@ private fun WebBookmarkCard(
             initialTags = event.hashtags().joinToString(", "),
             onDismiss = { showEditDialog = false },
             onSave = { url, title, description, tags ->
-                accountViewModel.launchSigner {
-                    accountViewModel.account.sendWebBookmark(url, title, description, tags)
-                }
+                accountViewModel.sendWebBookmark(url, title, description, tags)
                 showEditDialog = false
             },
         )
@@ -230,9 +226,7 @@ private fun WebBookmarkCard(
             text = { Text(stringResource(R.string.web_bookmark_delete_confirm)) },
             confirmButton = {
                 TextButton(onClick = {
-                    accountViewModel.launchSigner {
-                        accountViewModel.account.deleteWebBookmark(event)
-                    }
+                    accountViewModel.deleteWebBookmark(event)
                     showDeleteDialog = false
                 }) {
                     Text(stringResource(R.string.yes))
