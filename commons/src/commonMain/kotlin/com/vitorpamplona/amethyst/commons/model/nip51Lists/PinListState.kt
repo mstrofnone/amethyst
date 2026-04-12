@@ -19,8 +19,8 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package com.vitorpamplona.amethyst.commons.model.nip51Lists
+
 import androidx.compose.runtime.Stable
-import com.vitorpamplona.amethyst.commons.concurrency.Dispatchers_IO
 import com.vitorpamplona.amethyst.commons.model.Note
 import com.vitorpamplona.amethyst.commons.model.NoteState
 import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
@@ -28,6 +28,7 @@ import com.vitorpamplona.quartz.nip01Core.signers.NostrSigner
 import com.vitorpamplona.quartz.nip51Lists.PinListEvent
 import com.vitorpamplona.quartz.nip51Lists.bookmarkList.tags.EventBookmark
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -62,7 +63,7 @@ class PinListState(
             }.onStart {
                 emit(pinnedEvents(pinList))
             }.debounce(100)
-            .flowOn(Dispatchers_IO)
+            .flowOn(Dispatchers.IO)
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
@@ -73,7 +74,7 @@ class PinListState(
         pinnedNotes
             .map { pins ->
                 pins.map { it.eventId }.toSet()
-            }.flowOn(Dispatchers_IO)
+            }.flowOn(Dispatchers.IO)
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
@@ -89,7 +90,7 @@ class PinListState(
                 emit(
                     pinnedNotes.value.mapNotNull { cache.checkGetOrCreateNote(it.eventId) }.reversed(),
                 )
-            }.flowOn(Dispatchers_IO)
+            }.flowOn(Dispatchers.IO)
             .stateIn(
                 scope,
                 SharingStarted.Eagerly,
