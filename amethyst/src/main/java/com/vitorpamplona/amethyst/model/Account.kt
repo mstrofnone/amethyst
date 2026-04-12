@@ -290,8 +290,8 @@ class Account(
     override val trustedRelayListDecryptionCache = TrustedRelayListDecryptionCache(signer)
     val trustedRelayList = TrustedRelayListState(signer, cache, trustedRelayListDecryptionCache, scope, settings)
 
-    override val proxyRelayListDecryptionCache = ProxyRelayListDecryptionCache(signer)
-    val proxyRelayList = ProxyRelayListState(signer, cache, proxyRelayListDecryptionCache, scope, settings)
+    val proxyRelayListDecryptionCache = ProxyRelayListDecryptionCache(signer)
+    override val proxyRelayList = ProxyRelayListState(signer, cache, proxyRelayListDecryptionCache, scope, settings)
 
     override val broadcastRelayListDecryptionCache = BroadcastRelayListDecryptionCache(signer)
     val broadcastRelayList = BroadcastRelayListState(signer, cache, broadcastRelayListDecryptionCache, scope, settings)
@@ -302,8 +302,8 @@ class Account(
     override val relayFeedsListDecryptionCache = RelayFeedsListDecryptionCache(signer)
     val relayFeedsList = RelayFeedListState(signer, cache, relayFeedsListDecryptionCache, scope, settings)
 
-    override val blockedRelayListDecryptionCache = BlockedRelayListDecryptionCache(signer)
-    val blockedRelayList = BlockedRelayListState(signer, cache, blockedRelayListDecryptionCache, scope, settings)
+    val blockedRelayListDecryptionCache = BlockedRelayListDecryptionCache(signer)
+    override val blockedRelayList = BlockedRelayListState(signer, cache, blockedRelayListDecryptionCache, scope, settings)
 
     val kind3FollowList = Kind3FollowListState(signer, cache, scope, settings)
 
