@@ -20,5 +20,23 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.communities.dal
 
-// Re-export from commons for backwards compatibility
-typealias CommunityModerationFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.community.CommunityModerationFeedFilter
+import com.vitorpamplona.amethyst.model.Account
+import com.vitorpamplona.amethyst.model.AddressableNote
+import com.vitorpamplona.amethyst.model.LocalCache
+import com.vitorpamplona.amethyst.model.Note
+
+class CommunityModerationFeedFilter(
+    communityDefNote: AddressableNote,
+    account: Account,
+) : com.vitorpamplona.amethyst.commons.ui.feeds.communities.CommunityModerationFeedFilter(communityDefNote, account) {
+    override fun feed(): List<Note> {
+        if (communityDefEvent == null) return emptyList()
+
+        val result =
+            LocalCache.notes.mapFlattenIntoSet { _, it ->
+                filterMap(it)
+            }
+
+        return sort(result)
+    }
+}
