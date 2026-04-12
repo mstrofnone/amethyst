@@ -9,6 +9,12 @@ package = com.vitorpamplona.quartz.nativehelpers
 
 /**
  * Create NW parameters with TLS that accepts all certificates.
+ *
+ * ElectrumX servers for Namecoin typically use self-signed certificates.
+ * This creates TCP parameters with a custom TLS verify block that
+ * unconditionally accepts the peer certificate — acceptable because
+ * the ElectrumX protocol operates over a trust model where the client
+ * verifies blockchain data, not server identity.
  */
 static inline nw_parameters_t nw_create_tls_params_trust_all(dispatch_queue_t queue) {
     nw_parameters_t params = nw_parameters_create_secure_tcp(
@@ -32,10 +38,10 @@ static inline nw_parameters_t nw_create_tls_params_trust_all(dispatch_queue_t qu
  */
 static inline int nw_send_sync(nw_connection_t conn, const void *data, size_t len, dispatch_queue_t queue) {
     dispatch_data_t ddata = dispatch_data_create(data, len, queue, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
-    
+
     __block int result = 0;
     dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-    
+
     nw_connection_send(conn, ddata, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, false,
         ^(nw_error_t error) {
             if (error != NULL) {
@@ -44,7 +50,7 @@ static inline int nw_send_sync(nw_connection_t conn, const void *data, size_t le
             dispatch_semaphore_signal(sem);
         }
     );
-    
+
     dispatch_semaphore_wait(sem, dispatch_time(DISPATCH_TIME_NOW, 15LL * NSEC_PER_SEC));
     return result;
 }
@@ -59,7 +65,7 @@ static inline int nw_recv_sync(nw_connection_t conn, void *buf, size_t max_len) 
     __block bool got_error = false;
     __block bool is_complete = false;
     dispatch_semaphore_t sem = dispatch_semaphore_create(0);
-    
+
     nw_connection_receive(conn, 1, (uint32_t)max_len,
         ^(dispatch_data_t content, nw_content_context_t context, bool complete, nw_error_t error) {
             is_complete = complete;
@@ -82,10 +88,10 @@ static inline int nw_recv_sync(nw_connection_t conn, void *buf, size_t max_len) 
             dispatch_semaphore_signal(sem);
         }
     );
-    
+
     long wait_result = dispatch_semaphore_wait(sem, dispatch_time(DISPATCH_TIME_NOW, 15LL * NSEC_PER_SEC));
-    if (wait_result != 0) return -1; // timeout
+    if (wait_result != 0) return -1; /* timeout */
     if (got_error) return -1;
-    if (bytes_read == 0 && is_complete) return 0; // EOF
+    if (bytes_read == 0 && is_complete) return 0; /* EOF */
     return bytes_read;
 }

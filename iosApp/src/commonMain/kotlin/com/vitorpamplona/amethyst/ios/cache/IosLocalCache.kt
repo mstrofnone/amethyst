@@ -38,7 +38,12 @@ import com.vitorpamplona.quartz.nip10Notes.TextNoteEvent
 import com.vitorpamplona.quartz.nip18Reposts.GenericRepostEvent
 import com.vitorpamplona.quartz.nip18Reposts.RepostEvent
 import com.vitorpamplona.quartz.nip22Comments.CommentEvent
+import com.vitorpamplona.quartz.nip23LongContent.LongTextNoteEvent
 import com.vitorpamplona.quartz.nip25Reactions.ReactionEvent
+import com.vitorpamplona.quartz.nip38UserStatus.StatusEvent
+import com.vitorpamplona.quartz.nip51Lists.PrivateReplaceableTagArrayEvent
+import com.vitorpamplona.quartz.nip51Lists.peopleList.PeopleListEvent
+import com.vitorpamplona.quartz.nip51Lists.relaySets.RelaySetEvent
 import com.vitorpamplona.quartz.nip57Zaps.LnZapEvent
 import com.vitorpamplona.quartz.nip57Zaps.LnZapRequestEvent
 import com.vitorpamplona.quartz.utils.DualCase
@@ -62,8 +67,37 @@ class IosLocalCache : ICacheProvider {
 
     val eventStream = IosCacheEventStream()
 
+    /** Monotonically increasing version counter; bump on every consume. */
+    private val _cacheVersion = MutableStateFlow(0L)
+    val cacheVersion: StateFlow<Long> = _cacheVersion.asStateFlow()
+
     private val _followedUsers = MutableStateFlow<Set<HexKey>>(emptySet())
     val followedUsers: StateFlow<Set<HexKey>> = _followedUsers.asStateFlow()
+
+    private val _latestContactList = MutableStateFlow<ContactListEvent?>(null)
+    val latestContactList: StateFlow<ContactListEvent?> = _latestContactList.asStateFlow()
+
+    /** User statuses (NIP-38, kind 30315): pubkey -> latest StatusEvent */
+    private val userStatuses = HashMap<HexKey, StatusEvent>()
+
+    fun getUserStatus(pubKeyHex: HexKey): StatusEvent? = platformSynchronized(lock) { userStatuses[pubKeyHex] }
+
+    fun getUserStatusText(pubKeyHex: HexKey): String? {
+        val status = getUserStatus(pubKeyHex) ?: return null
+        return status.content.ifBlank { null }
+    }
+
+    fun getUserStatusType(pubKeyHex: HexKey): String {
+        val status = getUserStatus(pubKeyHex) ?: return StatusEvent.GENERAL
+        return status.dTag().ifBlank { StatusEvent.GENERAL }
+    }
+
+    fun getUserStatusUrl(pubKeyHex: HexKey): String? = getUserStatus(pubKeyHex)?.firstTaggedUrl()
+
+    /** Stores the latest MetadataEvent per pubkey for use in profile editing. */
+    private val latestMetadataEvents = HashMap<HexKey, MetadataEvent>()
+
+    fun getLatestMetadataEvent(pubKeyHex: HexKey): MetadataEvent? = platformSynchronized(lock) { latestMetadataEvents[pubKeyHex] }
 
     // ----- User operations -----
 
@@ -117,6 +151,9 @@ class IosLocalCache : ICacheProvider {
             val newUserMetadata = event.contactMetaData()
             if (newUserMetadata != null) {
                 user.updateUserInfo(newUserMetadata, event)
+                platformSynchronized(lock) {
+                    latestMetadataEvents[event.pubKey] = event
+                }
             }
         }
     }
@@ -165,10 +202,27 @@ class IosLocalCache : ICacheProvider {
                 consumeComment(event, relay)
             }
 
-            else -> {
-                false
+            is LongTextNoteEvent -> {
+                consumeLongTextNote(event, relay)
             }
-        }
+
+            is StatusEvent -> {
+                consumeStatus(event)
+            }
+
+            is PeopleListEvent -> {
+                consumeAddressableEvent(event, relay)
+            }
+
+            else -> {
+                // Try to consume as a generic addressable event if it has an address
+                if (event is PrivateReplaceableTagArrayEvent) {
+                    consumeAddressableEvent(event, relay)
+                } else {
+                    false
+                }
+            }
+        }.also { if (it) _cacheVersion.value++ }
 
     private fun consumeTextNote(
         event: TextNoteEvent,
@@ -294,6 +348,69 @@ class IosLocalCache : ICacheProvider {
         if (event.createdAt <= lastContactListCreatedAt) return false
         lastContactListCreatedAt = event.createdAt
         _followedUsers.value = event.verifiedFollowKeySet()
+        _latestContactList.value = event
+        return true
+    }
+
+    private fun consumeLongTextNote(
+        event: LongTextNoteEvent,
+        relay: NormalizedRelayUrl?,
+    ): Boolean {
+        val address = event.address()
+        val addressableNote = getOrCreateAddressableNote(address)
+        val existing = addressableNote.event
+        if (existing != null && existing.createdAt >= event.createdAt) return false
+
+        val author = getOrCreateUser(event.pubKey)
+        addressableNote.loadEvent(event, author, emptyList())
+        relay?.let { addressableNote.addRelay(it) }
+
+        // Also store as a regular note so it appears in feeds
+        val note = getOrCreateNote(event.id)
+        if (note.event == null) {
+            note.loadEvent(event, author, emptyList())
+            relay?.let { note.addRelay(it) }
+        }
+        return true
+    }
+
+    /**
+     * Generic consume for any addressable (replaceable) event.
+     * Stores by address and also by event id.
+     */
+    private fun consumeAddressableEvent(
+        event: Event,
+        relay: NormalizedRelayUrl?,
+    ): Boolean {
+        val address =
+            try {
+                (event as? com.vitorpamplona.quartz.nip01Core.core.AddressableEvent)?.address() ?: return false
+            } catch (e: Exception) {
+                return false
+            }
+        val addressableNote = getOrCreateAddressableNote(address)
+        val existing = addressableNote.event
+        if (existing != null && existing.createdAt >= event.createdAt) return false
+
+        val author = getOrCreateUser(event.pubKey)
+        addressableNote.loadEvent(event, author, emptyList())
+        relay?.let { addressableNote.addRelay(it) }
+
+        // Also store as regular note
+        val note = getOrCreateNote(event.id)
+        if (note.event == null) {
+            note.loadEvent(event, author, emptyList())
+            relay?.let { note.addRelay(it) }
+        }
+        return true
+    }
+
+    private fun consumeStatus(event: StatusEvent): Boolean {
+        val existing = platformSynchronized(lock) { userStatuses[event.pubKey] }
+        if (existing != null && existing.createdAt >= event.createdAt) return false
+        platformSynchronized(lock) {
+            userStatuses[event.pubKey] = event
+        }
         return true
     }
 
@@ -325,6 +442,19 @@ class IosLocalCache : ICacheProvider {
             else -> false
         }
 
+    /**
+     * Marks a note as deleted in the local cache.
+     * Returns the Note if it existed, null otherwise.
+     */
+    fun markAsDeleted(noteId: HexKey): Note? {
+        val note =
+            platformSynchronized(lock) {
+                deletedEvents.add(noteId)
+                notes[noteId]
+            }
+        return note
+    }
+
     override fun justConsumeMyOwnEvent(event: Event): Boolean = false
 
     override fun getEventStream(): ICacheEventStream = eventStream
@@ -342,6 +472,30 @@ class IosLocalCache : ICacheProvider {
      */
     fun allNotes(): List<Note> = platformSynchronized(lock) { notes.values.toList() }
 
+    /**
+     * Returns all addressable notes in cache matching PeopleListEvent (kind 30000)
+     * authored by the given pubkey.
+     */
+    fun findPeopleListsByAuthor(pubKeyHex: HexKey): List<AddressableNote> =
+        platformSynchronized(lock) {
+            addressableNotes.values.filter { note ->
+                val event = note.event
+                event is PeopleListEvent && event.pubKey == pubKeyHex
+            }
+        }
+
+    /**
+     * Returns all addressable notes matching RelaySetEvent (kind 30002)
+     * authored by the given pubkey.
+     */
+    fun findRelaySetsByAuthor(pubKeyHex: HexKey): List<AddressableNote> =
+        platformSynchronized(lock) {
+            addressableNotes.values.filter { note ->
+                val event = note.event
+                event is RelaySetEvent && event.pubKey == pubKeyHex
+            }
+        }
+
     fun clear() {
         platformSynchronized(lock) {
             users.clear()
@@ -350,6 +504,7 @@ class IosLocalCache : ICacheProvider {
             deletedEvents.clear()
         }
         _followedUsers.value = emptySet()
+        _latestContactList.value = null
     }
 }
 

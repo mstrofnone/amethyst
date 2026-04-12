@@ -24,7 +24,6 @@ import com.vitorpamplona.quartz.nip01Core.core.toHexKey
 import com.vitorpamplona.quartz.utils.sha256.sha256
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
-import kotlinx.cinterop.get
 import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -63,6 +62,12 @@ import platform.darwin.dispatch_semaphore_wait
  * certificates (ElectrumX servers typically use self-signed certs).
  * All async Network.framework calls are made synchronous via dispatch
  * semaphores — this is safe because the caller runs on Dispatchers.IO.
+ *
+ * Resolution strategy (same as JVM/Android):
+ * 1. Build a canonical name index script for the identifier
+ * 2. Compute the Electrum-style scripthash (reversed SHA-256)
+ * 3. Query `blockchain.scripthash.get_history` to find the latest tx
+ * 4. Fetch the raw transaction and parse the name value from the script
  */
 @OptIn(ExperimentalForeignApi::class)
 class ElectrumXClient : IElectrumXClient {

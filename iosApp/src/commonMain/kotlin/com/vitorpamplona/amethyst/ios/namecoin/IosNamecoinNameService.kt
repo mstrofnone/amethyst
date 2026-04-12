@@ -20,6 +20,7 @@
  */
 package com.vitorpamplona.amethyst.ios.namecoin
 
+import com.vitorpamplona.quartz.nip05DnsIdentifiers.namecoin.DEFAULT_ELECTRUMX_SERVERS
 import com.vitorpamplona.quartz.nip05DnsIdentifiers.namecoin.ElectrumXClient
 import com.vitorpamplona.quartz.nip05DnsIdentifiers.namecoin.NamecoinLookupCache
 import com.vitorpamplona.quartz.nip05DnsIdentifiers.namecoin.NamecoinNameResolver
@@ -28,9 +29,6 @@ import com.vitorpamplona.quartz.nip05DnsIdentifiers.namecoin.NamecoinResolveOutc
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/**
- * Sealed class representing the UI-visible state of a Namecoin resolution.
- */
 sealed class NamecoinResolveState {
     data object Idle : NamecoinResolveState()
 
@@ -45,49 +43,20 @@ sealed class NamecoinResolveState {
     ) : NamecoinResolveState()
 }
 
-/**
- * iOS Namecoin name service — wraps NamecoinNameResolver with caching,
- * preferences-aware server list, and StateFlow for UI observation.
- *
- * Mirrors the Desktop's DesktopNamecoinNameService pattern but uses
- * iOS-native persistence (NSUserDefaults via IosNamecoinPreferences).
- */
-class IosNamecoinNameService(
-    private val preferences: IosNamecoinPreferences,
-) {
+class IosNamecoinNameService {
     private val client = ElectrumXClient()
     private val cache = NamecoinLookupCache()
 
     private val resolver =
         NamecoinNameResolver(
             electrumxClient = client,
-            serverListProvider = { preferences.getServers() },
+            serverListProvider = { DEFAULT_ELECTRUMX_SERVERS },
         )
 
     private val _resolveState = MutableStateFlow<NamecoinResolveState>(NamecoinResolveState.Idle)
     val resolveState: StateFlow<NamecoinResolveState> = _resolveState
 
-    /**
-     * Check whether Namecoin resolution is enabled in preferences.
-     */
-    fun isEnabled(): Boolean = preferences.isEnabled()
-
-    /**
-     * Resolve a Namecoin identifier (.bit domain, d/ or id/ name) to a Nostr pubkey.
-     *
-     * Results are cached for 1 hour. The resolve state flow is updated
-     * throughout the process for UI observation.
-     *
-     * @param identifier e.g. "alice@example.bit", "example.bit", "d/example"
-     * @return [NamecoinNostrResult] on success, null on failure
-     */
     suspend fun resolve(identifier: String): NamecoinNostrResult? {
-        if (!preferences.isEnabled()) {
-            _resolveState.value = NamecoinResolveState.Error("Namecoin resolution is disabled")
-            return null
-        }
-
-        // Check cache first
         val cached = cache.get(identifier)
         if (cached != null) {
             val cachedResult = cached.result
@@ -137,22 +106,9 @@ class IosNamecoinNameService(
         }
     }
 
-    /**
-     * Quick check: is this identifier a Namecoin name?
-     */
     fun isNamecoinIdentifier(identifier: String): Boolean = NamecoinNameResolver.isNamecoinIdentifier(identifier)
 
-    /**
-     * Reset state to idle (e.g. when clearing search).
-     */
     fun resetState() {
         _resolveState.value = NamecoinResolveState.Idle
-    }
-
-    /**
-     * Invalidate a cached entry (e.g. for manual refresh).
-     */
-    suspend fun invalidateCache(identifier: String) {
-        cache.invalidate(identifier)
     }
 }
