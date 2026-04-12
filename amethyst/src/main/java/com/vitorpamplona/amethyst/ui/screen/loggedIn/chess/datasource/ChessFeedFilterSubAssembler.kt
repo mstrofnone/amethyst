@@ -20,6 +20,67 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.chess.datasource
 
-// Re-export from commons for backwards compatibility
-typealias ChessQueryState = com.vitorpamplona.amethyst.commons.relayClient.assemblers.chess.ChessQueryState
-typealias ChessFeedFilterSubAssembler = com.vitorpamplona.amethyst.commons.relayClient.assemblers.chess.ChessFeedFilterSubAssembler
+import com.vitorpamplona.amethyst.commons.relayClient.eoseManagers.PerKeyEoseManager
+import com.vitorpamplona.amethyst.commons.relays.SincePerRelayMap
+import com.vitorpamplona.quartz.nip01Core.core.Event
+import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
+import com.vitorpamplona.quartz.nip01Core.relay.client.pool.RelayBasedFilter
+import com.vitorpamplona.quartz.nip01Core.relay.client.reqs.SubscriptionListener
+import com.vitorpamplona.quartz.nip01Core.relay.client.subscriptions.Subscription
+import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
+import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.quartz.utils.TimeUtils
+
+/**
+ * Query state for chess subscription
+ */
+data class ChessQueryState(
+    val userPubkey: String,
+    val inboxRelays: Set<NormalizedRelayUrl>,
+    val globalRelays: Set<NormalizedRelayUrl>,
+    val isGlobal: Boolean,
+    val activeGameIds: Set<String> = emptySet(),
+    val opponentPubkeys: Set<String> = emptySet(),
+)
+
+/**
+ * Sub-assembler that creates the actual relay filters.
+ * Intercepts incoming chess events from relays and forwards them to the ViewModel.
+ */
+class ChessFeedFilterSubAssembler(
+    client: INostrClient,
+    allKeys: () -> Set<ChessQueryState>,
+) : PerKeyEoseManager<ChessQueryState, String>(client, allKeys) {
+    var onChessEvent: ((Event) -> Unit)? = null
+
+    override fun updateFilter(
+        queryState: ChessQueryState,
+        since: SincePerRelayMap?,
+    ): List<RelayBasedFilter> = filterChessEvents(queryState, since)
+
+    override fun extractKey(queryState: ChessQueryState): String = queryState.userPubkey
+
+    override fun newSub(queryState: ChessQueryState): Subscription =
+        requestNewSubscription(
+            object : SubscriptionListener {
+                override fun onEose(
+                    relay: NormalizedRelayUrl,
+                    forFilters: List<Filter>?,
+                ) {
+                    newEose(queryState, relay, TimeUtils.now(), forFilters)
+                }
+
+                override fun onEvent(
+                    event: Event,
+                    isLive: Boolean,
+                    relay: NormalizedRelayUrl,
+                    forFilters: List<Filter>?,
+                ) {
+                    if (isLive) {
+                        newEose(queryState, relay, TimeUtils.now(), forFilters)
+                    }
+                    onChessEvent?.invoke(event)
+                }
+            },
+        )
+}

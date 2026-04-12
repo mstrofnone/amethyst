@@ -20,5 +20,22 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.geohash.datasource
 
-// Re-export from commons for backwards compatibility
-typealias GeoHashFeedFilterSubAssembler = com.vitorpamplona.amethyst.commons.relayClient.assemblers.geohash.GeoHashFeedFilterSubAssembler
+import com.vitorpamplona.amethyst.commons.relayClient.eoseManagers.PerKeyEoseManager
+import com.vitorpamplona.amethyst.commons.relays.SincePerRelayMap
+import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
+import com.vitorpamplona.quartz.nip01Core.relay.client.pool.RelayBasedFilter
+
+class GeoHashFeedFilterSubAssembler(
+    client: INostrClient,
+    allKeys: () -> Set<GeohashQueryState>,
+) : PerKeyEoseManager<GeohashQueryState, String>(client, allKeys) {
+    override fun updateFilter(
+        queryState: GeohashQueryState,
+        since: SincePerRelayMap?,
+    ): List<RelayBasedFilter> = filterPostsByGeohash(queryState.geohash, queryState.relays, since)
+
+    /**
+     * Only one queryState per hashtag.
+     */
+    override fun extractKey(queryState: GeohashQueryState) = queryState.lowercaseGeohash
+}
