@@ -20,18 +20,19 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.feeds
 
-import com.vitorpamplona.amethyst.commons.model.IFeedTopNavFilter
 import com.vitorpamplona.amethyst.commons.model.LiveHiddenUsers
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
 import com.vitorpamplona.quartz.nip01Core.tags.hashtags.countHashtags
+import com.vitorpamplona.quartz.nip51Lists.muteList.MuteListEvent
+import com.vitorpamplona.quartz.nip51Lists.peopleList.PeopleListEvent
 import com.vitorpamplona.quartz.utils.TimeUtils
 
 class FilterByListParams(
     val isHiddenList: Boolean,
-    val followLists: IFeedTopNavFilter?,
+    val followLists: ITopNavFilterMatcher?,
     val hiddenLists: LiveHiddenUsers,
     val now: Long = TimeUtils.oneMinuteFromNow(),
 ) {
@@ -47,7 +48,7 @@ class FilterByListParams(
         return followLists.matchAuthor(author)
     }
 
-    fun isGlobal() = followLists?.isGlobal() == true
+    fun isGlobal() = followLists?.isGlobal() ?: false
 
     private fun applyTopFilter(
         comingFrom: List<NormalizedRelayUrl>,
@@ -55,8 +56,9 @@ class FilterByListParams(
     ): Boolean {
         if (followLists == null) return false
 
-        return if (followLists.isRelayFilter()) {
-            followLists.relayUrl()?.let { comingFrom.contains(it) } ?: false
+        val relay = followLists.relayUrl()
+        return if (relay != null) {
+            comingFrom.contains(relay)
         } else {
             followLists.match(noteEvent)
         }
@@ -68,8 +70,9 @@ class FilterByListParams(
     ): Boolean {
         if (followLists == null) return false
 
-        return if (followLists.isRelayFilter()) {
-            followLists.relayUrl()?.let { comingFrom.contains(it) } ?: false
+        val relay = followLists.relayUrl()
+        return if (relay != null) {
+            comingFrom.contains(relay)
         } else {
             followLists.matchAuthor(address.pubKeyHex)
         }
@@ -91,12 +94,17 @@ class FilterByListParams(
         (isHiddenList || isNotHidden(address.pubKeyHex))
 
     companion object {
+        fun showHiddenKey(
+            selectedListName: String,
+            userHex: String,
+        ) = selectedListName == PeopleListEvent.blockListFor(userHex) || selectedListName == MuteListEvent.blockListFor(userHex)
+
         fun create(
-            followLists: IFeedTopNavFilter?,
+            followLists: ITopNavFilterMatcher?,
             hiddenUsers: LiveHiddenUsers,
         ): FilterByListParams =
             FilterByListParams(
-                isHiddenList = followLists?.isMutedFilter() == true,
+                isHiddenList = followLists?.isHiddenList() ?: false,
                 followLists = followLists,
                 hiddenLists = hiddenUsers,
             )

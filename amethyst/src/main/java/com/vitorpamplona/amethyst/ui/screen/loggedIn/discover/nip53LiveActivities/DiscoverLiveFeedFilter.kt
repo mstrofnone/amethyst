@@ -20,7 +20,7 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.discover.nip53LiveActivities
 
-import com.vitorpamplona.amethyst.commons.ui.feeds.IOnlineChecker
+import com.vitorpamplona.amethyst.commons.ui.feeds.FilterByListParams
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.model.LocalCache
 import com.vitorpamplona.amethyst.model.TopFilter
@@ -32,7 +32,11 @@ import com.vitorpamplona.amethyst.model.topNavFeeds.noteBased.community.SingleCo
 import com.vitorpamplona.amethyst.model.topNavFeeds.noteBased.muted.MutedAuthorsByOutboxTopNavFilter
 import com.vitorpamplona.amethyst.model.topNavFeeds.noteBased.muted.MutedAuthorsByProxyTopNavFilter
 import com.vitorpamplona.amethyst.service.OnlineChecker
-import com.vitorpamplona.amethyst.ui.dal.FilterByListParams
+import com.vitorpamplona.amethyst.ui.dal.AdditiveFeedFilter
+import com.vitorpamplona.quartz.nip53LiveActivities.meetingSpaces.MeetingRoomEvent
+import com.vitorpamplona.quartz.nip53LiveActivities.meetingSpaces.MeetingSpaceEvent
+import com.vitorpamplona.quartz.nip53LiveActivities.streaming.LiveActivitiesEvent
+import com.vitorpamplona.quartz.nip53LiveActivities.streaming.tags.StatusTag
 
 /**
  * Adapter that makes [OnlineChecker] available as [IOnlineChecker] for commons.

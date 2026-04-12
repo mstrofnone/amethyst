@@ -20,9 +20,5 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.note.creators.expiration
 
-import androidx.compose.runtime.Stable
-
-@Stable
-interface IExpiration {
-    var expirationDate: Long
-}
+// Re-export from commons for backwards compatibility
+typealias AdditiveComplexFeedFilter<T, U> = com.vitorpamplona.amethyst.commons.ui.feeds.AdditiveComplexFeedFilter<T, U>

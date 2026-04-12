@@ -18,8 +18,27 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.vitorpamplona.amethyst.ui.dal
+package com.vitorpamplona.amethyst.commons.ui.feeds
 
-// Re-export from commons for backwards compatibility
-typealias FilterByListParams = com.vitorpamplona.amethyst.commons.ui.dal.FilterByListParams
-typealias IFilterByListTopNavFilter = com.vitorpamplona.amethyst.commons.ui.dal.IFilterByListTopNavFilter
+import com.vitorpamplona.quartz.nip01Core.core.Event
+import com.vitorpamplona.quartz.nip01Core.core.HexKey
+import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+
+/**
+ * Minimal interface for top-nav filter matching, used by [FilterByListParams].
+ * This decouples filter matching logic from Android-specific dependencies like LocalCache.
+ */
+interface ITopNavFilterMatcher {
+    fun matchAuthor(pubkey: HexKey): Boolean
+
+    fun match(noteEvent: Event): Boolean
+
+    /** Returns the relay URL if this is a relay-based filter, null otherwise. */
+    fun relayUrl(): NormalizedRelayUrl? = null
+
+    /** Returns true if this filter represents a global/unfiltered view. */
+    fun isGlobal(): Boolean = false
+
+    /** Returns true if this filter is for viewing hidden/muted content. */
+    fun isHiddenList(): Boolean = false
+}

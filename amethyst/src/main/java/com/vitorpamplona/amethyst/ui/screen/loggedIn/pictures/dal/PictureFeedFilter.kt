@@ -20,5 +20,58 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.pictures.dal
 
-// Re-export from commons for backwards compatibility
-typealias PictureFeedFilter = com.vitorpamplona.amethyst.commons.ui.dal.PictureFeedFilter
+import com.vitorpamplona.amethyst.commons.ui.feeds.FilterByListParams
+import com.vitorpamplona.amethyst.model.Account
+import com.vitorpamplona.amethyst.model.LocalCache
+import com.vitorpamplona.amethyst.model.Note
+import com.vitorpamplona.amethyst.model.TopFilter
+import com.vitorpamplona.amethyst.ui.dal.AdditiveFeedFilter
+import com.vitorpamplona.amethyst.ui.dal.DefaultFeedOrder
+import com.vitorpamplona.quartz.nip68Picture.PictureEvent
+
+class PictureFeedFilter(
+    val account: Account,
+) : AdditiveFeedFilter<Note>() {
+    override fun feedKey(): String = account.userProfile().pubkeyHex + "-" + followList().code
+
+    override fun limit() = 200
+
+    fun followList(): TopFilter = account.settings.defaultPicturesFollowList.value
+
+    fun TopFilter.isMuteList() = this is TopFilter.MuteList
+
+    fun TopFilter.isBlockList() = this is TopFilter.PeopleList && this.address == account.blockPeopleList.getBlockListAddress()
+
+    fun TopFilter.wantsToSeeNegativeStuff() = isMuteList() || isBlockList()
+
+    override fun showHiddenKey(): Boolean = followList().wantsToSeeNegativeStuff()
+
+    override fun feed(): List<Note> {
+        val params = buildFilterParams(account)
+        val notes =
+            LocalCache.notes.filterIntoSet { _, it ->
+                val noteEvent = it.event
+                noteEvent is PictureEvent && params.match(noteEvent, it.relays)
+            }
+        return sort(notes)
+    }
+
+    override fun applyFilter(newItems: Set<Note>): Set<Note> = innerApplyFilter(newItems)
+
+    fun buildFilterParams(account: Account): FilterByListParams =
+        FilterByListParams.create(
+            account.livePicturesFollowLists.value,
+            account.hiddenUsers.flow.value,
+        )
+
+    private fun innerApplyFilter(collection: Collection<Note>): Set<Note> {
+        val params = buildFilterParams(account)
+
+        return collection.filterTo(HashSet()) {
+            val noteEvent = it.event
+            noteEvent is PictureEvent && params.match(noteEvent, it.relays)
+        }
+    }
+
+    override fun sort(items: Set<Note>): List<Note> = items.sortedWith(DefaultFeedOrder)
+}

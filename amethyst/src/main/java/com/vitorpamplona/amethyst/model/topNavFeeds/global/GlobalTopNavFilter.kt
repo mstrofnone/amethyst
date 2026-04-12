@@ -36,7 +36,7 @@ class GlobalTopNavFilter(
     val proxyRelays: StateFlow<Set<NormalizedRelayUrl>>,
     val relayFeeds: StateFlow<Set<NormalizedRelayUrl>>,
 ) : IFeedTopNavFilter {
-    override val isGlobal: Boolean get() = true
+    override fun isGlobal(): Boolean = true
 
     override fun matchAuthor(pubkey: HexKey): Boolean = true
 

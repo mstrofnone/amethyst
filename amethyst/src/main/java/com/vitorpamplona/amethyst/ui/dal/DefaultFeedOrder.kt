@@ -20,7 +20,16 @@
  */
 package com.vitorpamplona.amethyst.ui.dal
 
+import com.vitorpamplona.amethyst.commons.model.Note
+import com.vitorpamplona.amethyst.commons.ui.notifications.Card
+import com.vitorpamplona.quartz.nip01Core.core.Event
+
 // Re-export from commons for backwards compatibility
-val DefaultFeedOrder = com.vitorpamplona.amethyst.commons.ui.feeds.DefaultFeedOrder
-val DefaultFeedOrderEvent = com.vitorpamplona.amethyst.commons.ui.feeds.DefaultFeedOrderEvent
-val DefaultFeedOrderCard = com.vitorpamplona.amethyst.commons.ui.feeds.DefaultFeedOrderCard
+val DefaultFeedOrder: Comparator<Note> =
+    com.vitorpamplona.amethyst.commons.ui.feeds.DefaultFeedOrder
+
+val DefaultFeedOrderEvent: Comparator<Event> =
+    com.vitorpamplona.amethyst.commons.ui.feeds.DefaultFeedOrderEvent
+
+val DefaultFeedOrderCard: Comparator<Card> =
+    com.vitorpamplona.amethyst.commons.ui.feeds.DefaultFeedOrderCard

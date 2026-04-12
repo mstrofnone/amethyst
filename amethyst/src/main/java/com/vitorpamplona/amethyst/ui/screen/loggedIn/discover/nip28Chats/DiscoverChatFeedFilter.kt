@@ -20,11 +20,13 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.discover.nip28Chats
 
-import com.vitorpamplona.amethyst.commons.model.TopFilter
+import com.vitorpamplona.amethyst.commons.ui.feeds.FilterByListParams
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.model.LocalCache
 import com.vitorpamplona.amethyst.model.TopFilter
-import com.vitorpamplona.amethyst.ui.dal.FilterByListParams
+import com.vitorpamplona.amethyst.ui.dal.AdditiveFeedFilter
+import com.vitorpamplona.quartz.nip28PublicChat.admin.ChannelCreateEvent
+import com.vitorpamplona.quartz.nip28PublicChat.base.IsInPublicChatChannel
 
 /**
  * App-specific wrapper that creates a [DiscoverChatFeedFilter][com.vitorpamplona.amethyst.commons.ui.feeds.DiscoverChatFeedFilter]

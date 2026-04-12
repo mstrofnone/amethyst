@@ -38,7 +38,7 @@ class MutedAuthorsByOutboxTopNavFilter(
     val authors: Set<String>,
     val blockedRelays: StateFlow<Set<NormalizedRelayUrl>>,
 ) : IFeedTopNavFilter {
-    override val isMutedFilter: Boolean get() = true
+    override fun isHiddenList(): Boolean = true
 
     override fun matchAuthor(pubkey: HexKey) = pubkey in authors
 
