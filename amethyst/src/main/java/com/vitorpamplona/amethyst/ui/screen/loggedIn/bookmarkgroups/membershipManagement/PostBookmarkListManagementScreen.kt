@@ -155,8 +155,8 @@ private fun ListManagementViewBody(
                 onRemoveBookmarkFromGroup = {
                     accountViewModel.removeBookmarkFromList(
                         bookmark = EventBookmark(eventId = note.idHex),
-                        bookmarkListIdentifier = bookmarkList.identifier,
-                        isBookmarkPrivate = maybePrivateBookmark != null,
+                        groupIdentifier = bookmarkList.identifier,
+                        isPrivate = maybePrivateBookmark != null,
                     )
                 },
             )

@@ -66,7 +66,6 @@ import com.vitorpamplona.amethyst.model.UiSettingsFlow
 import com.vitorpamplona.amethyst.model.UrlCachedPreviewer
 import com.vitorpamplona.amethyst.model.User
 import com.vitorpamplona.amethyst.model.nip51Lists.labeledBookmarkLists.LabeledBookmarkList
-import com.vitorpamplona.amethyst.model.nip51Lists.peopleList.PeopleList
 import com.vitorpamplona.amethyst.model.privacyOptions.EmptyRoleBasedHttpClientBuilder
 import com.vitorpamplona.amethyst.model.privacyOptions.IRoleBasedHttpClientBuilder
 import com.vitorpamplona.amethyst.model.privacyOptions.RoleBasedHttpClientBuilder
@@ -107,6 +106,7 @@ import com.vitorpamplona.quartz.nip01Core.relay.client.accessories.RelayOfflineT
 import com.vitorpamplona.quartz.nip01Core.relay.client.auth.EmptyIAuthStatus
 import com.vitorpamplona.quartz.nip01Core.relay.client.auth.RelayAuthenticator
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
 import com.vitorpamplona.quartz.nip01Core.signers.NostrSignerInternal
 import com.vitorpamplona.quartz.nip01Core.signers.SignerExceptions
 import com.vitorpamplona.quartz.nip01Core.tags.people.PubKeyReferenceTag
@@ -120,6 +120,7 @@ import com.vitorpamplona.quartz.nip05DnsIdentifiers.Nip05Client
 import com.vitorpamplona.quartz.nip10Notes.tags.MarkedETag
 import com.vitorpamplona.quartz.nip17Dm.base.ChatroomKeyable
 import com.vitorpamplona.quartz.nip17Dm.base.NIP17Group
+import com.vitorpamplona.quartz.nip17Dm.messages.ChatMessageEvent
 import com.vitorpamplona.quartz.nip18Reposts.GenericRepostEvent
 import com.vitorpamplona.quartz.nip18Reposts.RepostEvent
 import com.vitorpamplona.quartz.nip19Bech32.Nip19Parser
@@ -1163,6 +1164,86 @@ class AccountViewModel(
     override fun delete(notes: List<Note>) = launchSigner { account.delete(notes) }
 
     override fun delete(note: Note) = launchSigner { account.delete(note) }
+
+    fun deleteDraftIgnoreErrors(draftTag: String) = launchSigner { account.deleteDraftIgnoreErrors(draftTag) }
+
+    fun migrateOldBookmarksToNew(onDone: (() -> Unit)? = null) =
+        launchSigner {
+            account.migrateOldBookmarksToNew()
+            onDone?.invoke()
+        }
+
+    fun sendNip17PrivateMessage(template: EventTemplate<ChatMessageEvent>) = launchSigner { account.sendNip17PrivateMessage(template) }
+
+    // Labeled bookmark list operations
+    fun broadcastBookmarkGroup(bookmarkIdentifier: String) =
+        launchSigner {
+            account.labeledBookmarkLists.getLabeledBookmarkListNote(bookmarkIdentifier)?.let {
+                account.broadcast(it)
+            }
+        }
+
+    fun deleteBookmarkGroup(bookmarkIdentifier: String) =
+        launchSigner {
+            account.labeledBookmarkLists.deleteBookmarkList(bookmarkIdentifier, account)
+        }
+
+    fun moveBookmarkInList(
+        bookmark: BookmarkIdTag,
+        groupIdentifier: String,
+        isCurrentlyPrivate: Boolean,
+    ) = launchSigner {
+        account.labeledBookmarkLists.moveBookmarkInList(bookmark, groupIdentifier, isCurrentlyPrivate, account)
+    }
+
+    fun removeBookmarkFromList(
+        bookmark: BookmarkIdTag,
+        groupIdentifier: String,
+        isPrivate: Boolean,
+    ) = launchSigner {
+        account.labeledBookmarkLists.removeBookmarkFromList(bookmark, groupIdentifier, isPrivate, account)
+    }
+
+    fun cloneBookmarkList(
+        currentBookmarkList: LabeledBookmarkList,
+        customCloneName: String?,
+        customCloneDescription: String?,
+    ) = launchSigner {
+        account.labeledBookmarkLists.cloneBookmarkList(currentBookmarkList, customCloneName, customCloneDescription, account)
+    }
+
+    fun addBookmarkToList(
+        bookmark: BookmarkIdTag,
+        bookmarkListIdentifier: String,
+        isBookmarkPrivate: Boolean,
+    ) = launchSigner {
+        account.labeledBookmarkLists.addBookmarkToList(bookmark, bookmarkListIdentifier, isBookmarkPrivate, account)
+    }
+
+    fun addBookmark(
+        note: Note,
+        isPrivate: Boolean,
+    ) = launchSigner { account.addBookmark(note, isPrivate) }
+
+    fun removeBookmark(note: Note) = launchSigner { account.removeBookmark(note) }
+
+    fun sendWebBookmark(
+        url: String,
+        title: String?,
+        description: String,
+        hashtags: List<String> = emptyList(),
+    ) = launchSigner {
+        account.sendWebBookmark(url, title, description, hashtags)
+    }
+
+    fun deleteWebBookmark(event: WebBookmarkEvent) = launchSigner { account.deleteWebBookmark(event) }
+
+    fun pollRespond(
+        event: PollEvent,
+        responses: Set<String>,
+    ) = launchSigner {
+        account.pollRespond(event, responses)
+    }
 
     fun requestToVanish(
         relays: List<NormalizedRelayUrl>,

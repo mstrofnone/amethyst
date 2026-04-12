@@ -102,6 +102,13 @@ class NewUserMetadataViewModel : ViewModel() {
         }
     }
 
+    fun sendPost(onDone: (() -> Unit)? = null) {
+        accountViewModel.launchSigner {
+            create()
+            onDone?.invoke()
+        }
+    }
+
     suspend fun create() {
         val metadata =
             account.userMetadata.sendNewUserMetadata(

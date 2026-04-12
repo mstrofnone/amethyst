@@ -135,9 +135,7 @@ class ChatNewMessageViewModel :
             draftTag.versions.collectLatest {
                 // don't save the first
                 if (it > 0) {
-                    accountViewModel.launchSigner {
-                        sendDraftSync()
-                    }
+                    sendDraftSync()
                 }
             }
         }
@@ -419,6 +417,20 @@ class ChatNewMessageViewModel :
         cancel()
         accountViewModel.viewModelScope.launch(Dispatchers.IO) {
             accountViewModel.account.deleteDraftIgnoreErrors(version)
+        }
+    }
+
+    fun sendPost(onDone: (() -> Unit)? = null) {
+        accountViewModel.launchSigner {
+            sendPostSync()
+            onDone?.invoke()
+        }
+    }
+
+    fun sendDraftAndCancel() {
+        accountViewModel.launchSigner {
+            sendDraftSync()
+            cancel()
         }
     }
 

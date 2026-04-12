@@ -65,10 +65,7 @@ fun EditFieldRow(
     nav: INav,
 ) {
     BackHandler {
-        accountViewModel.launchSigner {
-            channelScreenModel.sendDraftSync()
-            channelScreenModel.cancel()
-        }
+        channelScreenModel.sendDraftAndCancel()
         nav.popBack()
     }
 

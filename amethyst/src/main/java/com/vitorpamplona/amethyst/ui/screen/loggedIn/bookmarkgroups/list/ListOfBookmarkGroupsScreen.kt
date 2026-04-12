@@ -74,7 +74,7 @@ fun ListOfBookmarkGroupsScreen(
             )
         },
         deleteBookmarkGroup = { bookmarkGroup ->
-            accountViewModel.deleteBookmarkList(bookmarkGroup.identifier)
+            accountViewModel.deleteBookmarkGroup(bookmarkGroup.identifier)
         },
         nav,
     )
