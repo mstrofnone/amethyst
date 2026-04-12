@@ -142,16 +142,17 @@ private fun RenderTextWithTranslateOptions(
     Column {
         displayText(toBeViewed)
 
-        val srcLang = translatedTextState.sourceLang
-        val tgtLang = translatedTextState.targetLang
+        val sourceLang = translatedTextState.sourceLang
+        val targetLang = translatedTextState.targetLang
+
         if (
-            srcLang != null &&
-            tgtLang != null &&
-            srcLang != tgtLang
+            sourceLang != null &&
+            targetLang != null &&
+            sourceLang != targetLang
         ) {
             TranslationMessage(
-                srcLang,
-                tgtLang,
+                sourceLang,
+                targetLang,
                 translationMessageModifier,
                 accountViewModel,
             ) {
@@ -369,18 +370,21 @@ fun TranslateAndWatchLanguageChanges(
                     accountViewModel.translateTo(),
                 ).addOnCompleteListener { task ->
                     if (task.isSuccessful && !content.equals(task.result.result, true)) {
-                        if (task.result.sourceLang != null && task.result.targetLang != null) {
+                        val resultSourceLang = task.result.sourceLang
+                        val resultTargetLang = task.result.targetLang
+
+                        if (resultSourceLang != null && resultTargetLang != null) {
                             val preference =
                                 accountViewModel.account.settings.preferenceBetween(
-                                    task.result.sourceLang!!,
-                                    task.result.targetLang!!,
+                                    resultSourceLang,
+                                    resultTargetLang,
                                 )
                             val newConfig =
                                 TranslationConfig(
                                     result = task.result.result,
-                                    sourceLang = task.result.sourceLang,
-                                    targetLang = task.result.targetLang,
-                                    showOriginal = preference == task.result.sourceLang,
+                                    sourceLang = resultSourceLang,
+                                    targetLang = resultTargetLang,
+                                    showOriginal = preference == resultSourceLang,
                                 )
 
                             onTranslated(newConfig)
