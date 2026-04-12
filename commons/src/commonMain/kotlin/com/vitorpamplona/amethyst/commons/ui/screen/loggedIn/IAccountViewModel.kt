@@ -24,181 +24,141 @@ import com.vitorpamplona.amethyst.commons.model.AddressableNote
 import com.vitorpamplona.amethyst.commons.model.IAccount
 import com.vitorpamplona.amethyst.commons.model.Note
 import com.vitorpamplona.amethyst.commons.model.User
-import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatChannel
-import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChannel
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
-import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.quartz.nip57Zaps.LnZapEvent
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Platform-agnostic interface for AccountViewModel.
+ * Cross-platform interface for AccountViewModel.
  *
- * Exposes the most commonly used members of AccountViewModel using only
- * commons-compatible types. Composables and ViewModels in the commons module
- * can depend on this interface instead of the concrete Android AccountViewModel,
- * enabling incremental migration to KMP.
+ * Provides the subset of AccountViewModel's API that can be expressed
+ * using only commonMain types (IAccount, Note, User, HexKey, etc.).
+ * The Android-specific AccountViewModel implements this interface so
+ * that UI files migrated to commonMain can accept IAccountViewModel
+ * as a parameter without depending on Android-only types.
  *
- * Members are ordered by usage frequency (most-referenced first).
+ * Usage pattern for migrated files:
+ *   Before: fun MyScreen(accountViewModel: AccountViewModel, ...)
+ *   After:  fun MyScreen(accountViewModel: IAccountViewModel, ...)
  */
 interface IAccountViewModel {
-    // ── core properties (475+ usages) ─────────────────────────────────
+    // ---- Core account access ----
 
-    /** The underlying account abstraction. */
+    /** The underlying account, abstracted via IAccount for commonMain use. */
     val account: IAccount
 
-    // ── identity helpers (50-20 usages) ───────────────────────────────
+    /** Coroutine scope tied to the ViewModel lifecycle. */
+    val scope: CoroutineScope
 
-    /** Current user's profile. */
+    // ---- Identity helpers (used by 50+ files) ----
+
+    /** Current user's profile. Delegates to account.userProfile(). */
     fun userProfile(): User
 
-    /** Whether the account can sign events. */
+    /** Whether the current account can sign events. */
     fun isWriteable(): Boolean
 
-    /** Whether the given pubkey is the logged-in user. */
+    /** Check if the given pubkey is the logged-in user. */
     fun isLoggedUser(pubkeyHex: HexKey?): Boolean
 
-    /** Whether the given user is the logged-in user. */
+    /** Check if the given user is the logged-in user. */
     fun isLoggedUser(user: User?): Boolean
 
-    /** Whether the logged-in user follows the given user. */
+    /** Check if the current account follows the given user. */
     fun isFollowing(user: User?): Boolean
 
-    /** Whether the logged-in user follows the given pubkey. */
+    /** Check if the current account follows the given pubkey. */
     fun isFollowing(user: HexKey): Boolean
 
-    // ── cache access (33-10 usages) ──────────────────────────────────
+    // ---- Cache lookups (used by 30+ files) ----
 
-    /** Get a note from cache if it exists. */
-    fun getNoteIfExists(hex: HexKey): Note?
-
-    /** Get or create a user in cache. */
     fun checkGetOrCreateUser(key: HexKey): User?
 
-    /** Get a user from cache if it exists. */
     fun getUserIfExists(hex: HexKey): User?
 
-    /** Get or create a note in cache. */
     fun checkGetOrCreateNote(key: HexKey): Note?
 
-    /** Get or create an addressable note in cache. */
-    fun getOrCreateAddressableNote(address: Address): AddressableNote
+    fun getNoteIfExists(hex: HexKey): Note?
 
-    // ── coroutine helpers ─────────────────────────────────────────────
+    fun getOrCreateAddressableNote(address: Address): AddressableNote?
 
-    /** Launch a coroutine on IO. */
+    fun getAddressableNoteIfExists(key: String): AddressableNote?
+
+    fun getAddressableNoteIfExists(key: Address): AddressableNote?
+
+    // ---- Async helpers ----
+
+    /** Launch a coroutine on IO dispatchers. */
     fun runOnIO(runOnIO: suspend () -> Unit)
 
-    // ── follow / unfollow (10-8 usages each) ─────────────────────────
+    // ---- Actions (commonly used) ----
 
     fun follow(user: User)
 
-    fun follow(users: List<User>)
-
-    fun follow(community: AddressableNote)
-
-    fun follow(channel: PublicChatChannel)
-
-    fun follow(channel: EphemeralChatChannel)
-
     fun unfollow(user: User)
-
-    fun unfollow(community: AddressableNote)
-
-    fun unfollow(channel: PublicChatChannel)
-
-    fun unfollow(channel: EphemeralChatChannel)
-
-    fun followHashtag(tag: String)
-
-    fun unfollowHashtag(tag: String)
-
-    fun followGeohash(tag: String)
-
-    fun unfollowGeohash(tag: String)
-
-    fun followRelayFeed(url: NormalizedRelayUrl)
-
-    fun unfollowRelayFeed(url: NormalizedRelayUrl)
-
-    // ── note actions (7-10 usages each) ──────────────────────────────
-
-    fun broadcast(note: Note)
-
-    fun delete(note: Note)
-
-    fun delete(notes: List<Note>)
 
     fun hide(user: User)
 
     fun show(user: User)
 
-    fun hide(word: String)
+    fun boost(note: Note)
 
-    fun showWord(word: String)
+    fun delete(note: Note)
 
-    fun hideWord(word: String)
+    fun delete(notes: List<Note>)
 
-    fun showUser(pubkeyHex: String)
+    fun broadcast(note: Note)
 
-    fun report(
+    fun reactToOrDelete(note: Note)
+
+    fun reactToOrDelete(
         note: Note,
-        type: com.vitorpamplona.quartz.nip56Reports.ReportType,
-        content: String,
+        reaction: String,
     )
 
-    fun report(
-        user: User,
-        type: com.vitorpamplona.quartz.nip56Reports.ReportType,
-        content: String = "",
-    )
-
-    // ── settings accessors (9+ usages) ───────────────────────────────
-
-    fun showSensitiveContent(): MutableStateFlow<Boolean?>
-
-    fun zapAmountChoices(): List<Long>
-
-    fun zapAmountChoicesFlow(): StateFlow<List<Long>>
-
-    fun reactionChoices(): List<String>
-
-    fun reactionChoicesFlow(): StateFlow<List<String>>
-
-    fun defaultZapType(): com.vitorpamplona.quartz.nip57Zaps.LnZapEvent.ZapType
-
-    fun dontTranslateFrom(): Set<String>
-
-    fun translateTo(): String
-
-    fun filterSpamFromStrangers(): MutableStateFlow<Boolean>
-
-    // ── misc (5-9 usages) ────────────────────────────────────────────
-
-    fun prefer(
-        source: String,
-        target: String,
-        preference: String,
-    )
-
-    /** Decrypt a note's content from cache or null. */
-    fun cachedDecrypt(note: Note): String?
-
-    /** Decrypt a note's content, calling onReady when done. */
     fun decrypt(
         note: Note,
         onReady: (String) -> Unit,
     )
 
-    fun markDonatedInThisVersion(): Boolean
+    fun cachedDecrypt(note: Note): String?
 
-    fun dismissPollNotification(noteId: String)
+    // ---- Bookmark / Pin (used by several files) ----
 
-    fun hasViewedPollResults(noteId: String): Boolean
+    fun addPrivateBookmark(note: Note)
 
-    fun markPollResultsViewed(
-        noteId: String,
-        pollEndsAt: Long?,
-    )
+    fun addPublicBookmark(note: Note)
+
+    fun removePrivateBookmark(note: Note)
+
+    fun removePublicBookmark(note: Note)
+
+    fun addPin(note: Note)
+
+    fun removePin(note: Note)
+
+    // ---- Navigation helpers ----
+
+    fun loadReactionTo(note: Note?): String?
+
+    fun loadAndMarkAsRead(
+        routeForLastRead: String,
+        createdAt: Long?,
+    ): Boolean
+
+    // ---- Settings delegates ----
+
+    fun defaultZapType(): LnZapEvent.ZapType
+
+    fun reactionChoices(): List<String>
+
+    fun zapAmountChoices(): List<Long>
+
+    fun showSensitiveContent(): MutableStateFlow<Boolean?>
+
+    fun dontTranslateFrom(): Set<String>
+
+    fun translateTo(): String
 }

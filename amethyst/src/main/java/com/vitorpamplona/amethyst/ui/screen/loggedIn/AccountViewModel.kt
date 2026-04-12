@@ -53,6 +53,7 @@ import com.vitorpamplona.amethyst.commons.model.observables.CreatedAtComparator
 import com.vitorpamplona.amethyst.commons.ui.components.UrlPreviewState
 import com.vitorpamplona.amethyst.commons.ui.feeds.FeedState
 import com.vitorpamplona.amethyst.commons.ui.notifications.CardFeedState
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel
 import com.vitorpamplona.amethyst.logTime
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.model.AccountSettings
@@ -185,7 +186,9 @@ class AccountViewModel(
     override val nip05ClientBuilder: () -> INip05Client,
 ) : ViewModel(),
     Dao,
-    com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel {
+    IAccountViewModel {
+    override val scope: CoroutineScope get() = viewModelScope
+
     var firstRoute: Route? = null
 
     override val toastManager = ToastManager()
@@ -425,7 +428,7 @@ class AccountViewModel(
 
     override fun userProfile(): User = account.userProfile()
 
-    fun reactToOrDelete(
+    override fun reactToOrDelete(
         note: Note,
         reaction: String,
     ) {
@@ -453,7 +456,7 @@ class AccountViewModel(
         }
     }
 
-    fun reactToOrDelete(note: Note) {
+    override fun reactToOrDelete(note: Note) {
         val reaction = reactionChoices().first()
         reactToOrDelete(note, reaction)
     }
@@ -862,7 +865,7 @@ class AccountViewModel(
         }
     }
 
-    fun boost(note: Note) {
+    override fun boost(note: Note) {
         if (settings.isCompleteUIMode()) {
             // Tracked broadcasting with progress feedback
             launchSigner {
@@ -907,7 +910,7 @@ class AccountViewModel(
 
     fun pinnedNotes(user: User): Note = LocalCache.getOrCreateAddressableNote(PinListEvent.createPinAddress(user.pubkeyHex))
 
-    fun addPin(note: Note) {
+    override fun addPin(note: Note) {
         if (settings.isCompleteUIMode()) {
             launchSigner {
                 account.createAddPinEvent(note)?.let { (event, relays) ->
@@ -924,7 +927,7 @@ class AccountViewModel(
         }
     }
 
-    fun removePin(note: Note) {
+    override fun removePin(note: Note) {
         if (settings.isCompleteUIMode()) {
             launchSigner {
                 account.createRemovePinEvent(note)?.let { (event, relays) ->
@@ -941,7 +944,7 @@ class AccountViewModel(
         }
     }
 
-    fun addPrivateBookmark(note: Note) {
+    override fun addPrivateBookmark(note: Note) {
         if (settings.isCompleteUIMode()) {
             launchSigner {
                 account.createAddBookmarkEvent(note, true)?.let { (event, relays) ->
@@ -958,7 +961,7 @@ class AccountViewModel(
         }
     }
 
-    fun addPublicBookmark(note: Note) {
+    override fun addPublicBookmark(note: Note) {
         if (settings.isCompleteUIMode()) {
             launchSigner {
                 account.createAddBookmarkEvent(note, false)?.let { (event, relays) ->
@@ -975,7 +978,7 @@ class AccountViewModel(
         }
     }
 
-    fun removePrivateBookmark(note: Note) {
+    override fun removePrivateBookmark(note: Note) {
         if (settings.isCompleteUIMode()) {
             launchSigner {
                 account.createRemoveBookmarkEvent(note, true)?.let { (event, relays) ->
@@ -993,7 +996,7 @@ class AccountViewModel(
         }
     }
 
-    fun removePublicBookmark(note: Note) {
+    override fun removePublicBookmark(note: Note) {
         if (settings.isCompleteUIMode()) {
             launchSigner {
                 account.createRemoveBookmarkEvent(note, false)?.let { (event, relays) ->
@@ -1239,7 +1242,7 @@ class AccountViewModel(
         }
     }
 
-    fun loadReactionTo(note: Note?): String? {
+    override fun loadReactionTo(note: Note?): String? {
         if (note == null) return null
 
         return note.getReactionBy(userProfile())
@@ -1302,7 +1305,7 @@ class AccountViewModel(
 
     override fun getAddressableNoteIfExists(key: String): AddressableNote? = LocalCache.getAddressableNoteIfExists(key)
 
-    fun getAddressableNoteIfExists(key: Address): AddressableNote? = LocalCache.getAddressableNoteIfExists(key)
+    override fun getAddressableNoteIfExists(key: Address): AddressableNote? = LocalCache.getAddressableNoteIfExists(key)
 
     fun cachedModificationEventsForNote(note: Note) = LocalCache.cachedModificationEventsForNote(note)
 
@@ -1364,7 +1367,7 @@ class AccountViewModel(
             OnlineChecker.isOnline(videoUrl, httpClientBuilder::okHttpClientForVideo)
         }
 
-    fun loadAndMarkAsRead(
+    override fun loadAndMarkAsRead(
         routeForLastRead: String,
         createdAt: Long?,
     ): Boolean {

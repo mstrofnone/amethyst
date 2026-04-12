@@ -20,12 +20,12 @@
  */
 package com.vitorpamplona.amethyst.ui.note.types
 
-import androidx.compose.material3.Text
+// Re-export from commons for backwards compatibility
 import androidx.compose.runtime.Composable
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
-import com.vitorpamplona.quartz.nip90Dvms.status.NIP90StatusEvent
+import com.vitorpamplona.amethyst.commons.ui.note.types.RenderNIP90Status as CommonsRenderNIP90Status
 
 @Composable
 fun RenderNIP90Status(
@@ -33,7 +33,5 @@ fun RenderNIP90Status(
     accountViewModel: AccountViewModel,
     nav: INav,
 ) {
-    val noteEvent = note.event as? NIP90StatusEvent ?: return
-
-    Text(text = noteEvent.content)
+    CommonsRenderNIP90Status(note, accountViewModel)
 }

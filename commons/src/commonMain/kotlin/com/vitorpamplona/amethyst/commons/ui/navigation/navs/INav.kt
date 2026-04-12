@@ -20,13 +20,31 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.navigation.navs
 
+import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Stable
+import com.vitorpamplona.amethyst.commons.ui.navigation.routes.Route
+import kotlinx.coroutines.CoroutineScope
+import kotlin.reflect.KClass
 
-/**
- * Navigation interface for KMP composables.
- * Platform-specific implementations add route-based navigation.
- */
 @Stable
 interface INav {
+    val navigationScope: CoroutineScope
+    val drawerState: DrawerState
+
+    fun closeDrawer()
+
+    fun openDrawer()
+
+    fun nav(route: Route)
+
+    fun nav(computeRoute: suspend () -> Route?)
+
+    fun newStack(route: Route)
+
     fun popBack()
+
+    fun <T : Route> popUpTo(
+        route: Route,
+        klass: KClass<T>,
+    )
 }
