@@ -20,10 +20,5 @@
  */
 package com.vitorpamplona.amethyst.commons.platformcompat
 
-expect class PlatformAtomicLong(
-    initialValue: Long,
-) {
-    fun get(): Long
-
-    fun incrementAndGet(): Long
-}
+// Re-export from commons for backwards compatibility
+typealias AdditiveComplexFeedFilter<T, U> = com.vitorpamplona.amethyst.commons.ui.feeds.AdditiveComplexFeedFilter<T, U>

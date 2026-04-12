@@ -20,33 +20,79 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.communities.datasource
 
-// Re-export from commons for backwards compatibility
+import com.vitorpamplona.quartz.experimental.attestations.attestation.AttestationEvent
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
 import com.vitorpamplona.quartz.nip01Core.relay.client.pool.RelayBasedFilter
+import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.quartz.nip10Notes.TextNoteEvent
+import com.vitorpamplona.quartz.nip18Reposts.GenericRepostEvent
+import com.vitorpamplona.quartz.nip18Reposts.RepostEvent
+import com.vitorpamplona.quartz.nip22Comments.CommentEvent
+import com.vitorpamplona.quartz.nip23LongContent.LongTextNoteEvent
+import com.vitorpamplona.quartz.nip72ModCommunities.approval.CommunityPostApprovalEvent
 import com.vitorpamplona.quartz.nip72ModCommunities.definition.CommunityDefinitionEvent
-import com.vitorpamplona.amethyst.commons.ui.screens.communities.datasource.CommunityPostKinds as CommonsCommunityPostKinds
-import com.vitorpamplona.amethyst.commons.ui.screens.communities.datasource.filterCommunityPosts as commonsFilterCommunityPosts
-import com.vitorpamplona.amethyst.commons.ui.screens.communities.datasource.filterCommunityPostsFromEverybody as commonsFilterCommunityPostsFromEverybody
-import com.vitorpamplona.amethyst.commons.ui.screens.communities.datasource.filterCommunityPostsFromModerators as commonsFilterCommunityPostsFromModerators
+import com.vitorpamplona.quartz.nip99Classifieds.ClassifiedsEvent
 
-val CommunityPostKinds = CommonsCommunityPostKinds
+val CommunityPostKinds =
+    listOf(
+        TextNoteEvent.KIND,
+        CommentEvent.KIND,
+        RepostEvent.KIND,
+        GenericRepostEvent.KIND,
+        ClassifiedsEvent.KIND,
+        LongTextNoteEvent.KIND,
+        CommunityPostApprovalEvent.KIND,
+        AttestationEvent.KIND,
+    )
 
 fun filterCommunityPosts(
     relay: NormalizedRelayUrl,
     community: CommunityDefinitionEvent,
     since: Long?,
-): RelayBasedFilter = commonsFilterCommunityPosts(relay, community, since)
+): RelayBasedFilter =
+    RelayBasedFilter(
+        relay = relay,
+        filter =
+            Filter(
+                authors = community.moderatorKeys(),
+                tags = mapOf("a" to listOf(community.addressTag())),
+                kinds = CommunityPostKinds,
+                limit = 500,
+                since = since,
+            ),
+    )
 
 fun filterCommunityPostsFromModerators(
     relay: NormalizedRelayUrl,
     authors: Set<HexKey>,
     community: CommunityDefinitionEvent,
     since: Long?,
-): RelayBasedFilter = commonsFilterCommunityPostsFromModerators(relay, authors, community, since)
+): RelayBasedFilter =
+    RelayBasedFilter(
+        relay = relay,
+        filter =
+            Filter(
+                authors = authors.sorted(),
+                tags = mapOf("a" to listOf(community.addressTag())),
+                kinds = CommunityPostKinds,
+                limit = 100,
+                since = since,
+            ),
+    )
 
 fun filterCommunityPostsFromEverybody(
     relay: NormalizedRelayUrl,
     community: CommunityDefinitionEvent,
     since: Long?,
-): RelayBasedFilter = commonsFilterCommunityPostsFromEverybody(relay, community, since)
+): RelayBasedFilter =
+    RelayBasedFilter(
+        relay = relay,
+        filter =
+            Filter(
+                tags = mapOf("a" to listOf(community.addressTag())),
+                kinds = CommunityPostKinds,
+                limit = 100,
+                since = since,
+            ),
+    )

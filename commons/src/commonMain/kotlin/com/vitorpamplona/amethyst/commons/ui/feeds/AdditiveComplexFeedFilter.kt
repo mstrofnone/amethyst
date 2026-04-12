@@ -20,5 +20,9 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.feeds
 
-// Re-export from commons for backwards compatibility
-typealias AdditiveComplexFeedFilter<T, U> = com.vitorpamplona.amethyst.commons.ui.feeds.AdditiveComplexFeedFilter<T, U>
+abstract class AdditiveComplexFeedFilter<T, U> : FeedFilter<T>() {
+    abstract fun updateListWith(
+        oldList: List<T>,
+        newItems: Set<U>,
+    ): List<T>
+}
