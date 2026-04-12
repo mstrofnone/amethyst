@@ -22,4 +22,17 @@
 
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.geohash.datasource
 
-// Re-export from commons for backwards compatibility
+import com.vitorpamplona.amethyst.commons.relays.SincePerRelayMap
+import com.vitorpamplona.quartz.nip01Core.relay.client.pool.RelayBasedFilter
+import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.amethyst.commons.relayClient.filters.PostsByGeohashKinds as CommonsPostsByGeohashKinds
+import com.vitorpamplona.amethyst.commons.relayClient.filters.filterPostsByGeohash as commonsFilterPostsByGeohash
+
+// Re-exports from commons
+val PostsByGeohashKinds = CommonsPostsByGeohashKinds
+
+fun filterPostsByGeohash(
+    geohash: String,
+    relays: Set<NormalizedRelayUrl>,
+    since: SincePerRelayMap?,
+): List<RelayBasedFilter> = commonsFilterPostsByGeohash(geohash, relays, since)

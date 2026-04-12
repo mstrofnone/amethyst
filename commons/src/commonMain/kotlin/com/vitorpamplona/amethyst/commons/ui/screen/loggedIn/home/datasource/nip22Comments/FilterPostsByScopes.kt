@@ -20,30 +20,12 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.home.datasource.nip22Comments
 
-import com.vitorpamplona.quartz.nip01Core.relay.client.pool.RelayBasedFilter
-import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
-import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
-
-// Re-export from commons for backwards compatibility
-val CommentKinds = com.vitorpamplona.amethyst.commons.relayClient.assemblers.nip22Comments.CommentKinds
+// Re-exports from commons
+val CommentKinds = com.vitorpamplona.amethyst.commons.relayClient.filters.CommentKinds
 
 fun filterHomePostsByScopes(
-    relay: NormalizedRelayUrl,
+    relay: com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl,
     scopesToLoad: Set<String>,
     since: Long?,
-): List<RelayBasedFilter> {
-    if (scopesToLoad.isEmpty()) return emptyList()
-
-    return listOf(
-        RelayBasedFilter(
-            relay = relay,
-            filter =
-                Filter(
-                    kinds = CommentKinds,
-                    tags = mapOf("I" to scopesToLoad.toList()),
-                    limit = 100,
-                    since = since,
-                ),
-        ),
-    )
-}
+) = com.vitorpamplona.amethyst.commons.relayClient.filters
+    .filterHomePostsByScopes(relay, scopesToLoad, since)

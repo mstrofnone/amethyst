@@ -20,25 +20,12 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.profile.datasource
 
-import com.vitorpamplona.amethyst.service.relays.SincePerRelayMap
+import com.vitorpamplona.amethyst.commons.relays.SincePerRelayMap
 import com.vitorpamplona.quartz.nip01Core.relay.client.pool.RelayBasedFilter
-import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.amethyst.commons.relayClient.filters.filterUserProfileLastSeen as commonsFilterUserProfileLastSeen
 
 fun filterUserProfileLastSeen(
     users: Map<NormalizedRelayUrl, Set<String>>,
     since: SincePerRelayMap?,
-): List<RelayBasedFilter> {
-    if (users.isEmpty()) return emptyList()
-
-    return users.map {
-        RelayBasedFilter(
-            relay = it.key,
-            filter =
-                Filter(
-                    authors = it.value.sorted(),
-                    since = since?.get(it.key)?.time,
-                ),
-        )
-    }
-}
+): List<RelayBasedFilter> = commonsFilterUserProfileLastSeen(users, since)

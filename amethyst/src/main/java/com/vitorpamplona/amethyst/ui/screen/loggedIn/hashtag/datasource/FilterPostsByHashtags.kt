@@ -22,4 +22,19 @@
 
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.hashtag.datasource
 
-// Re-export from commons for backwards compatibility
+import com.vitorpamplona.amethyst.commons.relays.SincePerRelayMap
+import com.vitorpamplona.quartz.nip01Core.relay.client.pool.RelayBasedFilter
+import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.amethyst.commons.relayClient.filters.PostsByHashtagKinds2 as CommonsPostsByHashtagKinds2
+import com.vitorpamplona.amethyst.commons.relayClient.filters.PostsByHashtagsKinds as CommonsPostsByHashtagsKinds
+import com.vitorpamplona.amethyst.commons.relayClient.filters.filterPostsByHashtags as commonsFilterPostsByHashtags
+
+// Re-exports from commons
+val PostsByHashtagsKinds = CommonsPostsByHashtagsKinds
+val PostsByHashtagKinds2 = CommonsPostsByHashtagKinds2
+
+fun filterPostsByHashtags(
+    hashtag: String,
+    relays: Set<NormalizedRelayUrl>,
+    since: SincePerRelayMap?,
+): List<RelayBasedFilter> = commonsFilterPostsByHashtags(hashtag, relays, since)
