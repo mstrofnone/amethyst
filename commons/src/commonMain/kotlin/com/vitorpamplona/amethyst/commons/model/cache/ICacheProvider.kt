@@ -143,25 +143,24 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Iterates all notes, applying a mapper that returns a collection per note,
-     * and flattens results into a set.
-     * Used by community feed filters to gather approved/pending posts.
+     * Filters all notes in cache matching a predicate.
+     * Used by feed filters to scan the note cache.
+     *
+     * @param predicate Filter function receiving (hexKey, note)
+     * @return Set of matching notes
      */
-    fun <R> mapFlattenNotesIntoSet(consumer: CacheCollectors.BiMapper<HexKey, Note, Collection<R>?>): Set<R>
+    fun filterNotes(predicate: (HexKey, Note) -> Boolean): Set<Note>
 
     /**
-     * Filters all notes into a set using the given predicate.
-     * Used by feed filters that scan the full note cache.
+     * Filters addressable notes by kind matching a predicate.
+     * Used by feed filters to scan addressable notes of a specific kind.
+     *
+     * @param kind The event kind to filter by
+     * @param predicate Filter function receiving (key, note)
+     * @return Set of matching notes
      */
-    fun filterNotesIntoSet(consumer: CacheCollectors.BiFilter<HexKey, Note>): Set<Note>
-
-    /**
-     * Filters addressable notes by kind and pubkey into a set.
-     * Used by draft and other addressable feed filters.
-     */
-    fun filterAddressablesIntoSet(
+    fun filterAddressablesByKind(
         kind: Int,
-        pubKey: HexKey,
-        consumer: CacheCollectors.BiFilter<Address, AddressableNote>,
-    ): Set<AddressableNote>
+        predicate: (Any, Note) -> Boolean,
+    ): Set<Note>
 }
