@@ -26,7 +26,7 @@ import com.vitorpamplona.amethyst.commons.model.Note
 import com.vitorpamplona.amethyst.commons.model.User
 import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatChannel
 import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChannel
-import com.vitorpamplona.quartz.experimental.ephemChat.chat.RoomId
+import com.vitorpamplona.amethyst.commons.model.nip53LiveActivities.LiveActivitiesChannel
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
@@ -157,20 +157,39 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Filters all notes in the cache using the given predicate.
-     * Used by feed filters that need to scan the entire note cache.
+     * Finds notes whose content or tags match the given text.
+     * Used by search functionality to find notes.
      *
-     * @param predicate Filter function receiving the note's hex key and the Note
-     * @return Set of notes matching the predicate
+     * @param text The search text to match against note content and tags
+     * @param limit Maximum number of results to return
+     * @return List of Notes matching the text
      */
-    fun filterNotes(predicate: (String, Note) -> Boolean): Set<Note>
+    fun findNotesStartingWith(
+        text: String,
+        limit: Int = 50,
+    ): List<Note> = emptyList()
 
     /**
-     * Filters addressable notes in the cache using the given predicate.
-     * Used by feed filters that need to scan addressable notes.
+     * Finds public chat channels whose name matches the given text.
      *
-     * @param predicate Filter function receiving the address and the AddressableNote
-     * @return Set of addressable notes matching the predicate
+     * @param text The search text to match against channel names
+     * @return List of matching PublicChatChannels
      */
-    fun filterAddressableNotes(predicate: (AddressableNote) -> Boolean): Set<AddressableNote>
+    fun findPublicChatChannelsStartingWith(text: String): List<PublicChatChannel> = emptyList()
+
+    /**
+     * Finds ephemeral chat channels whose name matches the given text.
+     *
+     * @param text The search text to match against channel names
+     * @return List of matching EphemeralChatChannels
+     */
+    fun findEphemeralChatChannelsStartingWith(text: String): List<EphemeralChatChannel> = emptyList()
+
+    /**
+     * Finds live activity channels whose name matches the given text.
+     *
+     * @param text The search text to match against channel names
+     * @return List of matching LiveActivitiesChannels
+     */
+    fun findLiveActivityChannelsStartingWith(text: String): List<LiveActivitiesChannel> = emptyList()
 }

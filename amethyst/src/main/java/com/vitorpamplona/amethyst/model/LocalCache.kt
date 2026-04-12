@@ -1915,7 +1915,7 @@ object LocalCache : ILocalCache, ICacheProvider {
             }
     }
 
-    fun findPublicChatChannelsStartingWith(text: String): List<PublicChatChannel> {
+    override fun findPublicChatChannelsStartingWith(text: String): List<PublicChatChannel> {
         if (text.isBlank()) return emptyList()
 
         val key = decodeEventIdAsHexOrNull(text)
@@ -1930,7 +1930,7 @@ object LocalCache : ILocalCache, ICacheProvider {
         }
     }
 
-    fun findEphemeralChatChannelsStartingWith(text: String): List<EphemeralChatChannel> {
+    override fun findEphemeralChatChannelsStartingWith(text: String): List<EphemeralChatChannel> {
         if (text.isBlank()) return emptyList()
 
         return ephemeralChannels.filter { _, channel ->
@@ -1938,7 +1938,7 @@ object LocalCache : ILocalCache, ICacheProvider {
         }
     }
 
-    fun findLiveActivityChannelsStartingWith(text: String): List<LiveActivitiesChannel> {
+    override fun findLiveActivityChannelsStartingWith(text: String): List<LiveActivitiesChannel> {
         if (text.isBlank()) return emptyList()
 
         try {
@@ -2430,9 +2430,34 @@ object LocalCache : ILocalCache, ICacheProvider {
 
     override fun justConsumeMyOwnEvent(event: Event) = justConsumeAndUpdateIndexes(event, null, true)
 
-    override fun filterNotes(predicate: (String, Note) -> Boolean): Set<Note> = notes.filterIntoSet { key, note -> predicate(key, note) }
+    override fun findUsersStartingWith(
+        prefix: String,
+        limit: Int,
+    ): List<com.vitorpamplona.amethyst.commons.model.User> = findUsersStartingWith(prefix, null)
 
-    override fun filterAddressableNotes(predicate: (AddressableNote) -> Boolean): Set<AddressableNote> = addressables.filterIntoSet { _, note -> predicate(note) }
+    override fun findNotesStartingWith(
+        text: String,
+        limit: Int,
+    ): List<com.vitorpamplona.amethyst.commons.model.Note> {
+        if (text.isBlank()) return emptyList()
+        checkNotInMainThread()
+        val key =
+            com.vitorpamplona.quartz.nip19Bech32
+                .decodeEventIdAsHexOrNull(text)
+        if (key != null) {
+            val note = getNoteIfExists(key)
+            if (note != null && !excludeNoteEventFromSearchResults(note)) {
+                return listOfNotNull(note)
+            }
+        }
+        return notes
+            .filter { _, note ->
+                if (excludeNoteEventFromSearchResults(note)) return@filter false
+                note.event?.tags?.tagValueContains(text, true) == true ||
+                    note.idHex.startsWith(text, true) ||
+                    (note.event?.isContentEncoded() == false && note.event?.content?.contains(text, true) == true)
+            }.take(limit)
+    }
 
     fun justConsume(
         event: Event,
