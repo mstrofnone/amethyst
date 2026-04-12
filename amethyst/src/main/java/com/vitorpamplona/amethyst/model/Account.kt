@@ -333,13 +333,14 @@ class Account(
     val peopleLists = PeopleListsState(signer, cache, peopleListDecryptionCache, scope)
     val followLists = FollowListsState(signer, cache, scope)
 
-    override val hiddenUsers = HiddenUsersState(muteList.flow, blockPeopleList.flow, scope, settings)
+    val hiddenUsers = HiddenUsersState(muteList.flow, blockPeopleList.flow, scope, settings)
+    override val liveHiddenUsers: StateFlow<LiveHiddenUsers> get() = hiddenUsers.flow
 
     val labeledBookmarkLists = LabeledBookmarkListsState(signer, cache, scope)
-    val oldBookmarkState = OldBookmarkListState(signer, cache, scope)
+    override val oldBookmarkState = OldBookmarkListState(signer, cache, scope)
     override val bookmarkState = BookmarkListState(signer, cache, scope)
-    override val pinState = PinListState(signer, cache, scope)
-    val emoji = EmojiPackState(signer, cache, scope)
+    val pinState = PinListState(signer, cache, scope)
+    override val emoji = EmojiPackState(signer, cache, scope)
 
     val vanish = VanishRequestsState(signer, cache, client, scope)
 
@@ -388,7 +389,7 @@ class Account(
 
     val otsState = OtsState(signer, cache, otsResolverBuilder, scope, settings)
 
-    val marmotManager: MarmotManager? = mlsGroupStateStore?.let { MarmotManager(signer, it) }
+    override val marmotManager: MarmotManager? = mlsGroupStateStore?.let { MarmotManager(signer, it) }
 
     val paymentTargetsState = NipA3PaymentTargetsState(signer, cache, scope, settings)
 
@@ -1448,7 +1449,7 @@ class Account(
         }
     }
 
-    suspend fun deleteDraftIgnoreErrors(draftTag: String) {
+    override suspend fun deleteDraftIgnoreErrors(draftTag: String) {
         try {
             deleteDraftInner(draftTag)
         } catch (e: Exception) {
@@ -2286,11 +2287,11 @@ class Account(
 
     override fun isFollowing(user: User): Boolean = user.pubkeyHex in followingKeySet()
 
-    override fun isFollowing(hex: HexKey): Boolean = hex in followingKeySet()
+    override fun isFollowing(userHex: HexKey): Boolean = userHex in followingKeySet()
 
-    fun isKnown(user: User): Boolean = user.pubkeyHex in allFollows.flow.value.authors
+    override fun isKnown(user: User): Boolean = user.pubkeyHex in allFollows.flow.value.authors
 
-    fun isKnown(user: HexKey): Boolean = user in allFollows.flow.value.authors
+    override fun isKnown(userHex: HexKey): Boolean = userHex in allFollows.flow.value.authors
 
     private fun hasExcessiveHashtags(note: Note): Boolean {
         val limit = settings.syncedSettings.security.maxHashtagLimit.value
@@ -2379,14 +2380,14 @@ class Account(
 
     suspend fun savePaymentTargets(targets: List<PaymentTarget>) = sendMyPublicAndPrivateOutbox(paymentTargetsState.savePaymentTargets(targets))
 
-    fun markAsRead(
+    override fun markAsRead(
         route: String,
         timestampInSecs: Long,
     ) = settings.markAsRead(route, timestampInSecs)
 
     fun loadLastRead(route: String): Long = settings.lastReadPerRoute.value[route]?.value ?: 0
 
-    fun loadLastReadFlow(route: String) = settings.getLastReadFlow(route)
+    override fun loadLastReadFlow(route: String) = settings.getLastReadFlow(route)
 
     fun hasDonatedInThisVersion() = settings.hasDonatedInVersion(BuildConfig.VERSION_NAME)
 

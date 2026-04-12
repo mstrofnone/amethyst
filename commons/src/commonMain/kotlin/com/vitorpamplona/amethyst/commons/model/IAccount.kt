@@ -20,9 +20,11 @@
  */
 package com.vitorpamplona.amethyst.commons.model
 
-import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatChannel
+import com.vitorpamplona.amethyst.commons.marmot.MarmotManager
 import com.vitorpamplona.amethyst.commons.model.marmotGroups.MarmotGroupList
+import com.vitorpamplona.amethyst.commons.model.nip30CustomEmojis.EmojiPackState
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.BookmarkListState
+import com.vitorpamplona.amethyst.commons.model.nip51Lists.OldBookmarkListState
 import com.vitorpamplona.amethyst.commons.model.privateChats.ChatroomList
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
 import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
@@ -159,60 +161,44 @@ interface IAccount {
     /** Broadcast pre-created gift wraps (e.g. reactions within group DMs) */
     suspend fun sendGiftWraps(wraps: List<GiftWrapEvent>)
 
-    // ── Follow / relationship queries ──────────────────────────────
+    // --- Members added for ViewModel migration ---
 
-    /** Whether the account follows the given user */
-    fun isFollowing(user: User): Boolean
-
-    /** Whether the account follows the user identified by hex pubkey */
-    fun isFollowing(hex: HexKey): Boolean
-
-    // ── Bookmark & pin state ──────────────────────────────────────
-
-    /** Bookmark list state (NIP-51 bookmarks) */
+    /** Bookmark list state (NIP-51 kind 10003) */
     val bookmarkState: BookmarkListState
 
-    /** Pin list state (NIP-51 pin lists) */
-    val pinState: IPinListState
+    /** Old bookmark list state (NIP-51 kind 30001 "bookmark") */
+    val oldBookmarkState: OldBookmarkListState
 
-    // ── Follow / content lists ───────────────────────────────────
+    /** Custom emoji pack state (NIP-30) */
+    val emoji: EmojiPackState
 
-    /** Merged state of all follow lists (kind-3 + people + hashtag + geohash + community) */
-    val allFollows: IAllFollowsState
+    /** Marmot MLS group manager (null when MLS unavailable) */
+    val marmotManager: MarmotManager?
 
-    /** Merged set of all trusted relay URLs */
-    val trustedRelays: ITrustedRelayListsState
+    /** Live hidden-users state as a flow for UI observation */
+    val liveHiddenUsers: StateFlow<LiveHiddenUsers>
 
-    // ── Hidden users ─────────────────────────────────────────────
+    /** Whether the given user is in the follow (kind 3) list */
+    fun isFollowing(user: User): Boolean
 
-    /** Reactive hidden-users state (mute lists + transient spammers) */
-    val hiddenUsers: IHiddenUsersState
+    /** Whether the given hex-key user is in the follow (kind 3) list */
+    fun isFollowing(userHex: String): Boolean
 
-    // ── Relay list decryption caches ─────────────────────────────
+    /** Whether the given user appears in any follow/people list */
+    fun isKnown(user: User): Boolean
 
-    /** Decryption cache for search relay lists */
-    val searchRelayListDecryptionCache: IRelayListDecryptionCache
+    /** Whether the given hex-key user appears in any follow/people list */
+    fun isKnown(userHex: String): Boolean
 
-    /** Decryption cache for trusted relay lists */
-    val trustedRelayListDecryptionCache: IRelayListDecryptionCache
+    /** Mark a route as read at the given timestamp. Returns true if updated. */
+    fun markAsRead(
+        route: String,
+        timestampInSecs: Long,
+    ): Boolean
 
-    /** Decryption cache for proxy relay lists */
-    val proxyRelayListDecryptionCache: IRelayListDecryptionCache
+    /** Observe last-read timestamp for a route */
+    fun loadLastReadFlow(route: String): StateFlow<Long>
 
-    /** Decryption cache for broadcast relay lists */
-    val broadcastRelayListDecryptionCache: IRelayListDecryptionCache
-
-    /** Decryption cache for indexer relay lists */
-    val indexerRelayListDecryptionCache: IRelayListDecryptionCache
-
-    /** Decryption cache for relay feed lists */
-    val relayFeedsListDecryptionCache: IRelayListDecryptionCache
-
-    /** Decryption cache for blocked relay lists */
-    val blockedRelayListDecryptionCache: IRelayListDecryptionCache
-
-    // ── Nostr client ─────────────────────────────────────────────
-
-    /** Nostr relay client for broadcasting events */
-    val client: INostrClient
+    /** Delete a draft event by tag, swallowing errors */
+    suspend fun deleteDraftIgnoreErrors(draftTag: String)
 }
