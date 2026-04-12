@@ -27,7 +27,7 @@ import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
 /**
  * Minimal interface for top-nav filter capabilities needed by [FilterByListParams].
  * This allows FilterByListParams to live in commons without depending on the full
- * IFeedTopNavFilter from amethyst which requires LocalCache.
+ * [IFeedTopNavFilter] from amethyst which requires LocalCache.
  */
 interface IFilterByListTopNavFilter {
     fun matchAuthor(pubkey: HexKey): Boolean
