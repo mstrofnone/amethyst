@@ -24,9 +24,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import com.vitorpamplona.amethyst.commons.model.Channel
-import com.vitorpamplona.amethyst.commons.service.BundledInsert
-import com.vitorpamplona.amethyst.commons.service.BundledUpdate
-import com.vitorpamplona.amethyst.commons.threading.checkNotInMainThread
+import com.vitorpamplona.amethyst.commons.ui.feeds.ChannelFeedState
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.ui.dal.AdditiveComplexFeedFilter
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.notifications.equalImmutableLists

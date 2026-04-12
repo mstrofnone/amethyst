@@ -185,9 +185,7 @@ class AccountViewModel(
     override val nip05ClientBuilder: () -> INip05Client,
 ) : ViewModel(),
     Dao,
-    IAccountViewModel {
-    override val scope: CoroutineScope get() = viewModelScope
-
+    com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel {
     var firstRoute: Route? = null
 
     override val toastManager = ToastManager()
