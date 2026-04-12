@@ -21,8 +21,10 @@
 package com.vitorpamplona.amethyst.service
 
 // Re-export from commons for backwards compatibility
-import com.vitorpamplona.amethyst.commons.service.countToHumanReadableBytes as commonsCountToHumanReadableBytes
+fun countToHumanReadableBytes(counter: Int) =
+    com.vitorpamplona.amethyst.commons.util
+        .countToHumanReadableBytes(counter)
 
-fun countToHumanReadableBytes(counter: Int) = commonsCountToHumanReadableBytes(counter)
-
-fun countToHumanReadableBytes(counter: Long) = commonsCountToHumanReadableBytes(counter)
+fun countToHumanReadableBytes(counter: Long) =
+    com.vitorpamplona.amethyst.commons.util
+        .countToHumanReadableBytes(counter)

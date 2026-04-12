@@ -21,6 +21,6 @@
 package com.vitorpamplona.amethyst.service.playback.diskCache
 
 // Re-export from commons for backwards compatibility
-import com.vitorpamplona.amethyst.commons.service.playback.isLiveStreaming as commonsIsLiveStreaming
-
-fun isLiveStreaming(url: String) = commonsIsLiveStreaming(url)
+fun isLiveStreaming(url: String) =
+    com.vitorpamplona.amethyst.commons.util
+        .isLiveStreaming(url)

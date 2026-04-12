@@ -20,9 +20,9 @@
  */
 package com.vitorpamplona.amethyst.service
 
-// Re-export from commons for backwards compatibility
-import com.vitorpamplona.amethyst.commons.service.replace as commonsReplace
+import com.vitorpamplona.amethyst.commons.util.replace as commonsReplace
 
+// Re-export from commons for backwards compatibility
 fun <T> Iterable<T>.replace(
     old: T,
     new: T,

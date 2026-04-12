@@ -21,14 +21,14 @@
 package com.vitorpamplona.amethyst.service
 
 // Re-export from commons for backwards compatibility
-import com.vitorpamplona.amethyst.commons.service.countToHumanReadable as commonsCountToHumanReadable
-
 fun countToHumanReadable(
     counter: Int,
     str: String,
-) = commonsCountToHumanReadable(counter, str)
+) = com.vitorpamplona.amethyst.commons.util
+    .countToHumanReadable(counter, str)
 
 fun countToHumanReadable(
     counter: Long,
     str: String,
-) = commonsCountToHumanReadable(counter, str)
+) = com.vitorpamplona.amethyst.commons.util
+    .countToHumanReadable(counter, str)

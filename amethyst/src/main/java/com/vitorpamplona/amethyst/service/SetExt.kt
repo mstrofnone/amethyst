@@ -20,7 +20,7 @@
  */
 package com.vitorpamplona.amethyst.service
 
-// Re-export from commons for backwards compatibility
-import com.vitorpamplona.amethyst.commons.service.togglePresenceInSet as commonsTogglePresenceInSet
+import com.vitorpamplona.amethyst.commons.util.togglePresenceInSet as commonsTogglePresenceInSet
 
+// Re-export from commons for backwards compatibility
 fun <T> Set<T>.togglePresenceInSet(item: T): Set<T> = commonsTogglePresenceInSet(item)
