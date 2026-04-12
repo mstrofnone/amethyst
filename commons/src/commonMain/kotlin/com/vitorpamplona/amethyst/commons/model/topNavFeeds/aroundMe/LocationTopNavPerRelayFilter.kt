@@ -20,13 +20,6 @@
  */
 package com.vitorpamplona.amethyst.commons.model.topNavFeeds.aroundMe
 
-import androidx.compose.runtime.Immutable
-import com.vitorpamplona.amethyst.commons.model.topNavFeeds.IFeedTopNavPerRelayFilter
-import com.vitorpamplona.quartz.nip73ExternalIds.location.GeohashId
+import com.vitorpamplona.amethyst.commons.ui.components.UrlPreviewState as CommonsUrlPreviewState
 
-@Immutable
-class LocationTopNavPerRelayFilter(
-    val geotags: Set<String>,
-) : IFeedTopNavPerRelayFilter {
-    val geotagScopes: Set<String> = geotags.mapTo(mutableSetOf()) { GeohashId.toScope(it) }
-}
+typealias UrlPreviewState = CommonsUrlPreviewState

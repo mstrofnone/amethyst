@@ -20,5 +20,6 @@
  */
 package com.vitorpamplona.amethyst.service.connectivity
 
-// Re-export from commons for backwards compatibility
-typealias ConnectivityStatus = com.vitorpamplona.amethyst.commons.service.connectivity.ConnectivityStatus
+import com.vitorpamplona.amethyst.commons.service.connectivity.ConnectivityStatus as CommonsConnectivityStatus
+
+typealias ConnectivityStatus = CommonsConnectivityStatus
