@@ -82,6 +82,7 @@ import com.vitorpamplona.amethyst.commons.richtext.MediaPreloadedContent
 import com.vitorpamplona.amethyst.commons.richtext.MediaUrlContent
 import com.vitorpamplona.amethyst.commons.richtext.MediaUrlImage
 import com.vitorpamplona.amethyst.commons.richtext.MediaUrlVideo
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel
 import com.vitorpamplona.amethyst.model.MediaAspectRatioCache
 import com.vitorpamplona.amethyst.service.playback.composable.VideoViewInner
 import com.vitorpamplona.amethyst.service.playback.diskCache.isLiveStreaming
@@ -106,8 +107,10 @@ fun ZoomableImageDialog(
     imageUrl: BaseMediaContent,
     allImages: ImmutableList<BaseMediaContent> = listOf(imageUrl).toImmutableList(),
     onDismiss: () -> Unit,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     Dialog(
         onDismissRequest = onDismiss,
         properties =
@@ -141,8 +144,10 @@ private fun DialogContent(
     allImages: ImmutableList<BaseMediaContent>,
     imageUrl: BaseMediaContent,
     onDismiss: () -> Unit,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     val pagerState: PagerState = rememberPagerState { allImages.size }
     val controllerVisible = remember { mutableStateOf(true) }
     val sharePopupExpanded = remember { mutableStateOf(false) }
@@ -326,8 +331,10 @@ private fun showToastOnMain(
 private suspend fun saveMediaToGallery(
     content: BaseMediaContent,
     localContext: Context,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     val isImage = content is MediaUrlImage || content is MediaLocalImage
 
     val success = if (isImage) R.string.image_saved_to_the_gallery else R.string.video_saved_to_the_gallery
@@ -375,8 +382,10 @@ private fun RenderImageOrVideo(
     roundedCorner: Boolean,
     isFiniteHeight: Boolean,
     controllerVisible: MutableState<Boolean>,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     val contentScale =
         if (isFiniteHeight) {
             ContentScale.Fit

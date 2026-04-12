@@ -50,11 +50,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.content_warning
-import com.vitorpamplona.amethyst.commons.resources.content_warning_explanation
-import com.vitorpamplona.amethyst.commons.resources.content_warning_with_reason
-import com.vitorpamplona.amethyst.commons.resources.show_anyway
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.ui.actions.CrossfadeIfEnabled
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
@@ -70,18 +67,22 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun SensitivityWarning(
     note: Note,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
     content: @Composable () -> Unit,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     note.event?.let { SensitivityWarning(it, accountViewModel, content) }
 }
 
 @Composable
 fun SensitivityWarning(
     event: Event,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
     content: @Composable () -> Unit,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     val hasSensitiveContent = remember(event) { event.isSensitiveOrNSFW() }
 
     if (hasSensitiveContent) {
@@ -95,9 +96,11 @@ fun SensitivityWarning(
 @Composable
 fun SensitivityWarning(
     reason: String?,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
     content: @Composable () -> Unit,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     if (reason != null) {
         ObserveSensitivityWarning(reason, accountViewModel, content)
     } else {
@@ -108,9 +111,11 @@ fun SensitivityWarning(
 @Composable
 fun ObserveSensitivityWarning(
     reason: String?,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
     content: @Composable () -> Unit,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     val accountState = accountViewModel.showSensitiveContent().collectAsStateWithLifecycle()
 
     var showContentWarningNote by remember(accountState) { mutableStateOf(accountState.value != true) }

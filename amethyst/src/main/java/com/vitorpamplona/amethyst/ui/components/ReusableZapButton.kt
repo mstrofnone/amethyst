@@ -45,7 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.vitorpamplona.amethyst.R
-import com.vitorpamplona.amethyst.commons.navigation.routes.Route
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.model.User
 import com.vitorpamplona.amethyst.service.ZapPaymentHandler
@@ -98,11 +98,13 @@ data class ZapButtonCallbacks(
 @Composable
 fun ReusableZapButton(
     baseNote: Note,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
     nav: INav,
     config: ZapButtonConfig = ZapButtonConfig(),
     callbacks: ZapButtonCallbacks = ZapButtonCallbacks(),
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     var wantsToZap by remember { mutableStateOf<ImmutableList<Long>?>(null) }
 
     // Makes sure the user is loaded to get his ln address ahead of time (for DVM buttons)
@@ -274,7 +276,7 @@ fun ReusableZapButton(
 
 private fun handleZapClick(
     baseNote: Note,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
     context: Context,
     zapAmountChoices: List<Long>?,
     onZapStarts: () -> Unit,
@@ -283,6 +285,8 @@ private fun handleZapClick(
     onError: (String, String, User?) -> Unit,
     onPayViaIntent: (ImmutableList<ZapPaymentHandler.Payable>) -> Unit,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     if (baseNote.isDraft()) {
         accountViewModel.toastManager.toast(
             R.string.draft_note,

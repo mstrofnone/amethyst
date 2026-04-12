@@ -36,8 +36,7 @@ import com.vitorpamplona.amethyst.commons.resources.failed_to_upload_media_no_de
 import com.vitorpamplona.amethyst.commons.resources.login_with_a_private_key_to_be_able_to_sign_events
 import com.vitorpamplona.amethyst.commons.resources.read_only_user
 import com.vitorpamplona.amethyst.commons.richtext.RichTextParser
-import com.vitorpamplona.amethyst.commons.ui.actions.mediaServers.ServerName
-import com.vitorpamplona.amethyst.commons.ui.actions.uploads.MediaUploadTracker
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.model.User
@@ -105,7 +104,9 @@ open class EditPostViewModel : ViewModel() {
     var canAddInvoice by mutableStateOf(false)
     var wantsInvoice by mutableStateOf(false)
 
-    open fun init(accountViewModel: AccountViewModel) {
+    open fun init(accountViewModel: IAccountViewModel) {
+        @Suppress("NAME_SHADOWING")
+        val accountViewModel = accountViewModel as AccountViewModel
         this.accountViewModel = accountViewModel
         this.account = accountViewModel.account
     }

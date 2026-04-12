@@ -31,8 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.vitorpamplona.amethyst.R
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.error_dialog_zap_error
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel
 import com.vitorpamplona.amethyst.model.LocalCache
 import com.vitorpamplona.amethyst.model.User
 import com.vitorpamplona.amethyst.ui.components.toasts.LegacyMultiErrorToastMsg
@@ -84,9 +83,11 @@ fun MultiUserErrorMessageContentPreview() {
 @Composable
 fun MultiUserErrorMessageDialog(
     model: MultiErrorToastMsg,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
     nav: INav,
 ) {
+    @Suppress("NAME_SHADOWING")
+    val accountViewModel = accountViewModel as AccountViewModel
     AlertDialog(
         onDismissRequest = accountViewModel.toastManager::clearToasts,
         title = { Text(stringResource(model.titleRes)) },
