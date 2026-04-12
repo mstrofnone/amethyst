@@ -20,6 +20,20 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.components
 
-import com.vitorpamplona.amethyst.commons.ui.components.UrlPreviewState as CommonsUrlPreviewState
+import androidx.compose.runtime.Immutable
+import com.vitorpamplona.amethyst.commons.preview.UrlInfoItem
 
-typealias UrlPreviewState = CommonsUrlPreviewState
+@Immutable
+sealed class UrlPreviewState {
+    @Immutable object Loading : UrlPreviewState()
+
+    @Immutable class Loaded(
+        val previewInfo: UrlInfoItem,
+    ) : UrlPreviewState()
+
+    @Immutable object Empty : UrlPreviewState()
+
+    @Immutable class Error(
+        val errorMessage: String,
+    ) : UrlPreviewState()
+}

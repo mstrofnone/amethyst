@@ -20,7 +20,6 @@
  */
 package com.vitorpamplona.amethyst.model.nip51Lists.geohashLists
 
-// Re-export from commons for backwards compatibility
 typealias GeohashListCard = com.vitorpamplona.amethyst.commons.model.nip51Lists.geohashLists.GeohashListCard
 
 val EmptyGeohashListCard = com.vitorpamplona.amethyst.commons.model.nip51Lists.geohashLists.EmptyGeohashListCard

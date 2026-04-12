@@ -22,7 +22,6 @@
 
 package com.vitorpamplona.amethyst.model.nip51Lists.relayLists
 
-// Re-export from commons for backward compatibility
-typealias RelayListCard = com.vitorpamplona.amethyst.commons.model.RelayListCard
+typealias RelayListCard = com.vitorpamplona.amethyst.commons.model.nip51Lists.relayLists.RelayListCard
 
-val EmptyRelayListCard = com.vitorpamplona.amethyst.commons.model.EmptyRelayListCard
+val EmptyRelayListCard = com.vitorpamplona.amethyst.commons.model.nip51Lists.relayLists.EmptyRelayListCard
