@@ -28,10 +28,7 @@ import com.vitorpamplona.amethyst.commons.model.privateChats.ChatroomList
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
-import com.vitorpamplona.quartz.nip01Core.hints.HintIndexer
-import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import com.vitorpamplona.quartz.utils.cache.ICacheOperations
 
 /**
  * Cache provider interface for accessing cached Notes, Users, and Channels.
@@ -143,70 +140,15 @@ interface ICacheProvider {
 
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
-    // --- Methods needed by Account.kt ---
+    /**
+     * Provides cache operations over all Note objects.
+     * Used by DAL FeedFilter subclasses for filtering and querying notes.
+     */
+    val notes: ICacheOperations<HexKey, Note>
 
     /**
-     * Gets the relay hint indexer for resolving relay URLs for keys.
+     * Provides cache operations over all AddressableNote objects.
+     * Used by DAL FeedFilter subclasses for filtering and querying addressable notes.
      */
-    val relayHints: HintIndexer
-        get() = HintIndexer()
-
-    /**
-     * Gets or creates a Note by event ID hex.
-     */
-    fun getOrCreateNote(idHex: HexKey): Note
-
-    /**
-     * Gets or creates a Note from an Event (addressable or regular).
-     */
-    fun getOrCreateNote(event: Event): Note = getOrCreateNote(event.id) ?: error("Failed to create note for event ${event.id}")
-
-    /**
-     * Gets an AddressableNote if it exists, by string key.
-     */
-    fun getAddressableNoteIfExists(key: String): AddressableNote? = null
-
-    /**
-     * Gets an AddressableNote if it exists, by Address.
-     */
-    fun getAddressableNoteIfExists(address: Address): AddressableNote? = null
-
-    /**
-     * Gets or creates a ChatroomList for a given key.
-     */
-    fun getOrCreateChatroomList(key: HexKey): ChatroomList = ChatroomList(key)
-
-    /**
-     * Gets or adds an alias note mapping.
-     */
-    fun getOrAddAliasNote(
-        idHex: String,
-        note: Note,
-    ): Note = note
-
-    /**
-     * Checks and gets or creates an AddressableNote from a string key.
-     * Returns null if the key cannot be parsed as an Address.
-     */
-    fun checkGetOrCreateAddressableNote(key: String): AddressableNote? = null
-
-    /**
-     * Observes notes matching a filter, returning a flow that emits updated lists.
-     * Used by VanishRequestsState and similar reactive consumers.
-     */
-    fun observeNotes(filter: Filter): Flow<List<Note>> = emptyFlow()
-
-    /**
-     * Filters addressable notes by kind and pubKey.
-     * Used by list state classes (FollowListsState, PeopleListsState, etc.)
-     */
-    fun filterAddressables(
-        kind: Int,
-        pubKey: HexKey,
-    ): List<AddressableNote> = emptyList()
-
-    /**
-     * Loads a set of Users from their hex public keys.
-     */
-    fun loadUsers(keys: Set<String>): Set<User> = emptySet()
+    val addressables: ICacheOperations<Address, AddressableNote>
 }
