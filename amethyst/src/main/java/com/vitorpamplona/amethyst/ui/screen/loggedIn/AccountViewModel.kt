@@ -65,7 +65,8 @@ import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.model.UiSettingsFlow
 import com.vitorpamplona.amethyst.model.UrlCachedPreviewer
 import com.vitorpamplona.amethyst.model.User
-import com.vitorpamplona.amethyst.model.nip47WalletConnect.NwcSignerState
+import com.vitorpamplona.amethyst.model.nip51Lists.labeledBookmarkLists.LabeledBookmarkList
+import com.vitorpamplona.amethyst.model.nip51Lists.peopleList.PeopleList
 import com.vitorpamplona.amethyst.model.privacyOptions.EmptyRoleBasedHttpClientBuilder
 import com.vitorpamplona.amethyst.model.privacyOptions.IRoleBasedHttpClientBuilder
 import com.vitorpamplona.amethyst.model.privacyOptions.RoleBasedHttpClientBuilder
@@ -138,6 +139,7 @@ import com.vitorpamplona.quartz.nip47WalletConnect.rpc.Response
 import com.vitorpamplona.quartz.nip51Lists.PinListEvent
 import com.vitorpamplona.quartz.nip51Lists.bookmarkList.BookmarkListEvent
 import com.vitorpamplona.quartz.nip51Lists.bookmarkList.OldBookmarkListEvent
+import com.vitorpamplona.quartz.nip51Lists.bookmarkList.tags.BookmarkIdTag
 import com.vitorpamplona.quartz.nip51Lists.hashtagList.HashtagListEvent
 import com.vitorpamplona.quartz.nip56Reports.ReportType
 import com.vitorpamplona.quartz.nip57Zaps.LnZapEvent
@@ -1011,33 +1013,148 @@ class AccountViewModel(
         }
     }
 
-    fun addBookmark(
-        note: Note,
-        isPrivate: Boolean,
-    ) = if (isPrivate) addPrivateBookmark(note) else addPublicBookmark(note)
+    // -- Labeled Bookmark Lists --
 
-    fun removeBookmark(note: Note) {
-        removePrivateBookmark(note)
-        removePublicBookmark(note)
+    fun addBookmarkToList(
+        bookmark: BookmarkIdTag,
+        bookmarkListIdentifier: String,
+        isBookmarkPrivate: Boolean,
+    ) = launchSigner {
+        account.labeledBookmarkLists.addBookmarkToList(
+            bookmark = bookmark,
+            bookmarkListIdentifier = bookmarkListIdentifier,
+            isBookmarkPrivate = isBookmarkPrivate,
+            account = account,
+        )
     }
 
-    fun pollRespond(
-        event: PollEvent,
-        responses: Set<String>,
-    ) = launchSigner { account.pollRespond(event, responses) }
+    fun removeBookmarkFromList(
+        bookmark: BookmarkIdTag,
+        bookmarkListIdentifier: String,
+        isBookmarkPrivate: Boolean,
+    ) = launchSigner {
+        account.labeledBookmarkLists.removeBookmarkFromList(
+            bookmark = bookmark,
+            bookmarkListIdentifier = bookmarkListIdentifier,
+            isBookmarkPrivate = isBookmarkPrivate,
+            account = account,
+        )
+    }
 
-    fun deleteDraftIgnoreErrors(draftTag: String) = launchSigner { account.deleteDraftIgnoreErrors(draftTag) }
+    fun cloneBookmarkList(
+        currentBookmarkList: LabeledBookmarkList,
+        customCloneName: String?,
+        customCloneDescription: String?,
+    ) = launchSigner {
+        account.labeledBookmarkLists.cloneBookmarkList(
+            currentBookmarkList = currentBookmarkList,
+            customCloneName = customCloneName,
+            customCloneDescription = customCloneDescription,
+            account = account,
+        )
+    }
 
-    fun sendWebBookmark(
-        url: String,
-        title: String?,
-        description: String,
-        tags: List<String> = emptyList(),
-    ) = launchSigner { account.sendWebBookmark(url, title, description, tags) }
+    fun deleteBookmarkList(bookmarkListIdentifier: String) =
+        launchSigner {
+            account.labeledBookmarkLists.deleteBookmarkList(
+                bookmarkListIdentifier = bookmarkListIdentifier,
+                account = account,
+            )
+        }
 
-    fun deleteWebBookmark(event: WebBookmarkEvent) = launchSigner { account.deleteWebBookmark(event) }
+    // -- People Lists --
 
-    fun migrateOldBookmarksToNew() = launchSigner { account.migrateOldBookmarksToNew() }
+    fun clonePeopleList(
+        currentPeopleList: PeopleList,
+        customCloneName: String?,
+        customCloneDescription: String?,
+    ) = launchSigner {
+        account.peopleLists.cloneFollowSet(
+            currentPeopleList = currentPeopleList,
+            customCloneName = customCloneName,
+            customCloneDescription = customCloneDescription,
+            account = account,
+        )
+    }
+
+    fun deletePeopleList(identifierTag: String) =
+        launchSigner {
+            account.peopleLists.deleteFollowSet(
+                identifierTag = identifierTag,
+                account = account,
+            )
+        }
+
+    fun addUserToPeopleList(
+        user: User,
+        identifierTag: String,
+        shouldBePrivateMember: Boolean,
+    ) = launchSigner {
+        account.peopleLists.addUserToSet(
+            user = user,
+            identifierTag = identifierTag,
+            shouldBePrivateMember = shouldBePrivateMember,
+            account = account,
+        )
+    }
+
+    fun removeUserFromPeopleList(
+        user: User,
+        isPrivate: Boolean,
+        identifierTag: String,
+    ) = launchSigner {
+        account.peopleLists.removeUserFromSet(
+            user = user,
+            isPrivate = isPrivate,
+            identifierTag = identifierTag,
+            account = account,
+        )
+    }
+
+    // -- Follow Packs --
+
+    fun cloneFollowPack(
+        currentFollowPack: PeopleList,
+        customCloneName: String?,
+        customCloneDescription: String?,
+    ) = launchSigner {
+        account.followLists.cloneFollowSet(
+            currentFollowPack = currentFollowPack,
+            customCloneName = customCloneName,
+            customCloneDescription = customCloneDescription,
+            account = account,
+        )
+    }
+
+    fun deleteFollowPack(identifierTag: String) =
+        launchSigner {
+            account.followLists.deleteFollowSet(
+                identifierTag = identifierTag,
+                account = account,
+            )
+        }
+
+    fun addUserToFollowPack(
+        user: User,
+        identifierTag: String,
+    ) = launchSigner {
+        account.followLists.addUserToSet(
+            user = user,
+            identifierTag = identifierTag,
+            account = account,
+        )
+    }
+
+    fun removeUserFromFollowPack(
+        user: User,
+        identifierTag: String,
+    ) = launchSigner {
+        account.followLists.removeUserFromSet(
+            user = user,
+            identifierTag = identifierTag,
+            account = account,
+        )
+    }
 
     fun broadcast(note: Note) = launchSigner { account.broadcast(note) }
 

@@ -36,25 +36,19 @@ fun PeopleListViewModel.init(accountViewModel: AccountViewModel) {
                 accountViewModel.launchSigner { block() }
             }
 
-            override suspend fun cloneFollowSet(
-                currentPeopleList: PeopleList,
-                customCloneName: String?,
-                customCloneDescription: String?,
-            ) {
-                accountViewModel.account.peopleLists.cloneFollowSet(
-                    currentPeopleList = currentPeopleList,
-                    customCloneName = customCloneName,
-                    customCloneDescription = customCloneDescription,
-                    account = accountViewModel.account,
-                )
-            }
+    fun cloneItem(
+        followSet: PeopleList,
+        customName: String?,
+        customDescription: String?,
+    ) {
+        accountViewModel.clonePeopleList(
+            currentPeopleList = followSet,
+            customCloneName = customName,
+            customCloneDescription = customDescription,
+        )
+    }
 
-            override suspend fun deleteFollowSet(identifierTag: String) {
-                accountViewModel.account.peopleLists.deleteFollowSet(
-                    identifierTag = identifierTag,
-                    account = accountViewModel.account,
-                )
-            }
-        },
-    )
+    fun deleteItem(followSet: PeopleList) {
+        accountViewModel.deletePeopleList(followSet.identifierTag)
+    }
 }
