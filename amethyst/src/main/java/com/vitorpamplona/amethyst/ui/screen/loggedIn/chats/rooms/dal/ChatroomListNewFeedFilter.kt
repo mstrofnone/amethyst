@@ -20,5 +20,4 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.chats.rooms.dal
 
-// Re-export from commons for backwards compatibility
 typealias ChatroomListNewFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.ChatroomListNewFeedFilter

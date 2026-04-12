@@ -20,11 +20,9 @@
  */
 package com.vitorpamplona.amethyst.commons.model
 
-import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
+import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatListState
 import com.vitorpamplona.amethyst.commons.model.marmotGroups.MarmotGroupList
-import com.vitorpamplona.amethyst.commons.model.nip51Lists.BookmarkListState
-import com.vitorpamplona.amethyst.commons.model.nip51Lists.OldBookmarkListState
-import com.vitorpamplona.amethyst.commons.model.nip51Lists.PinListState
+import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatListState
 import com.vitorpamplona.amethyst.commons.model.privateChats.ChatroomList
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
 import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
@@ -153,16 +151,13 @@ interface IAccount {
     /** Marmot MLS group chat list */
     val marmotGroupList: MarmotGroupList
 
-    /** Bookmark list state for public/private bookmarks */
-    val bookmarkState: BookmarkListState
+    /** Public chat (NIP-28) list state */
+    val publicChatList: PublicChatListState
 
-    /** Old-style bookmark list state (deprecated) */
-    val oldBookmarkState: OldBookmarkListState
+    /** Ephemeral chat list state */
+    val ephemeralChatList: EphemeralChatListState
 
-    /** Pin list state for pinned notes */
-    val pinState: PinListState
-
-    /** Check if all users in a set are hidden */
+    /** Check if all users in the set are hidden */
     fun isAllHidden(users: Set<HexKey>): Boolean
 
     /** Whether a note is acceptable (not hidden, not blocked, etc.) */

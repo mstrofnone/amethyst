@@ -24,8 +24,9 @@ import com.vitorpamplona.amethyst.commons.model.AddressableNote
 import com.vitorpamplona.amethyst.commons.model.Channel
 import com.vitorpamplona.amethyst.commons.model.Note
 import com.vitorpamplona.amethyst.commons.model.User
+import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatChannel
 import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChannel
-import com.vitorpamplona.amethyst.commons.model.nip53LiveActivities.LiveActivitiesChannel
+import com.vitorpamplona.quartz.experimental.ephemChat.chat.RoomId
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
@@ -156,30 +157,20 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Public chat channels cache.
-     * Used by discover feed filters to iterate over channels.
-     */
-    val publicChatChannels: ICacheOperations<HexKey, PublicChatChannel>
-
-    /**
-     * Live activity channels cache.
-     * Used by discover feed filters to iterate over channels.
-     */
-    val liveChatChannels: ICacheOperations<Address, LiveActivitiesChannel>
-
-    /**
-     * Gets a PublicChatChannel if it exists in cache.
+     * Gets or creates a PublicChatChannel by event ID.
+     * Used for resolving NIP-28 public chat channels.
      *
-     * @param key The channel's ID in hex format
-     * @return The PublicChatChannel if exists, null otherwise
+     * @param key The channel event ID in hex format
+     * @return The PublicChatChannel (existing or newly created)
      */
-    fun getPublicChatChannelIfExists(key: String): PublicChatChannel?
+    fun getOrCreatePublicChatChannel(key: HexKey): PublicChatChannel
 
     /**
-     * Gets an AddressableNote if it exists in cache.
+     * Gets or creates an EphemeralChatChannel by room ID.
+     * Used for resolving ephemeral chat channels.
      *
-     * @param address The addressable note's address
-     * @return The AddressableNote if exists, null otherwise
+     * @param key The room ID
+     * @return The EphemeralChatChannel (existing or newly created)
      */
-    fun getAddressableNoteIfExists(address: Address): AddressableNote?
+    fun getOrCreateEphemeralChannel(key: RoomId): EphemeralChatChannel
 }

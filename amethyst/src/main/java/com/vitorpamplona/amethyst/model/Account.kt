@@ -312,10 +312,10 @@ class Account(
     val kind3FollowList = Kind3FollowListState(signer, cache, scope, settings)
 
     val ephemeralChatListDecryptionCache = EphemeralChatListDecryptionCache(signer)
-    val ephemeralChatList = EphemeralChatListState(signer, cache, ephemeralChatListDecryptionCache, scope, settings)
+    override val ephemeralChatList = EphemeralChatListState(signer, cache, ephemeralChatListDecryptionCache, scope, settings)
 
     val publicChatListDecryptionCache = PublicChatListDecryptionCache(signer)
-    val publicChatList = PublicChatListState(signer, cache, publicChatListDecryptionCache, scope, settings)
+    override val publicChatList = PublicChatListState(signer, cache, publicChatListDecryptionCache, scope, settings)
 
     val communityListDecryptionCache = CommunityListDecryptionCache(signer)
     val communityList = CommunityListState(signer, cache, communityListDecryptionCache, scope, settings)

@@ -22,7 +22,7 @@ package com.vitorpamplona.amethyst.commons.ui.feeds
 
 import com.vitorpamplona.amethyst.commons.model.IAccount
 import com.vitorpamplona.amethyst.commons.model.Note
-import com.vitorpamplona.amethyst.commons.utils.replace
+import com.vitorpamplona.amethyst.commons.util.replace
 import com.vitorpamplona.quartz.nip17Dm.base.ChatroomKey
 import com.vitorpamplona.quartz.nip17Dm.base.ChatroomKeyable
 
