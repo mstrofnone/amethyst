@@ -22,32 +22,82 @@ package com.vitorpamplona.amethyst.commons.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.halilibo.richtext.ui.HeadingStyle
 
-// Set of Material typography styles to start with
-val Typography =
-    Typography(
-        bodyLarge =
-            TextStyle(
-                fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp,
-            ),
-    )
-
-val Font4SP = 4.sp
-val Font6SP = 6.sp
-val Font8SP = 8.sp
-val Font10SP = 10.sp
-val Font12SP = 12.sp
 val Font14SP = 14.sp
-val Font17SP = 17.sp
-val Font18SP = 18.sp
 
 val MarkdownTextStyle = TextStyle(lineHeight = 1.50.em)
 
 val DefaultParagraphSpacing: TextUnit = 20.sp
+
+private val DefaultTypography = Typography()
+
+internal val DefaultHeadingStyle: HeadingStyle = { level, textStyle ->
+    when (level) {
+        0 -> {
+            DefaultTypography.displayLarge.copy(
+                fontSize = 32.sp,
+                lineHeight = 40.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.5).sp,
+            )
+        }
+
+        1 -> {
+            DefaultTypography.displayMedium.copy(
+                fontSize = 26.sp,
+                lineHeight = 34.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.25).sp,
+            )
+        }
+
+        2 -> {
+            DefaultTypography.displaySmall.copy(
+                fontSize = 22.sp,
+                lineHeight = 30.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+
+        3 -> {
+            DefaultTypography.displaySmall.copy(
+                fontSize = 20.sp,
+                lineHeight = 28.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+
+        4 -> {
+            DefaultTypography.headlineLarge.copy(
+                fontSize = 18.sp,
+                lineHeight = 24.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+
+        5 -> {
+            DefaultTypography.headlineMedium.copy(
+                fontSize = 16.sp,
+                lineHeight = 22.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+
+        6 -> {
+            DefaultTypography.headlineSmall.copy(
+                fontSize = 15.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+
+        else -> {
+            textStyle
+        }
+    }
+}

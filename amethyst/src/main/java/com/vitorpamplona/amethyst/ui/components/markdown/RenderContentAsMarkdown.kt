@@ -42,7 +42,7 @@ import com.halilibo.richtext.ui.material3.RichText
 import com.vitorpamplona.amethyst.commons.model.EmptyTagList
 import com.vitorpamplona.amethyst.commons.model.ImmutableListOfLists
 import com.vitorpamplona.amethyst.commons.preview.UrlInfoItem
-import com.vitorpamplona.amethyst.commons.ui.components.UrlPreviewState
+import com.vitorpamplona.amethyst.commons.ui.theme.markdownStyle
 import com.vitorpamplona.amethyst.model.LocalCache
 import com.vitorpamplona.amethyst.model.UrlCachedPreviewer
 import com.vitorpamplona.amethyst.ui.navigation.navs.EmptyNav
@@ -50,7 +50,6 @@ import com.vitorpamplona.amethyst.ui.navigation.navs.INav
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.mockAccountViewModel
 import com.vitorpamplona.amethyst.ui.theme.ThemeComparisonRow
-import com.vitorpamplona.amethyst.ui.theme.markdownStyle
 import com.vitorpamplona.amethyst.ui.uriToRoute
 import com.vitorpamplona.quartz.nip01Core.metadata.MetadataEvent
 import com.vitorpamplona.quartz.nip23LongContent.LongTextNoteEvent

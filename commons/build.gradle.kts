@@ -83,8 +83,14 @@ kotlin {
                 // Kotlin serialization
                 implementation(libs.kotlinx.serialization.json)
 
-                // Compose Multiplatform Resources
-                api(libs.jetbrains.compose.components.resources)
+                // Markdown rendering (richtext-commonmark)
+                implementation(libs.markdown.commonmark)
+                implementation(libs.markdown.ui)
+                implementation(libs.markdown.ui.material3)
+
+                // Charting (Vico - Compose Multiplatform)
+                implementation(libs.vico.charts.compose)
+                implementation(libs.vico.charts.m3)
             }
         }
 
