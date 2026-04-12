@@ -109,17 +109,9 @@ kotlin {
             create("jvmAndroid") {
                 dependsOn(commonMain.get())
                 dependencies {
-                    // AndroidX Lifecycle (no native/iOS variants)
-                    implementation(libs.androidx.lifecycle.viewmodel.compose)
-                    implementation(libs.androidx.lifecycle.runtime.compose)
-
-                    // JVM-only: OkHttp image loader
-                    implementation(libs.coil.okhttp)
-
-                    // JVM-only: Markdown rendering (richtext-commonmark)
-                    implementation(libs.markdown.commonmark)
-                    implementation(libs.markdown.ui)
-                    implementation(libs.markdown.ui.material3)
+                    // OkHttp for NIP-86 relay management HTTP client
+                    implementation(libs.okhttp)
+                    implementation(libs.okhttpCoroutines)
                 }
             }
 
