@@ -21,4 +21,4 @@
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.bookmarkgroups.default.dal
 
 // Re-export from commons for backwards compatibility
-typealias PinnedNotesFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.dal.PinnedNotesFeedFilter
+typealias PinnedNotesFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.PinnedNotesFeedFilter

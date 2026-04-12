@@ -22,15 +22,17 @@ package com.vitorpamplona.amethyst.commons.ui.feeds
 
 import com.vitorpamplona.amethyst.commons.model.IAccount
 import com.vitorpamplona.amethyst.commons.model.User
+import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
 
 class SpammerAccountsFeedFilter(
     val account: IAccount,
+    val cache: ICacheProvider,
 ) : FeedFilter<User>() {
     override fun feedKey(): String = account.userProfile().pubkeyHex
 
     override fun showHiddenKey(): Boolean = true
 
     override fun feed(): List<User> =
-        account.transientHiddenUsers
-            .mapNotNull { account.cacheProvider.getOrCreateUser(it) }
+        account.liveHiddenUsers.spammers
+            .mapNotNull { cache.getOrCreateUser(it) }
 }

@@ -20,4 +20,5 @@
  */
 package com.vitorpamplona.amethyst.model.nip51Lists
 
+// Re-export from commons for backwards compatibility
 typealias PinListState = com.vitorpamplona.amethyst.commons.model.nip51Lists.PinListState

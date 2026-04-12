@@ -272,43 +272,7 @@ class Account(
     override val hiddenWordsCase: List<DualCase> get() = hiddenUsers.flow.value.hiddenWordsCase
     override val hiddenUsersHashCodes: Set<Int> get() = hiddenUsers.flow.value.hiddenUsersHashCodes
     override val spammersHashCodes: Set<Int> get() = hiddenUsers.flow.value.spammersHashCodes
-    override val liveHiddenUsers get() = hiddenUsers.flow.value
-
-    override fun isKnown(user: User): Boolean = user.pubkeyHex in allFollows.flow.value.authors
-
-    override fun isKnown(user: String): Boolean = user in allFollows.flow.value.authors
-
-    override fun pinnedNotesList(): List<Note> = pinState.pinnedNotesList.value
-
-    // IAccountSettings adapter wrapping AccountSettings TopFilter codes
-    override val accountSettings: IAccountSettings by lazy {
-        val homeCode = MutableStateFlow(settings.defaultHomeFollowList.value.code)
-        val storiesCode = MutableStateFlow(settings.defaultStoriesFollowList.value.code)
-        val discoveryCode = MutableStateFlow(settings.defaultDiscoveryFollowList.value.code)
-        scope.launch {
-            settings.defaultHomeFollowList.collect { homeCode.value = it.code }
-        }
-        scope.launch {
-            settings.defaultStoriesFollowList.collect { storiesCode.value = it.code }
-        }
-        scope.launch {
-            settings.defaultDiscoveryFollowList.collect { discoveryCode.value = it.code }
-        }
-        object : IAccountSettings {
-            override val defaultHomeFollowListCode: StateFlow<String> = homeCode
-            override val defaultStoriesFollowListCode: StateFlow<String> = storiesCode
-            override val defaultDiscoveryFollowListCode: StateFlow<String> = discoveryCode
-        }
-    }
-
-    // IAccount feed list accessors
-    override fun getHomeFollowList(): IFilterByListTopNavFilter? = liveHomeFollowLists.value
-
-    override fun getStoriesFollowList(): IFilterByListTopNavFilter? = liveStoriesFollowLists.value
-
-    override fun getDiscoveryFollowList(): IFilterByListTopNavFilter? = liveDiscoveryFollowLists.value
-
-    override fun getLiveHiddenUsers(): LiveHiddenUsers = hiddenUsers.flow.value
+    override val liveHiddenUsers: LiveHiddenUsers get() = hiddenUsers.flow.value
 
     val userMetadata = UserMetadataState(signer, cache, scope, settings)
 
@@ -382,7 +346,7 @@ class Account(
     val labeledBookmarkLists = LabeledBookmarkListsState(signer, cache, scope)
     override val oldBookmarkState = OldBookmarkListState(signer, cache, scope)
     override val bookmarkState = BookmarkListState(signer, cache, scope)
-    val pinState = PinListState(signer, cache, scope)
+    override val pinState = PinListState(signer, cache, scope)
     val emoji = EmojiPackState(signer, cache, scope)
 
     val vanish = VanishRequestsState(signer, cache, client, scope)
@@ -2278,7 +2242,7 @@ class Account(
 
     suspend fun decryptZapOrNull(event: LnZapRequestEvent): LnZapPrivateEvent? = if (event.isPrivateZap() && isWriteable()) privateZapsDecryptionCache.decryptPrivateZap(event) else null
 
-    fun isAllHidden(users: Set<HexKey>): Boolean = users.all { isHidden(it) }
+    override fun isAllHidden(users: Set<HexKey>): Boolean = users.all { isHidden(it) }
 
     override fun isHidden(user: User) = isHidden(user.pubkeyHex)
 

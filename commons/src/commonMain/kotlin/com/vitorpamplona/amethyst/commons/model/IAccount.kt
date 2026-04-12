@@ -24,8 +24,9 @@ import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
 import com.vitorpamplona.amethyst.commons.model.marmotGroups.MarmotGroupList
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.BookmarkListState
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.OldBookmarkListState
+import com.vitorpamplona.amethyst.commons.model.nip51Lists.PinListState
 import com.vitorpamplona.amethyst.commons.model.privateChats.ChatroomList
-import com.vitorpamplona.quartz.nip01Core.core.Address
+import com.vitorpamplona.quartz.nip01Core.core.HexKey
 import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
 import com.vitorpamplona.quartz.nip01Core.signers.NostrSigner
 import com.vitorpamplona.quartz.nip04Dm.messages.PrivateDmEvent
@@ -123,11 +124,8 @@ interface IAccount {
     val hiddenUsersHashCodes: Set<Int>
     val spammersHashCodes: Set<Int>
 
-    /** Hidden users state for DAL content filtering */
-    val hiddenUsers: IHiddenUsersState
-
-    /** Block people list state for DAL filter comparisons */
-    val blockPeopleList: IBlockPeopleListState
+    /** Live hidden users state for feed filtering */
+    val liveHiddenUsers: LiveHiddenUsers
 
     /** Set of followed user pubkeys (for feed ordering/highlighting) */
     fun followingKeySet(): Set<String>
@@ -155,17 +153,17 @@ interface IAccount {
     /** Marmot MLS group chat list */
     val marmotGroupList: MarmotGroupList
 
-    /** Current hidden users state (live, from flows) */
-    val liveHiddenUsers: LiveHiddenUsers
+    /** Bookmark list state for public/private bookmarks */
+    val bookmarkState: BookmarkListState
 
-    /** Whether the given user is known (followed) by this account */
-    fun isKnown(user: User): Boolean
+    /** Old-style bookmark list state (deprecated) */
+    val oldBookmarkState: OldBookmarkListState
 
-    /** Whether the given hex key is known (followed) by this account */
-    fun isKnown(user: String): Boolean
+    /** Pin list state for pinned notes */
+    val pinState: PinListState
 
-    /** Currently pinned notes list */
-    fun pinnedNotesList(): List<Note>
+    /** Check if all users in a set are hidden */
+    fun isAllHidden(users: Set<HexKey>): Boolean
 
     /** Whether a note is acceptable (not hidden, not blocked, etc.) */
     fun isAcceptable(note: Note): Boolean

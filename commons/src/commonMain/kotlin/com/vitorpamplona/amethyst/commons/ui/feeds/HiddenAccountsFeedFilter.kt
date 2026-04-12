@@ -35,7 +35,7 @@ class HiddenAccountsFeedFilter(
     override fun showHiddenKey(): Boolean = true
 
     override fun feed(): List<User> =
-        account.hiddenUsers.flow.value.hiddenUsers.reversed().mapNotNull {
+        account.liveHiddenUsers.hiddenUsers.reversed().mapNotNull {
             try {
                 cache.getOrCreateUser(it)
             } catch (e: Exception) {

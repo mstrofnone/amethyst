@@ -28,7 +28,7 @@ import com.vitorpamplona.amethyst.ui.screen.UserFeedViewModel
 
 class HiddenAccountsFeedViewModel(
     val account: Account,
-) : UserFeedViewModel(HiddenAccountsFeedFilter(account, account.cache)) {
+) : UserFeedViewModel(HiddenAccountsFeedFilter(account, LocalCache)) {
     class Factory(
         val account: Account,
     ) : ViewModelProvider.Factory {
