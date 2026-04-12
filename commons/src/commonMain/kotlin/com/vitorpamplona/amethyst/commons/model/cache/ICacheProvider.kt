@@ -24,7 +24,7 @@ import com.vitorpamplona.amethyst.commons.model.AddressableNote
 import com.vitorpamplona.amethyst.commons.model.Channel
 import com.vitorpamplona.amethyst.commons.model.Note
 import com.vitorpamplona.amethyst.commons.model.User
-import com.vitorpamplona.amethyst.commons.model.privateChats.ChatroomList
+import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChannel
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
@@ -147,78 +147,11 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Access to the notes cache for bulk filtering operations.
-     * Used by DAL FeedFilter subclasses for filterIntoSet/mapFlattenIntoSet queries.
+     * Gets a PublicChatChannel by key if it exists.
+     * Used by ParticipantListBuilder to find channel participants.
+     *
+     * @param key The channel's key (note id hex)
+     * @return The PublicChatChannel if found, null otherwise
      */
-    val notes: ICacheOperations<HexKey, Note>
-
-    /**
-     * Access to the addressable notes cache for bulk filtering operations.
-     * Used by DAL FeedFilter subclasses for filterIntoSet/mapFlattenIntoSet queries by kind.
-     */
-    val relayHints: HintIndexer
-        get() = HintIndexer()
-
-    /**
-     * Gets or creates a Note by event ID hex.
-     */
-    fun getOrCreateNote(idHex: HexKey): Note
-
-    /**
-     * Gets or creates a Note from an Event (addressable or regular).
-     */
-    fun getOrCreateNote(event: Event): Note = getOrCreateNote(event.id)
-
-    /**
-     * Gets an AddressableNote if it exists, by string key.
-     */
-    fun getAddressableNoteIfExists(key: String): AddressableNote? = null
-
-    /**
-     * Gets an AddressableNote if it exists, by Address.
-     */
-    fun getAddressableNoteIfExists(address: Address): AddressableNote? = null
-
-    /**
-     * Gets or creates a ChatroomList for a given key.
-     */
-    fun getOrCreateChatroomList(key: HexKey): ChatroomList = ChatroomList(key)
-
-    /**
-     * Gets or adds an alias note mapping.
-     */
-    fun getOrAddAliasNote(
-        idHex: String,
-        note: Note,
-    ): Note = note
-
-    /**
-     * Checks and gets or creates an AddressableNote from a string key.
-     * Returns null if the key cannot be parsed as an Address.
-     */
-    fun checkGetOrCreateAddressableNote(key: String): AddressableNote? = null
-
-    /**
-     * Observes notes matching a filter, returning a flow that emits updated lists.
-     * Used by VanishRequestsState and similar reactive consumers.
-     */
-    fun observeNotes(filter: Filter): Flow<List<Note>> = emptyFlow()
-
-    fun <T : Event> observeEvents(filter: Filter): Flow<List<T>> = emptyFlow()
-
-    fun <T : Event> observeLatestEvent(filter: Filter): Flow<T?> = observeEvents<T>(filter).map { it.firstOrNull() }
-
-    /**
-     * Filters addressable notes by kind and pubKey.
-     * Used by list state classes (FollowListsState, PeopleListsState, etc.)
-     */
-    fun filterAddressables(
-        kind: Int,
-        pubKey: HexKey,
-    ): List<AddressableNote> = emptyList()
-
-    /**
-     * Loads a set of Users from their hex public keys.
-     */
-    fun loadUsers(keys: Set<String>): Set<User> = emptySet()
+    fun getPublicChatChannelIfExists(key: String): PublicChatChannel? = null
 }
