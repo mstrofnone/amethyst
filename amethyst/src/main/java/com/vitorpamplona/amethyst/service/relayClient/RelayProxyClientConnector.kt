@@ -20,7 +20,6 @@
  */
 package com.vitorpamplona.amethyst.service.relayClient
 
-import com.vitorpamplona.amethyst.commons.service.connectivity.ConnectivityStatus
 import com.vitorpamplona.amethyst.commons.ui.tor.TorServiceStatus
 import com.vitorpamplona.amethyst.model.torState.TorRelayEvaluation
 import com.vitorpamplona.amethyst.service.connectivity.ConnectivityManager
