@@ -75,10 +75,10 @@ class ChessRelayFetchHelper(
     ): List<Event> {
         if (filters.isEmpty()) return emptyList()
 
-        val events = PlatformConcurrentHashMap<String, Event>()
+        val events = HashMap<String, Event>()
         val relayCount = filters.keys.size
-        val eoseReceived = platformConcurrentKeySet<NormalizedRelayUrl>()
-        val relayEventCounts = PlatformConcurrentHashMap<NormalizedRelayUrl, Int>()
+        val eoseReceived = mutableSetOf<NormalizedRelayUrl>()
+        val relayEventCounts = HashMap<NormalizedRelayUrl, Int>()
         val allEose = CompletableDeferred<Unit>()
         val subId = newSubId()
 
@@ -97,7 +97,8 @@ class ChessRelayFetchHelper(
                     forFilters: List<Filter>?,
                 ) {
                     events[event.id] = event
-                    val count = relayEventCounts.compute(relay) { _, v -> (v ?: 0) + 1 } ?: 1
+                    val count = (relayEventCounts[relay] ?: 0) + 1
+                    relayEventCounts[relay] = count
                     onProgress?.invoke(RelayFetchProgress(relay, RelayFetchStatus.RECEIVING, count))
                 }
 

@@ -21,8 +21,6 @@
 package com.vitorpamplona.amethyst.commons.preview
 
 import androidx.compose.runtime.Immutable
-import com.vitorpamplona.amethyst.commons.platformcompat.getUrlHost
-import com.vitorpamplona.amethyst.commons.platformcompat.isValidUrl
 
 @Immutable
 class UrlInfoItem(
@@ -32,17 +30,19 @@ class UrlInfoItem(
     val image: String = "",
     val mimeType: String,
 ) {
-    val isUrlValid = isValidUrl(url)
-    val verifiedUrlHost = getUrlHost(url)
+    val verifiedUrl = url.takeIf { it.startsWith("http://") || it.startsWith("https://") }
     val imageUrlFullPath =
         if (image.startsWith("/")) {
-            val host = getUrlHost(url)
-            if (host != null && isUrlValid) {
-                val scheme = if (url.startsWith("https")) "https" else "http"
-                "$scheme://$host$image"
-            } else {
-                image
-            }
+            verifiedUrl?.let { baseUrl ->
+                val schemeEnd = baseUrl.indexOf("://")
+                if (schemeEnd >= 0) {
+                    val pathStart = baseUrl.indexOf('/', schemeEnd + 3)
+                    val base = if (pathStart >= 0) baseUrl.substring(0, pathStart) else baseUrl
+                    base + image
+                } else {
+                    image
+                }
+            } ?: image
         } else {
             image
         }

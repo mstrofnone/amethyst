@@ -420,9 +420,13 @@ class RichTextParser {
         }
 
         fun isValidURL(url: String?): Boolean =
-            if (url != null) {
-                isValidUrl(url)
-            } else {
+            try {
+                if (url != null) {
+                    url.startsWith("http://") || url.startsWith("https://")
+                } else {
+                    false
+                }
+            } catch (e: IllegalArgumentException) {
                 false
             }
 

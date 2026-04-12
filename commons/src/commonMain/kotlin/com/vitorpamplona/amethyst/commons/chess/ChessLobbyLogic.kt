@@ -132,17 +132,15 @@ class ChessLobbyLogic(
     val state = ChessLobbyState(userPubkey, scope)
 
     private val dismissedGameIds: MutableSet<String> =
-        platformSynchronizedSet(
-            dismissedStorage?.load(userPubkey)?.toMutableSet() ?: mutableSetOf(),
-        )
+        dismissedStorage?.load(userPubkey)?.toMutableSet() ?: mutableSetOf()
 
     // Track when games were last loaded to prevent duplicate fetches
     // (e.g., discoverUserGames loads a game, then polling immediately re-fetches it)
-    private val recentlyLoadedGames = PlatformConcurrentHashMap<String, Long>()
+    private val recentlyLoadedGames = HashMap<String, Long>()
 
     // Dedup incoming events (same event delivered by multiple relays)
     // Bounded LRU: evict oldest when exceeding capacity
-    private val seenEventIds = platformSynchronizedSet(LinkedHashSet<String>())
+    private val seenEventIds = LinkedHashSet<String>()
     private val seenEventIdsMax = 500
 
     private val pollingDelegate =
@@ -209,7 +207,7 @@ class ChessLobbyLogic(
         if (!event.isStartEvent() && !event.isMoveEvent()) return
 
         // Dedup: skip if we already processed this event ID (multiple relays deliver same event)
-        synchronized(seenEventIds) {
+        com.vitorpamplona.quartz.utils.kmpSynchronized(seenEventIds) {
             if (!seenEventIds.add(event.id)) return
             if (seenEventIds.size > seenEventIdsMax) {
                 seenEventIds.iterator().let {
@@ -441,7 +439,7 @@ class ChessLobbyLogic(
     fun handleGameAccepted(startEventId: String) {
         // Skip if already loaded or in-flight (multiple move events from same game trigger this)
         val lastLoaded = recentlyLoadedGames[startEventId]
-        if (lastLoaded != null && (TimeUtils.now() - lastLoaded) < 10) {
+        if (lastLoaded != null && (TimeUtils.now() - lastLoaded) < 10L) {
             Log.d("chessdebug") { "[Lobby] handleGameAccepted: SKIPPED game ${startEventId.take(8)} - loaded ${TimeUtils.now() - lastLoaded}s ago" }
             return
         }
@@ -681,7 +679,7 @@ class ChessLobbyLogic(
     private suspend fun refreshGame(startEventId: String) {
         // Skip if this game was just loaded (prevents duplicate fetch after discoverUserGames)
         val lastLoaded = recentlyLoadedGames[startEventId]
-        if (lastLoaded != null && (TimeUtils.now() - lastLoaded) < 10) {
+        if (lastLoaded != null && (TimeUtils.now() - lastLoaded) < 10L) {
             Log.d("chessdebug") { "[Lobby] refreshGame: SKIPPED game ${startEventId.take(8)} - loaded ${TimeUtils.now() - lastLoaded}s ago" }
             return
         }

@@ -20,9 +20,6 @@
  */
 package com.vitorpamplona.amethyst.commons.preview
 
-import com.vitorpamplona.amethyst.commons.platformcompat.PlatformCharset
-import com.vitorpamplona.amethyst.commons.platformcompat.decodeBytes
-
 object HtmlCharsetParser {
     val ATTRIBUTE_VALUE_CHARSET = "charset"
     val ATTRIBUTE_VALUE_HTTP_EQUIV = "http-equiv"
@@ -30,28 +27,28 @@ object HtmlCharsetParser {
 
     private val RE_CONTENT_TYPE_CHARSET = Regex("""charset=([^;]+)""")
 
-    fun detectCharset(bodyBytes: ByteArray): PlatformCharset {
+    /**
+     * Detects the charset name from HTML meta tags in the first 1024 bytes.
+     * Returns a charset name string (e.g. "utf-8").
+     */
+    fun detectCharset(bodyBytes: ByteArray): String {
         // try to detect charset from meta tags parsed from first 1024 bytes of body
-        val firstPart = decodeBytes(bodyBytes, 0, minOf(bodyBytes.size, 1024), PlatformCharset.forName("utf-8"))
+        val firstPart = bodyBytes.take(1024).toByteArray().decodeToString()
         val metaTags = MetaTagsParser.parse(firstPart)
         metaTags.forEach { meta ->
             val charsetAttr = meta.attr(ATTRIBUTE_VALUE_CHARSET)
             if (charsetAttr.isNotEmpty()) {
-                runCatching { PlatformCharset.forName(charsetAttr) }.getOrNull()?.let {
-                    return it
-                }
+                return charsetAttr.lowercase()
             }
             if (meta.attr(ATTRIBUTE_VALUE_HTTP_EQUIV).lowercase() == "content-type") {
                 RE_CONTENT_TYPE_CHARSET
                     .find(meta.attr(CONTENT))
                     ?.let {
-                        runCatching { PlatformCharset.forName(it.groupValues[1]) }.getOrNull()
-                    }?.let {
-                        return it
+                        return it.groupValues[1].lowercase()
                     }
             }
         }
         // defaults to UTF-8
-        return PlatformCharset.forName("utf-8")
+        return "utf-8"
     }
 }

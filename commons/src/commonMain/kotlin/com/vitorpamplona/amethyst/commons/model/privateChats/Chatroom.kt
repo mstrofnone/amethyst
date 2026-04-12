@@ -44,13 +44,13 @@ class Chatroom : NotesGatherer {
     var ownerSentMessage: Boolean = false
     var newestMessage: Note? = null
 
-    private var changesFlow: PlatformWeakReference<MutableSharedFlow<ListChange<Note>>> = PlatformWeakReference(null)
+    private var changesFlow: MutableSharedFlow<ListChange<Note>>? = null
 
     fun changesFlow(): MutableSharedFlow<ListChange<Note>> {
-        val current = changesFlow.get()
+        val current = changesFlow
         if (current != null) return current
         val new = MutableSharedFlow<ListChange<Note>>(0, 100, BufferOverflow.DROP_OLDEST)
-        changesFlow = PlatformWeakReference(new)
+        changesFlow = new
         return new
     }
 
@@ -58,7 +58,6 @@ class Chatroom : NotesGatherer {
         removeMessageSync(note)
     }
 
-    @Synchronized
     fun addMessageSync(msg: Note): Boolean {
         if (msg !in messages) {
             messages = messages + msg
@@ -82,14 +81,13 @@ class Chatroom : NotesGatherer {
                 subjectCreatedAt = msg.createdAt()
             }
 
-            changesFlow.get()?.tryEmit(ListChange.Addition(msg))
+            changesFlow?.tryEmit(ListChange.Addition(msg))
 
             return true
         }
         return false
     }
 
-    @Synchronized
     fun removeMessageSync(msg: Note): Boolean {
         if (msg in messages) {
             messages = messages - msg
@@ -114,7 +112,7 @@ class Chatroom : NotesGatherer {
                     }
             }
 
-            changesFlow.get()?.tryEmit(ListChange.Deletion(msg))
+            changesFlow?.tryEmit(ListChange.Deletion(msg))
 
             return true
         }
@@ -138,7 +136,7 @@ class Chatroom : NotesGatherer {
         val toRemove = messages.minus(toKeep)
         messages = toKeep
 
-        changesFlow.get()?.tryEmit(ListChange.SetDeletion<Note>(toRemove))
+        changesFlow?.tryEmit(ListChange.SetDeletion<Note>(toRemove))
 
         return toRemove
     }

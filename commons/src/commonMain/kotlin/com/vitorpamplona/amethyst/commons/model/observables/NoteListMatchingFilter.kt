@@ -38,7 +38,7 @@ class NoteListMatchingFilter(
     private val atOnce: (filter: Filter) -> Set<Note>,
     private val update: (List<Note>) -> Unit,
 ) : Observable {
-    var currentResults: MutableSet<Note> = platformConcurrentSortedSet(CreatedAtIdHexComparator)
+    var currentResults: MutableSet<Note> = mutableListOf<Note>().also { it.sortWith(CreatedAtIdHexComparator) }.toMutableSet()
 
     override fun new(
         event: Event,
@@ -65,7 +65,7 @@ class NoteListMatchingFilter(
     }
 
     fun init() {
-        currentResults = platformConcurrentSortedSet(atOnce(filter))
+        currentResults = atOnce(filter).sortedWith(CreatedAtIdHexComparator).toMutableSet()
         update(currentResults.toList())
     }
 }

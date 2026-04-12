@@ -38,7 +38,7 @@ class EventListMatchingFilter<T : Event>(
     private val update: (List<T>) -> Unit,
 ) : Observable {
     // Keeping this here blocks it from being cleared from memory
-    var currentResults: MutableSet<Note> = platformConcurrentSortedSet(CreatedAtIdHexComparator)
+    var currentResults: MutableSet<Note> = mutableListOf<Note>().also { it.sortWith(CreatedAtIdHexComparator) }.toMutableSet()
 
     @Suppress("UNCHECKED_CAST")
     override fun new(
@@ -73,7 +73,7 @@ class EventListMatchingFilter<T : Event>(
 
     @Suppress("UNCHECKED_CAST")
     fun init() {
-        currentResults = platformConcurrentSortedSet(atOnce(filter))
+        currentResults = atOnce(filter).sortedWith(CreatedAtIdHexComparator).toMutableSet()
         update(currentResults.mapNotNull { it.event as? T })
     }
 }
