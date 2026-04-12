@@ -107,9 +107,9 @@ fun FollowListAndPackAndUserView(
                     userIsPublicMember = list.publicMembers.contains(userToAddOrRemove),
                     onRemoveUser = {
                         accountViewModel.removeUserFromPeopleList(
-                            user = userToAddOrRemove,
+                            userToAddOrRemove,
                             isPrivate = list.privateMembers.contains(userToAddOrRemove),
-                            identifierTag = list.identifierTag,
+                            list.identifierTag,
                         )
                     },
                     privateMemberSize = list.privateMembers.size,
@@ -119,9 +119,9 @@ fun FollowListAndPackAndUserView(
                     },
                     onAddUserToList = { userShouldBePrivate ->
                         accountViewModel.addUserToPeopleList(
-                            user = userToAddOrRemove,
-                            identifierTag = list.identifierTag,
-                            shouldBePrivateMember = userShouldBePrivate,
+                            userToAddOrRemove,
+                            list.identifierTag,
+                            userShouldBePrivate,
                         )
                     },
                 )
@@ -176,15 +176,15 @@ fun FollowListAndPackAndUserView(
                     },
                     onRemoveUser = {
                         accountViewModel.removeUserFromFollowPack(
-                            user = userToAddOrRemove,
-                            identifierTag = list.identifierTag,
+                            userToAddOrRemove,
+                            list.identifierTag,
                         )
                     },
                     memberSize = list.publicMembers.size,
                     onAddUserToList = {
                         accountViewModel.addUserToFollowPack(
-                            user = userToAddOrRemove,
-                            identifierTag = list.identifierTag,
+                            userToAddOrRemove,
+                            list.identifierTag,
                         )
                     },
                 )
