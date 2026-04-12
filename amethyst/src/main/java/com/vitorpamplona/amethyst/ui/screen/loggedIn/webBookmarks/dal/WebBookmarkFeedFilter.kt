@@ -20,37 +20,4 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.webBookmarks.dal
 
-import com.vitorpamplona.amethyst.model.Account
-import com.vitorpamplona.amethyst.model.LocalCache
-import com.vitorpamplona.amethyst.model.Note
-import com.vitorpamplona.amethyst.model.filterIntoSet
-import com.vitorpamplona.amethyst.ui.dal.AdditiveFeedFilter
-import com.vitorpamplona.amethyst.ui.dal.DefaultFeedOrder
-import com.vitorpamplona.quartz.nipB0WebBookmarks.WebBookmarkEvent
-
-class WebBookmarkFeedFilter(
-    val account: Account,
-) : AdditiveFeedFilter<Note>() {
-    override fun feedKey(): String = account.userProfile().pubkeyHex + "/webBookmarks"
-
-    override fun applyFilter(newItems: Set<Note>): Set<Note> =
-        newItems.filterTo(HashSet()) {
-            acceptableEvent(it)
-        }
-
-    override fun feed(): List<Note> {
-        val bookmarks =
-            LocalCache.addressables.filterIntoSet(WebBookmarkEvent.KIND, account.userProfile().pubkeyHex) { _, note ->
-                acceptableEvent(note)
-            }
-
-        return sort(bookmarks)
-    }
-
-    fun acceptableEvent(it: Note): Boolean {
-        val noteEvent = it.event
-        return noteEvent is WebBookmarkEvent && noteEvent.pubKey == account.userProfile().pubkeyHex
-    }
-
-    override fun sort(items: Set<Note>): List<Note> = items.sortedWith(DefaultFeedOrder)
-}
+typealias WebBookmarkFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.WebBookmarkFeedFilter

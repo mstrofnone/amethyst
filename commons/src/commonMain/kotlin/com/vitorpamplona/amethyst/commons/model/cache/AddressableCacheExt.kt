@@ -40,25 +40,8 @@ private fun kindEnd(
     pubKey: HexKey = END_KEY,
 ) = Address(kind, pubKey, END_D_TAG)
 
-private val ACCEPT_ALL = CacheCollectors.BiFilter<Address, AddressableNote> { _, _ -> true }
-
 fun ICacheOperations<Address, AddressableNote>.filterIntoSet(
     kind: Int,
-    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL,
-): Set<AddressableNote> = filterIntoSet(kindStart(kind), kindEnd(kind), consumer)
-
-fun ICacheOperations<Address, AddressableNote>.filterIntoSet(
-    kinds: List<Int>,
-    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL,
-): Set<AddressableNote> {
-    val set = mutableSetOf<AddressableNote>()
-    kinds.forEach {
-        set.addAll(filterIntoSet(kindStart(it), kindEnd(it), consumer))
-    }
-    return set
-}
-
-fun <R> ICacheOperations<Address, AddressableNote>.mapNotNullIntoSet(
-    kind: Int,
-    consumer: CacheCollectors.BiMapper<Address, AddressableNote, R?>,
-): Set<R> = mapNotNullIntoSet(kindStart(kind), kindEnd(kind), consumer)
+    pubKey: HexKey,
+    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = CacheCollectors.BiFilter { _, _ -> true },
+): Set<AddressableNote> = filterIntoSet(kindStart(kind, pubKey), kindEnd(kind, pubKey), consumer)

@@ -2284,6 +2284,8 @@ class Account(
 
     override fun isHidden(pubkeyHex: String): Boolean = hiddenUsers.flow.value.isUserHidden(pubkeyHex)
 
+    override fun liveHiddenUsers(): LiveHiddenUsers = hiddenUsers.flow.value
+
     override fun followingKeySet(): Set<HexKey> = kind3FollowList.flow.value.authors
 
     fun isAcceptable(user: User): Boolean {

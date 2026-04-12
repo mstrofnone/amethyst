@@ -44,6 +44,18 @@ import com.vitorpamplona.quartz.utils.cache.ICacheOperations
  */
 interface ICacheProvider {
     /**
+     * Collection-level access to notes cache.
+     * Supports filterIntoSet, mapFlattenIntoSet, and other ICacheOperations.
+     */
+    val notes: ICacheOperations<HexKey, Note>
+
+    /**
+     * Collection-level access to addressable notes cache.
+     * Supports filterIntoSet, mapFlattenIntoSet, and other ICacheOperations.
+     */
+    val addressables: ICacheOperations<Address, AddressableNote>
+
+    /**
      * Gets a channel by Note reference.
      * Used for resolving relay hints for channel messages.
      *
