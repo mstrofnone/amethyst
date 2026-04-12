@@ -20,5 +20,8 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.bookmarks
 
-// Re-export from commons for backwards compatibility
-typealias BookmarkType = com.vitorpamplona.amethyst.commons.ui.screens.bookmarkgroups.BookmarkType
+enum class BookmarkType {
+    PostBookmark,
+
+    ArticleBookmark,
+}

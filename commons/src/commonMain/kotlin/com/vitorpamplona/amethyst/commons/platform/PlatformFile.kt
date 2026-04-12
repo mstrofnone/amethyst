@@ -20,10 +20,5 @@
  */
 package com.vitorpamplona.amethyst.commons.platform
 
-expect class PlatformFile(
-    path: String,
-) {
-    val path: String
-
-    fun exists(): Boolean
-}
+// Re-export from commons for backwards compatibility
+typealias IExpiration = com.vitorpamplona.amethyst.commons.ui.note.creators.expiration.IExpiration

@@ -20,6 +20,5 @@
  */
 package com.vitorpamplona.amethyst.commons.network
 
-import okhttp3.OkHttpClient
-
-actual typealias PlatformHttpClient = OkHttpClient
+// Re-export from commons for backwards compatibility
+typealias BookmarkType = com.vitorpamplona.amethyst.commons.ui.bookmarks.BookmarkType
