@@ -26,10 +26,11 @@ import kotlinx.cinterop.alloc
 import kotlinx.cinterop.memScoped
 import kotlinx.cinterop.ptr
 import kotlinx.cinterop.value
-import platform.CoreFoundation.CFDictionaryAddValue
 import platform.CoreFoundation.CFDictionaryCreateMutable
+import platform.CoreFoundation.CFDictionaryRef
+import platform.CoreFoundation.CFDictionarySetValue
 import platform.CoreFoundation.CFTypeRefVar
-import platform.CoreFoundation.kCFBooleanTrue
+import platform.CoreFoundation.kCFAllocatorDefault
 import platform.Foundation.CFBridgingRelease
 import platform.Foundation.CFBridgingRetain
 import platform.Foundation.NSData
@@ -40,7 +41,6 @@ import platform.Foundation.dataUsingEncoding
 import platform.Security.SecItemAdd
 import platform.Security.SecItemCopyMatching
 import platform.Security.SecItemDelete
-import platform.Security.errSecItemNotFound
 import platform.Security.errSecSuccess
 import platform.Security.kSecAttrAccount
 import platform.Security.kSecAttrService
@@ -50,7 +50,7 @@ import platform.Security.kSecMatchLimitOne
 import platform.Security.kSecReturnData
 import platform.Security.kSecValueData
 
-private const val SERVICE_NAME = "com.vitorpamplona.amethyst.keystore"
+private const val SERVICE_NAME = "com.vitorpamplona.amethyst.keys"
 
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 actual class SecureKeyStorage private actual constructor() {
@@ -67,57 +67,52 @@ actual class SecureKeyStorage private actual constructor() {
 
         val data =
             (privKeyHex as NSString).dataUsingEncoding(NSUTF8StringEncoding)
-                ?: throw SecureStorageException("Failed to encode private key")
+                ?: throw SecureStorageException("Failed to encode key data")
 
         memScoped {
-            val query =
-                CFDictionaryCreateMutable(null, 5, null, null).apply {
-                    CFDictionaryAddValue(this, kSecAttrService, CFBridgingRetain(SERVICE_NAME))
-                    CFDictionaryAddValue(this, kSecAttrAccount, CFBridgingRetain(npub))
-                    CFDictionaryAddValue(this, platform.Security.kSecClass, kSecClassGenericPassword)
-                    CFDictionaryAddValue(this, kSecValueData, CFBridgingRetain(data))
-                }
+            val query = CFDictionaryCreateMutable(kCFAllocatorDefault, 5, null, null)
+            CFDictionarySetValue(query, CFBridgingRetain(kSecClassGenericPassword), CFBridgingRetain(kSecClassGenericPassword))
+            CFDictionarySetValue(query, CFBridgingRetain(kSecAttrService), CFBridgingRetain(SERVICE_NAME as NSString))
+            CFDictionarySetValue(query, CFBridgingRetain(kSecAttrAccount), CFBridgingRetain(npub as NSString))
+            CFDictionarySetValue(query, CFBridgingRetain(kSecValueData), CFBridgingRetain(data))
 
-            val status = SecItemAdd(query, null)
+            val status = SecItemAdd(query as CFDictionaryRef, null)
             if (status != errSecSuccess) {
-                throw SecureStorageException("Failed to save key to Keychain: $status")
+                throw SecureStorageException("Failed to save key: OSStatus $status")
             }
         }
     }
 
     actual suspend fun getPrivateKey(npub: String): String? =
         memScoped {
+            val query = CFDictionaryCreateMutable(kCFAllocatorDefault, 5, null, null)
+            CFDictionarySetValue(query, CFBridgingRetain(kSecClassGenericPassword), CFBridgingRetain(kSecClassGenericPassword))
+            CFDictionarySetValue(query, CFBridgingRetain(kSecAttrService), CFBridgingRetain(SERVICE_NAME as NSString))
+            CFDictionarySetValue(query, CFBridgingRetain(kSecAttrAccount), CFBridgingRetain(npub as NSString))
+            CFDictionarySetValue(query, CFBridgingRetain(kSecReturnData), CFBridgingRetain(true as Any))
+            CFDictionarySetValue(query, CFBridgingRetain(kSecMatchLimit), CFBridgingRetain(kSecMatchLimitOne))
+
             val result = alloc<CFTypeRefVar>()
-            val query =
-                CFDictionaryCreateMutable(null, 5, null, null).apply {
-                    CFDictionaryAddValue(this, kSecAttrService, CFBridgingRetain(SERVICE_NAME))
-                    CFDictionaryAddValue(this, kSecAttrAccount, CFBridgingRetain(npub))
-                    CFDictionaryAddValue(this, platform.Security.kSecClass, kSecClassGenericPassword)
-                    CFDictionaryAddValue(this, kSecReturnData, kCFBooleanTrue)
-                    CFDictionaryAddValue(this, kSecMatchLimit, kSecMatchLimitOne)
+            val status = SecItemCopyMatching(query as CFDictionaryRef, result.ptr)
+
+            if (status == errSecSuccess) {
+                val data = CFBridgingRelease(result.value) as? NSData
+                data?.let {
+                    NSString.create(data = it, encoding = NSUTF8StringEncoding) as? String
                 }
-
-            val status = SecItemCopyMatching(query, result.ptr)
-            if (status == errSecItemNotFound) return@memScoped null
-            if (status != errSecSuccess) {
-                throw SecureStorageException("Failed to read key from Keychain: $status")
+            } else {
+                null
             }
-
-            @Suppress("UNCHECKED_CAST")
-            val data = CFBridgingRelease(result.value) as? NSData ?: return@memScoped null
-            NSString.create(data = data, encoding = NSUTF8StringEncoding) as? String
         }
 
     actual suspend fun deletePrivateKey(npub: String): Boolean =
         memScoped {
-            val query =
-                CFDictionaryCreateMutable(null, 3, null, null).apply {
-                    CFDictionaryAddValue(this, kSecAttrService, CFBridgingRetain(SERVICE_NAME))
-                    CFDictionaryAddValue(this, kSecAttrAccount, CFBridgingRetain(npub))
-                    CFDictionaryAddValue(this, platform.Security.kSecClass, kSecClassGenericPassword)
-                }
+            val query = CFDictionaryCreateMutable(kCFAllocatorDefault, 3, null, null)
+            CFDictionarySetValue(query, CFBridgingRetain(kSecClassGenericPassword), CFBridgingRetain(kSecClassGenericPassword))
+            CFDictionarySetValue(query, CFBridgingRetain(kSecAttrService), CFBridgingRetain(SERVICE_NAME as NSString))
+            CFDictionarySetValue(query, CFBridgingRetain(kSecAttrAccount), CFBridgingRetain(npub as NSString))
 
-            val status = SecItemDelete(query)
+            val status = SecItemDelete(query as CFDictionaryRef)
             status == errSecSuccess
         }
 

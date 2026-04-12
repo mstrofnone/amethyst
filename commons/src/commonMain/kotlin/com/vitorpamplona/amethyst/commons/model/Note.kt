@@ -759,7 +759,11 @@ open class Note(
                 pledgeValue != null && it.author == user
             }
 
-    fun pledgedAmountByOthers(): BigDecimal = replies.fold(BigDecimal(0)) { acc, note -> acc.add(note.event?.addedRewardValue() ?: BigDecimal(0)) }
+    fun pledgedAmountByOthers(): BigDecimal {
+        var total = BigDecimal(0)
+        replies.forEach { total = total.add(it.event?.addedRewardValue() ?: BigDecimal(0)) }
+        return total
+    }
 
     fun hasAnyReports(): Boolean {
         val dayAgo = TimeUtils.oneDayAgo()

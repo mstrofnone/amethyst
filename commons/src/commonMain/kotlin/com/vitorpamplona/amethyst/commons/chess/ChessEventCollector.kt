@@ -69,10 +69,10 @@ class ChessEventCollector(
     val startEvent: StateFlow<JesterEvent?> = _startEvent.asStateFlow()
 
     // Move events (deduplicated by event ID)
-    private val moves = concurrentMutableMapOf<String, JesterEvent>()
+    private val moves = HashMap<String, JesterEvent>()
 
     // Track all processed event IDs for fast deduplication
-    private val processedEventIds = concurrentMutableSetOf<String>()
+    private val processedEventIds = HashSet<String>()
 
     // Flow that emits when any event is added (for reactive updates)
     private val _eventCount = MutableStateFlow(0)
@@ -154,8 +154,7 @@ class ChessEventCollector(
         if (!event.isMoveEvent()) return false
         if (event.startEventId() != startEventId) return false
 
-        if (event.id !in moves) {
-            moves[event.id] = event
+        if (moves.put(event.id, event) == null) {
             processedEventIds.add(event.id)
             incrementEventCount()
             Log.d("chessdebug") { "[Collector] MOVE event added: id=${event.id.take(8)}, pubkey=${event.pubKey.take(8)}, move=${event.move()}, historySize=${event.history().size}, fen=${event.fen()?.take(30)}, result=${event.result()}, totalMoves=${moves.size}" }
@@ -220,7 +219,7 @@ class ChessEventCollector(
  * such as in a chess lobby or when spectating multiple games.
  */
 class ChessEventCollectorManager {
-    private val collectors = concurrentMutableMapOf<String, ChessEventCollector>()
+    private val collectors = HashMap<String, ChessEventCollector>()
 
     /**
      * Get or create a collector for a game.

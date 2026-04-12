@@ -63,7 +63,7 @@ class FeedContentState(
         if (scrollToTopPending) return
 
         scrollToTopPending = true
-        viewModelScope.launch(Dispatchers_IO) { _scrollToTop.emit(_scrollToTop.value + 1) }
+        viewModelScope.launch(Dispatchers.Default) { _scrollToTop.emit(_scrollToTop.value + 1) }
     }
 
     suspend fun sentToTop() {
@@ -71,7 +71,7 @@ class FeedContentState(
     }
 
     private fun refresh() {
-        viewModelScope.launch(Dispatchers_IO) { refreshSuspended() }
+        viewModelScope.launch(Dispatchers.Default) { refreshSuspended() }
     }
 
     fun visibleNotes(): List<Note> {
@@ -186,11 +186,11 @@ class FeedContentState(
         }
     }
 
-    private val bundler = BasicBundledUpdate(250, Dispatchers_IO, viewModelScope)
-    private val bundlerInsert = BasicBundledInsert<Set<Note>>(250, Dispatchers_IO, viewModelScope)
+    private val bundler = BasicBundledUpdate(250, Dispatchers.Default, viewModelScope)
+    private val bundlerInsert = BasicBundledInsert<Set<Note>>(250, Dispatchers.Default, viewModelScope)
 
     override fun invalidateData(ignoreIfDoing: Boolean) {
-        viewModelScope.launch(Dispatchers_IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             bundler.invalidate(ignoreIfDoing) {
                 // adds the time to perform the refresh into this delay
                 // holding off new updates in case of heavy refresh routines.

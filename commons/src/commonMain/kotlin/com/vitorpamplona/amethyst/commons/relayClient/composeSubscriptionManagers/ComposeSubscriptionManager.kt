@@ -21,7 +21,6 @@
 package com.vitorpamplona.amethyst.commons.relayClient.composeSubscriptionManagers
 
 import androidx.compose.runtime.Stable
-import com.vitorpamplona.amethyst.commons.concurrency.concurrentMutableMapOf
 
 /**
  *  This allows composables to directly register their queries
@@ -32,7 +31,7 @@ import com.vitorpamplona.amethyst.commons.concurrency.concurrentMutableMapOf
 abstract class ComposeSubscriptionManager<T> :
     ComposeSubscriptionManagerControls,
     Subscribable<T> {
-    private var composeSubscriptions: MutableMap<T, T> = concurrentMutableMapOf()
+    private var composeSubscriptions: HashMap<T, T> = HashMap()
 
     // This is called by main. Keep it really fast.
     override fun subscribe(query: T?) {

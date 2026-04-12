@@ -22,17 +22,18 @@ package com.vitorpamplona.amethyst.commons.chess
 
 import platform.Foundation.NSUserDefaults
 
-private const val KEY_PREFIX = "chess_dismissed_"
-
 actual class ChessDismissedGamesStorage private actual constructor() {
     actual companion object {
         actual fun create(context: Any?): ChessDismissedGamesStorage = ChessDismissedGamesStorage()
     }
 
+    private val defaults = NSUserDefaults.standardUserDefaults
+
+    private fun key(userPubkey: String) = "chess_dismissed_$userPubkey"
+
     @Suppress("UNCHECKED_CAST")
     actual fun load(userPubkey: String): Set<String> {
-        val key = KEY_PREFIX + userPubkey
-        val array = NSUserDefaults.standardUserDefaults.stringArrayForKey(key)
+        val array = defaults.stringArrayForKey(key(userPubkey))
         return (array as? List<String>)?.toSet() ?: emptySet()
     }
 
@@ -40,7 +41,6 @@ actual class ChessDismissedGamesStorage private actual constructor() {
         userPubkey: String,
         ids: Set<String>,
     ) {
-        val key = KEY_PREFIX + userPubkey
-        NSUserDefaults.standardUserDefaults.setObject(ids.toList(), forKey = key)
+        defaults.setObject(ids.toList(), key(userPubkey))
     }
 }

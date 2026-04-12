@@ -23,8 +23,8 @@ package com.vitorpamplona.amethyst.commons.util
 import com.vitorpamplona.amethyst.commons.emojicoder.EmojiCoder
 import com.vitorpamplona.amethyst.commons.model.ImmutableListOfLists
 
-// KMP-compatible codePoint helpers
-private fun String.kmpCodePointAt(index: Int): Int {
+/** Returns the Unicode code point at the given char index, handling surrogate pairs. */
+private fun String.codePointAtIndex(index: Int): Int {
     val high = this[index]
     if (high.isHighSurrogate() && index + 1 < length) {
         val low = this[index + 1]
@@ -35,21 +35,22 @@ private fun String.kmpCodePointAt(index: Int): Int {
     return high.code
 }
 
-private fun charCountForCodePoint(codePoint: Int): Int = if (codePoint >= 0x10000) 2 else 1
+/** Returns the number of UTF-16 chars needed to represent the given code point. */
+private fun codePointCharCount(codePoint: Int): Int = if (codePoint >= 0x10000) 2 else 1
 
-private fun String.kmpOffsetByCodePoints(
+/** Advances the char index by one code point. */
+private fun String.offsetByCodePoints(
     index: Int,
-    count: Int,
+    offset: Int,
 ): Int {
-    var i = index
-    repeat(count) {
-        if (i >= length) return i
-        i += charCountForCodePoint(kmpCodePointAt(i))
+    var pos = index
+    repeat(offset) {
+        pos += codePointCharCount(codePointAtIndex(pos))
     }
-    return i
+    return pos
 }
 
-fun String.isUTF16Char(pos: Int): Boolean = charCountForCodePoint(this.kmpCodePointAt(pos)) == 2
+fun String.isUTF16Char(pos: Int): Boolean = codePointCharCount(this.codePointAtIndex(pos)) == 2
 
 fun String.firstFullCharOld(): String {
     return when (this.length) {
@@ -90,7 +91,7 @@ fun String.firstFullChar(): String {
     var i = 0
 
     while (i < this.length) {
-        codePoint = kmpCodePointAt(i)
+        codePoint = codePointAtIndex(i)
 
         // Skips if it starts with the join char 0x200D
         if (codePoint == 0x200D && previousCharLength == 0) {
@@ -104,7 +105,7 @@ fun String.firstFullChar(): String {
             } else {
                 // stops when two chars are not joined together
                 if (previousCharLength > 0 && !isInJoin) {
-                    if (charCountForCodePoint(codePoint) == 1 || hasHadSecondChance) {
+                    if (codePointCharCount(codePoint) == 1 || hasHadSecondChance) {
                         break
                     } else {
                         hasHadSecondChance = true

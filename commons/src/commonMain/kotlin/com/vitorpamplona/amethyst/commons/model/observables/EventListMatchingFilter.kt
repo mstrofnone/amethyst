@@ -35,11 +35,11 @@ import com.vitorpamplona.quartz.nip01Core.relay.filters.Filter
  */
 class EventListMatchingFilter<T : Event>(
     private val filter: Filter,
-    private val atOnce: (filter: Filter) -> Collection<Note>,
+    private val atOnce: (filter: Filter) -> Set<Note>,
     private val update: (List<T>) -> Unit,
 ) : Observable {
     // Keeping this here blocks it from being cleared from memory
-    var currentResults: MutableSet<Note> = concurrentSortedSetOf(CreatedAtIdHexComparator)
+    var currentResults: MutableList<Note> = mutableListOf()
 
     @Suppress("UNCHECKED_CAST")
     override fun new(
@@ -55,10 +55,13 @@ class EventListMatchingFilter<T : Event>(
         }
 
         if (filter.match(event)) {
-            currentResults.add(note)
-            val limit = filter.limit
-            if (limit != null && currentResults.size > limit) {
-                currentResults.remove(currentResults.last())
+            if (!currentResults.contains(note)) {
+                currentResults.add(note)
+                currentResults.sortWith(CreatedAtIdHexComparator)
+                val limit = filter.limit
+                if (limit != null && currentResults.size > limit) {
+                    currentResults.removeAt(currentResults.size - 1)
+                }
             }
 
             update(currentResults.mapNotNull { it.event as? T })
@@ -74,7 +77,7 @@ class EventListMatchingFilter<T : Event>(
 
     @Suppress("UNCHECKED_CAST")
     fun init() {
-        currentResults = concurrentSortedSetOf(CreatedAtIdHexComparator).also { it.addAll(atOnce(filter)) }
+        currentResults = atOnce(filter).sortedWith(CreatedAtIdHexComparator).toMutableList()
         update(currentResults.mapNotNull { it.event as? T })
     }
 }

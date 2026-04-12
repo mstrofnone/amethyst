@@ -41,13 +41,13 @@ abstract class Channel : NotesGatherer {
 
     private var relays = mapOf<NormalizedRelayUrl, Counter>()
 
-    private var changesFlow: WeakRef<MutableSharedFlow<ListChange<Note>>>? = null
+    private var changesFlow: MutableSharedFlow<ListChange<Note>>? = null
 
     fun changesFlow(): MutableSharedFlow<ListChange<Note>> {
-        val current = changesFlow?.get()
+        val current = changesFlow
         if (current != null) return current
         val new = MutableSharedFlow<ListChange<Note>>(0, 10, BufferOverflow.DROP_OLDEST)
-        changesFlow = WeakRef(new)
+        changesFlow = new
         return new
     }
 
@@ -64,12 +64,10 @@ abstract class Channel : NotesGatherer {
     abstract fun toBestDisplayName(): String
 
     open fun relays(): Set<NormalizedRelayUrl> =
-        relays.keys
-            .sortedWith { o1, o2 ->
-                val o1Count = relays[o1]?.number ?: 0
-                val o2Count = relays[o2]?.number ?: 0
-                o2Count.compareTo(o1Count) // descending
-            }.toSet()
+        relays.entries
+            .sortedByDescending { it.value.number }
+            .map { it.key }
+            .toSet()
 
     fun updateChannelInfo() {
         flowSet?.metadata?.invalidateData()
@@ -106,7 +104,7 @@ abstract class Channel : NotesGatherer {
                 addRelay(relay)
             }
 
-            changesFlow?.get()?.tryEmit(ListChange.Addition(note))
+            changesFlow?.tryEmit(ListChange.Addition(note))
 
             flowSet?.notes?.invalidateData()
         }
@@ -121,7 +119,7 @@ abstract class Channel : NotesGatherer {
                 lastNote = notes.values().sortedWith(DefaultFeedOrder).firstOrNull()
             }
 
-            changesFlow?.get()?.tryEmit(ListChange.Deletion(note))
+            changesFlow?.tryEmit(ListChange.Deletion(note))
 
             flowSet?.notes?.invalidateData()
         }
@@ -139,7 +137,7 @@ abstract class Channel : NotesGatherer {
 
         toBeRemoved.forEach { notes.remove(it.idHex) }
 
-        changesFlow?.get()?.tryEmit(ListChange.SetDeletion(toBeRemoved.toSet()))
+        changesFlow?.tryEmit(ListChange.SetDeletion(toBeRemoved.toSet()))
 
         flowSet?.notes?.invalidateData()
 
@@ -155,7 +153,7 @@ abstract class Channel : NotesGatherer {
 
         hidden.forEach { notes.remove(it.idHex) }
 
-        changesFlow?.get()?.tryEmit(ListChange.SetDeletion(hidden))
+        changesFlow?.tryEmit(ListChange.SetDeletion(hidden))
 
         flowSet?.notes?.invalidateData()
 

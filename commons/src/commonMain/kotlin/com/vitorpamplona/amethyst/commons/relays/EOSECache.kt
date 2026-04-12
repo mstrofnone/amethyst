@@ -20,7 +20,7 @@
  */
 package com.vitorpamplona.amethyst.commons.relays
 
-import com.vitorpamplona.amethyst.commons.concurrency.kmpSynchronized
+import com.vitorpamplona.amethyst.commons.threading.platformSynchronized
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
 
 /**
@@ -41,7 +41,7 @@ open class EOSECache<K : Any>(
         relayUrl: NormalizedRelayUrl,
         time: Long,
     ) {
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             val relayList = cache[key]
             if (relayList == null) {
                 // Evict oldest if at capacity
@@ -58,7 +58,7 @@ open class EOSECache<K : Any>(
     }
 
     fun since(key: K): SincePerRelayMap? =
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             cache[key]?.relayList?.toMutableMap()
         }
 
@@ -69,18 +69,18 @@ open class EOSECache<K : Any>(
     ) = addOrUpdate(key, relayUrl, time)
 
     fun remove(key: K) {
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             cache.remove(key)
         }
     }
 
     fun clear() {
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             cache.clear()
         }
     }
 
-    fun size(): Int = kmpSynchronized(lock) { cache.size }
+    fun size(): Int = platformSynchronized(lock) { cache.size }
 }
 
 /**
@@ -100,7 +100,7 @@ open class EOSETwoLevelCache<K1 : Any, K2 : Any>(
         relayUrl: NormalizedRelayUrl,
         time: Long,
     ) {
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             val innerCache = cache[outerKey]
             if (innerCache == null) {
                 // Evict oldest if at capacity
@@ -120,7 +120,7 @@ open class EOSETwoLevelCache<K1 : Any, K2 : Any>(
         outerKey: K1,
         innerKey: K2,
     ): SincePerRelayMap? =
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             cache[outerKey]?.since(innerKey)
         }
 
@@ -132,13 +132,13 @@ open class EOSETwoLevelCache<K1 : Any, K2 : Any>(
     ) = addOrUpdate(outerKey, innerKey, relayUrl, time)
 
     fun removeOuter(key: K1) {
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             cache.remove(key)
         }
     }
 
     fun clear() {
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             cache.clear()
         }
     }

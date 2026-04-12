@@ -20,19 +20,29 @@
  */
 package com.vitorpamplona.amethyst.commons.emojicoder
 
-// KMP-compatible codePoint helpers
+/**
+ * Returns the number of UTF-16 chars needed to represent the given code point.
+ */
+private fun codePointCharCount(codePoint: Int): Int = if (codePoint >= 0x10000) 2 else 1
+
+/**
+ * Converts a code point to one or two UTF-16 chars (surrogate pair for supplementary).
+ */
 private fun codePointToChars(codePoint: Int): CharArray =
-    if (codePoint in 0x10000..0x10FFFF) {
-        val high = ((codePoint - 0x10000) shr 10) + 0xD800
-        val low = ((codePoint - 0x10000) and 0x3FF) + 0xDC00
-        charArrayOf(high.toChar(), low.toChar())
+    if (codePoint >= 0x10000) {
+        val offset = codePoint - 0x10000
+        charArrayOf(
+            (0xD800 + (offset shr 10)).toChar(),
+            (0xDC00 + (offset and 0x3FF)).toChar(),
+        )
     } else {
         charArrayOf(codePoint.toChar())
     }
 
-private fun charCountForCodePoint(codePoint: Int): Int = if (codePoint >= 0x10000) 2 else 1
-
-private fun String.codePointAt(index: Int): Int {
+/**
+ * Returns the Unicode code point at the given char index, handling surrogate pairs.
+ */
+private fun String.codePointAtIndex(index: Int): Int {
     val high = this[index]
     if (high.isHighSurrogate() && index + 1 < length) {
         val low = this[index + 1]
@@ -77,11 +87,11 @@ object EmojiCoder {
     fun isCoded(text: String): Boolean {
         if (text.length <= 3) return false
 
-        if (!isVariationChar(text.codePointAt(text.length - 2))) {
+        if (!isVariationChar(text.codePointAtIndex(text.length - 2))) {
             return false
         }
 
-        if (text.length > 4 && !isVariationChar(text.codePointAt(text.length - 4))) {
+        if (text.length > 4 && !isVariationChar(text.codePointAtIndex(text.length - 4))) {
             return false
         }
 
@@ -108,18 +118,18 @@ object EmojiCoder {
 
         var i = 0
         while (i < text.length) {
-            val codePoint = text.codePointAt(i)
+            val codePoint = text.codePointAtIndex(i)
             val byte = fromVariationSelector(codePoint)
 
             if (byte == null && decoded.isNotEmpty()) {
                 break
             } else if (byte == null) {
-                i += charCountForCodePoint(codePoint)
+                i += codePointCharCount(codePoint) // Advance index by correct number of chars
                 continue
             }
 
             decoded.add(byte)
-            i += charCountForCodePoint(codePoint)
+            i += codePointCharCount(codePoint) // Advance index by correct number of chars
         }
 
         val decodedArray = ByteArray(decoded.size) { decoded[it].toByte() }
@@ -131,18 +141,18 @@ object EmojiCoder {
 
         var i = 0
         while (i < text.length) {
-            val codePoint = text.codePointAt(i)
+            val codePoint = text.codePointAtIndex(i)
             val byte = fromVariationSelector(codePoint)
 
             if (byte == null && decoded.isNotEmpty()) {
                 break
             } else if (byte == null) {
-                i += charCountForCodePoint(codePoint)
+                i += codePointCharCount(codePoint) // Advance index by correct number of chars
                 continue
             }
 
             decoded.add(byte)
-            i += charCountForCodePoint(codePoint)
+            i += codePointCharCount(codePoint) // Advance index by correct number of chars
         }
 
         return text.substring(0, i)

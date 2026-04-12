@@ -21,8 +21,7 @@
 package com.vitorpamplona.amethyst.commons.blurhash
 
 /**
- * iOS implementation of PlatformImage using raw ARGB pixel arrays.
- * No platform image dependency needed — blurhash operates on pixel data directly.
+ * Simple pixel-array-backed image for iOS blurhash encoding/decoding.
  */
 actual class PlatformImage(
     private val pixels: IntArray,
@@ -40,8 +39,7 @@ actual class PlatformImage(
     ) {
         for (row in 0 until height) {
             for (col in 0 until width) {
-                pixels[offset + row * stride + col] =
-                    this.pixels[(y + row) * this.width + (x + col)]
+                pixels[offset + row * stride + col] = this.pixels[(y + row) * this.width + (x + col)]
             }
         }
     }
@@ -53,11 +51,11 @@ actual class PlatformImage(
         val scaled = IntArray(width * height)
         val xRatio = this.width.toFloat() / width
         val yRatio = this.height.toFloat() / height
-        for (row in 0 until height) {
-            for (col in 0 until width) {
-                val srcX = (col * xRatio).toInt().coerceIn(0, this.width - 1)
-                val srcY = (row * yRatio).toInt().coerceIn(0, this.height - 1)
-                scaled[row * width + col] = pixels[srcY * this.width + srcX]
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                val srcX = (x * xRatio).toInt().coerceIn(0, this.width - 1)
+                val srcY = (y * yRatio).toInt().coerceIn(0, this.height - 1)
+                scaled[y * width + x] = pixels[srcY * this.width + srcX]
             }
         }
         return PlatformImage(scaled, width, height)

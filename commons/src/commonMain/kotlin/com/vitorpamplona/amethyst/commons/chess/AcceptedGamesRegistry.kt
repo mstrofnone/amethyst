@@ -20,7 +20,7 @@
  */
 package com.vitorpamplona.amethyst.commons.chess
 
-import com.vitorpamplona.amethyst.commons.concurrency.kmpSynchronized
+import com.vitorpamplona.amethyst.commons.threading.platformSynchronized
 
 /**
  * Global registry of accepted game IDs.
@@ -34,25 +34,25 @@ object AcceptedGamesRegistry {
     private val lock = Any()
 
     fun markAsAccepted(gameId: String) {
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             acceptedGameIds.add(gameId)
         }
     }
 
     fun wasAccepted(gameId: String): Boolean =
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             acceptedGameIds.contains(gameId)
         }
 
     fun clear() {
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             acceptedGameIds.clear()
         }
     }
 
     /** Remove old entries - call periodically to prevent memory leak */
     fun clearOldEntries(keepGameIds: Set<String>) {
-        kmpSynchronized(lock) {
+        platformSynchronized(lock) {
             acceptedGameIds.retainAll(keepGameIds)
         }
     }

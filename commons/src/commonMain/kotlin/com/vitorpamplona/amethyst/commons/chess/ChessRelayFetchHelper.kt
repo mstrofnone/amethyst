@@ -20,8 +20,7 @@
  */
 package com.vitorpamplona.amethyst.commons.chess
 
-import com.vitorpamplona.amethyst.commons.concurrency.concurrentMutableMapOf
-import com.vitorpamplona.amethyst.commons.concurrency.concurrentMutableSetOf
+import com.vitorpamplona.amethyst.commons.threading.platformSynchronized
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
 import com.vitorpamplona.quartz.nip01Core.relay.client.reqs.SubscriptionListener
@@ -75,10 +74,11 @@ class ChessRelayFetchHelper(
     ): List<Event> {
         if (filters.isEmpty()) return emptyList()
 
-        val events = concurrentMutableMapOf<String, Event>()
+        val lock = Any()
+        val events = HashMap<String, Event>()
         val relayCount = filters.keys.size
-        val eoseReceived = concurrentMutableSetOf<NormalizedRelayUrl>()
-        val relayEventCounts = concurrentMutableMapOf<NormalizedRelayUrl, Int>()
+        val eoseReceived = HashSet<NormalizedRelayUrl>()
+        val relayEventCounts = HashMap<NormalizedRelayUrl, Int>()
         val allEose = CompletableDeferred<Unit>()
         val subId = newSubId()
 
@@ -96,22 +96,26 @@ class ChessRelayFetchHelper(
                     relay: NormalizedRelayUrl,
                     forFilters: List<Filter>?,
                 ) {
-                    events[event.id] = event
-                    val count = (relayEventCounts[relay] ?: 0) + 1
-                    relayEventCounts[relay] = count
-                    onProgress?.invoke(RelayFetchProgress(relay, RelayFetchStatus.RECEIVING, count))
+                    platformSynchronized(lock) {
+                        events[event.id] = event
+                        val count = (relayEventCounts[relay] ?: 0) + 1
+                        relayEventCounts[relay] = count
+                        onProgress?.invoke(RelayFetchProgress(relay, RelayFetchStatus.RECEIVING, count))
+                    }
                 }
 
                 override fun onEose(
                     relay: NormalizedRelayUrl,
                     forFilters: List<Filter>?,
                 ) {
-                    eoseReceived.add(relay)
-                    val count = relayEventCounts[relay] ?: 0
-                    onProgress?.invoke(RelayFetchProgress(relay, RelayFetchStatus.EOSE_RECEIVED, count))
-                    // Complete when all relays respond
-                    if (eoseReceived.size >= relayCount) {
-                        allEose.complete(Unit)
+                    platformSynchronized(lock) {
+                        eoseReceived.add(relay)
+                        val count = relayEventCounts[relay] ?: 0
+                        onProgress?.invoke(RelayFetchProgress(relay, RelayFetchStatus.EOSE_RECEIVED, count))
+                        // Complete when all relays respond
+                        if (eoseReceived.size >= relayCount) {
+                            allEose.complete(Unit)
+                        }
                     }
                 }
             }
@@ -121,16 +125,18 @@ class ChessRelayFetchHelper(
 
         // Mark timed-out relays
         if (eoseResult == null) {
-            filters.keys.forEach { relay ->
-                if (relay !in eoseReceived) {
-                    val count = relayEventCounts[relay] ?: 0
-                    onProgress?.invoke(RelayFetchProgress(relay, RelayFetchStatus.TIMEOUT, count))
+            platformSynchronized(lock) {
+                filters.keys.forEach { relay ->
+                    if (relay !in eoseReceived) {
+                        val count = relayEventCounts[relay] ?: 0
+                        onProgress?.invoke(RelayFetchProgress(relay, RelayFetchStatus.TIMEOUT, count))
+                    }
                 }
             }
         }
 
         client.unsubscribe(subId)
 
-        return events.values.toList()
+        return platformSynchronized(lock) { events.values.toList() }
     }
 }

@@ -248,7 +248,7 @@ class ChessLobbyState(
 
     // State version counter - increments on every game state update
     // UI can observe this to force recomposition when internal state changes
-    private val stateVersionCounter = atomic(0L)
+    private var stateVersionCounter = 0L
     private val _stateVersion = MutableStateFlow(0L)
     val stateVersion: StateFlow<Long> = _stateVersion.asStateFlow()
 

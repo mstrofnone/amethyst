@@ -50,13 +50,13 @@ class MarmotGroupChatroom(
     var newestMessage: Note? = null
     val unreadCount = MutableStateFlow(0)
 
-    private var changesFlow: WeakRef<MutableSharedFlow<ListChange<Note>>>? = null
+    private var changesFlow: MutableSharedFlow<ListChange<Note>>? = null
 
     fun changesFlow(): MutableSharedFlow<ListChange<Note>> {
-        val current = changesFlow?.get()
+        val current = changesFlow
         if (current != null) return current
         val new = MutableSharedFlow<ListChange<Note>>(0, 100, BufferOverflow.DROP_OLDEST)
-        changesFlow = WeakRef(new)
+        changesFlow = new
         return new
     }
 
@@ -75,7 +75,7 @@ class MarmotGroupChatroom(
             }
 
             unreadCount.value += 1
-            changesFlow?.get()?.tryEmit(ListChange.Addition(msg))
+            changesFlow?.tryEmit(ListChange.Addition(msg))
             return true
         }
         return false
@@ -90,7 +90,7 @@ class MarmotGroupChatroom(
                 newestMessage = messages.maxByOrNull { it.createdAt() ?: 0L }
             }
 
-            changesFlow?.get()?.tryEmit(ListChange.Deletion(msg))
+            changesFlow?.tryEmit(ListChange.Deletion(msg))
             return true
         }
         return false
@@ -109,7 +109,7 @@ class MarmotGroupChatroom(
         val toRemove = messages.minus(toKeep)
         messages = toKeep
 
-        changesFlow?.get()?.tryEmit(ListChange.SetDeletion<Note>(toRemove))
+        changesFlow?.tryEmit(ListChange.SetDeletion<Note>(toRemove))
         return toRemove
     }
 }

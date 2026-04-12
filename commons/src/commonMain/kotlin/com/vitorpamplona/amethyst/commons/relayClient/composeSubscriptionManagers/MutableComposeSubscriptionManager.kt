@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 abstract class MutableComposeSubscriptionManager<T : MutableQueryState>(
     val scope: CoroutineScope,
 ) : ComposeSubscriptionManagerControls {
-    private var composeSubscriptions: MutableMap<T, Job?> = concurrentMutableMapOf()
+    private var composeSubscriptions: HashMap<T, Job?> = HashMap()
 
     // This is called by main. Keep it really fast.
     fun subscribe(query: T?) {

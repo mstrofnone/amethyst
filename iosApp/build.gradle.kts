@@ -1,9 +1,7 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.jetbrainsComposeCompiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.jetbrainsComposeCompiler)
 }
 
 kotlin {
@@ -14,39 +12,45 @@ kotlin {
     listOf(
         iosArm64(),
         iosSimulatorArm64(),
-    ).forEach { target ->
-        target.binaries.framework {
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
             baseName = "AmethystIos"
             isStatic = true
-            binaryOption("bundleId", "com.vitorpamplona.amethyst.ios")
+            binaryOption("bundleId", "com.vitorpamplona.amethyst.ios.framework")
         }
     }
 
     sourceSets {
-        commonMain {
-            dependencies {
-                implementation(project(":quartz"))
-                implementation(project(":commons"))
+        commonMain.dependencies {
+            // Quartz Nostr library (already has iOS targets)
+            implementation(project(":quartz"))
 
-                // Compose Multiplatform
-                implementation(compose.ui)
-                implementation(compose.foundation)
-                implementation(compose.runtime)
-                implementation(compose.material3)
-                implementation(compose.components.resources)
+            // Commons library (now has iOS targets)
+            implementation(project(":commons"))
 
-                // Coroutines
-                implementation(libs.kotlinx.coroutines.core)
+            // Compose Multiplatform
+            implementation(compose.ui)
+            implementation(compose.foundation)
+            implementation(compose.runtime)
+            implementation(compose.material3)
+            implementation(compose.components.resources)
 
-                // Image loading
-                implementation(libs.coil.compose)
-                implementation("io.coil-kt.coil3:coil-network-ktor3:${libs.versions.coil.get()}")
-                implementation("io.ktor:ktor-client-darwin:3.1.3")
+            // Coroutines
+            implementation(libs.kotlinx.coroutines.core)
 
-                // Collections
-                implementation(libs.kotlinx.collections.immutable)
-                implementation(libs.androidx.collection)
-            }
+            // Image loading (Coil 3 — KMP + Ktor for iOS networking)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.ktor)
+
+            // Immutable collections
+            implementation(libs.kotlinx.collections.immutable)
+
+            // LruCache
+            implementation(libs.androidx.collection)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }

@@ -20,17 +20,17 @@
  */
 package com.vitorpamplona.amethyst.commons.search
 
-import com.vitorpamplona.amethyst.commons.concurrency.kmpSynchronized
+import com.vitorpamplona.amethyst.commons.threading.platformSynchronized
 
 class EventDeduplicator {
     private val lock = Any()
     private val seenIds = mutableSetOf<String>()
 
-    fun tryAdd(id: String): Boolean = kmpSynchronized(lock) { seenIds.add(id) }
+    fun tryAdd(id: String): Boolean = platformSynchronized(lock) { seenIds.add(id) }
 
-    fun contains(id: String): Boolean = kmpSynchronized(lock) { id in seenIds }
+    fun contains(id: String): Boolean = platformSynchronized(lock) { id in seenIds }
 
-    fun clear() = kmpSynchronized(lock) { seenIds.clear() }
+    fun clear() = platformSynchronized(lock) { seenIds.clear() }
 
-    val size: Int get() = kmpSynchronized(lock) { seenIds.size }
+    val size: Int get() = platformSynchronized(lock) { seenIds.size }
 }

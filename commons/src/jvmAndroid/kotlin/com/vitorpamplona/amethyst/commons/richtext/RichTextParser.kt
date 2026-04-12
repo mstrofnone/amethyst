@@ -419,7 +419,14 @@ class RichTextParser {
             return videoExtensions.any { removedParamsFromUrl.endsWith(it) }
         }
 
-        fun isValidURL(url: String?): Boolean = url != null && parseUrl(url) != null
+        private val URL_PATTERN = Regex("^https?://[^\\s/$.?#].[^\\s]*$", RegexOption.IGNORE_CASE)
+
+        fun isValidURL(url: String?): Boolean =
+            try {
+                url != null && URL_PATTERN.matches(url)
+            } catch (e: Exception) {
+                false
+            }
 
         fun parseImageOrVideo(fullUrl: String): BaseMediaContent {
             val removedParamsFromUrl = removeQueryParamsForExtensionComparison(fullUrl)
