@@ -30,7 +30,7 @@ import com.vitorpamplona.amethyst.commons.model.nip53LiveActivities.LiveActiviti
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
-import com.vitorpamplona.quartz.nip01Core.hints.HintIndexer
+import com.vitorpamplona.quartz.utils.cache.ICacheOperations
 
 /**
  * Cache provider interface for accessing cached Notes, Users, and Channels.
@@ -46,14 +46,14 @@ import com.vitorpamplona.quartz.nip01Core.hints.HintIndexer
  */
 interface ICacheProvider {
     /**
-     * Collection-level access to notes cache.
-     * Supports filterIntoSet, mapFlattenIntoSet, and other ICacheOperations.
+     * Collection-level access to cached notes.
+     * Provides filterIntoSet, mapFlattenIntoSet, etc. for feed filters.
      */
     val notes: ICacheOperations<HexKey, Note>
 
     /**
-     * Collection-level access to addressable notes cache.
-     * Supports filterIntoSet, mapFlattenIntoSet, and other ICacheOperations.
+     * Collection-level access to cached addressable notes.
+     * Provides filterIntoSet, mapFlattenIntoSet, etc. for feed filters.
      */
     val addressables: ICacheOperations<Address, AddressableNote>
 

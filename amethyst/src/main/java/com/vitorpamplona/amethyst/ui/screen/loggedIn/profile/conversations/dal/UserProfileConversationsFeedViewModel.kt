@@ -29,13 +29,9 @@ import com.vitorpamplona.amethyst.model.User
 
 @Stable
 class UserProfileConversationsFeedViewModel(
-    user: User,
-    account: Account,
-) : com.vitorpamplona.amethyst.commons.viewmodels.profile.UserProfileConversationsFeedViewModel(
-        user,
-        account,
-        LocalCache,
-    ) {
+    val user: User,
+    val account: Account,
+) : AndroidFeedViewModel(UserProfileConversationsFeedFilter(user, account, LocalCache)) {
     class Factory(
         val user: User,
         val account: Account,

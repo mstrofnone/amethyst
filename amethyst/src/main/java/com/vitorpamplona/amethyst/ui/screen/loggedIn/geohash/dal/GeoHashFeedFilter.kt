@@ -21,4 +21,4 @@
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.geohash.dal
 
 // Re-export from commons for backwards compatibility
-typealias GeoHashFeedFilter = com.vitorpamplona.amethyst.commons.viewmodels.geohash.GeoHashFeedFilter
+typealias GeoHashFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.geohash.GeoHashFeedFilter

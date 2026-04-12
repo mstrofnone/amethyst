@@ -21,4 +21,4 @@
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.hashtag.dal
 
 // Re-export from commons for backwards compatibility
-typealias HashtagFeedFilter = com.vitorpamplona.amethyst.commons.viewmodels.hashtag.HashtagFeedFilter
+typealias HashtagFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.hashtag.HashtagFeedFilter

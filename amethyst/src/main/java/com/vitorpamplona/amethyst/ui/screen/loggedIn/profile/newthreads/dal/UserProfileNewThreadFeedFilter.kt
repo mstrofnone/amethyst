@@ -21,4 +21,4 @@
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.profile.newthreads.dal
 
 // Re-export from commons for backwards compatibility
-typealias UserProfileNewThreadFeedFilter = com.vitorpamplona.amethyst.commons.viewmodels.profile.UserProfileNewThreadFeedFilter
+typealias UserProfileNewThreadFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.profile.UserProfileNewThreadFeedFilter

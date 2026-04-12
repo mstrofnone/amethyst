@@ -21,4 +21,4 @@
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.communities.dal
 
 // Re-export from commons for backwards compatibility
-typealias CommunityFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.CommunityFeedFilter
+typealias CommunityFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.community.CommunityFeedFilter

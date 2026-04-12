@@ -274,6 +274,8 @@ class Account(
     override val spammersHashCodes: Set<Int> get() = hiddenUsers.flow.value.spammersHashCodes
     override val liveHiddenUsers: LiveHiddenUsers get() = hiddenUsers.flow.value
 
+    override fun liveHiddenUsers(): LiveHiddenUsers = hiddenUsers.flow.value
+
     val userMetadata = UserMetadataState(signer, cache, scope, settings)
 
     override val nip47SignerState = NwcSignerState(signer, nwcFilterAssembler, cache, scope, settings)
