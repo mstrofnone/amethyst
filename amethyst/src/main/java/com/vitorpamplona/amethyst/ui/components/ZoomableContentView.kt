@@ -126,6 +126,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.coroutines.executeAsync
 import okio.sink
+import org.jetbrains.compose.resources.StringResource
 import java.io.File
 import java.io.IOException
 
@@ -588,7 +589,7 @@ fun WaitAndDisplay(content: @Composable (AnimatedVisibilityScope.() -> Unit)) {
 @Composable
 fun DisplayUrlWithLoadingSymbol(
     content: BaseMediaContent,
-    onError: (Int, Int) -> Unit = { _, _ -> },
+    onError: (StringResource, StringResource) -> Unit = { _, _ -> },
 ) {
     val uri = LocalUriHandler.current
 
@@ -656,7 +657,7 @@ fun DisplayUrlWithLoadingSymbol(
 @Composable
 fun DisplayUrlWithLoadingSymbol(
     url: String,
-    onError: (Int, Int) -> Unit = { _, _ -> },
+    onError: (StringResource, StringResource) -> Unit = { _, _ -> },
 ) {
     val uri = LocalUriHandler.current
 

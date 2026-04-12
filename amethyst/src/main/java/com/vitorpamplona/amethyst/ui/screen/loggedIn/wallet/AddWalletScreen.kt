@@ -57,7 +57,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.vitorpamplona.amethyst.R
 import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.ic_qrcode
+import com.vitorpamplona.amethyst.commons.resources.couldnt_find_nwc_wallets
+import com.vitorpamplona.amethyst.commons.resources.couldnt_find_nwc_wallets_description
 import com.vitorpamplona.amethyst.ui.components.util.getText
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
 import com.vitorpamplona.amethyst.ui.painterRes
@@ -139,8 +140,8 @@ fun AddWalletScreen(
                             )
                         } catch (_: IllegalArgumentException) {
                             accountViewModel.toastManager.toast(
-                                R.string.couldnt_find_nwc_wallets,
-                                R.string.couldnt_find_nwc_wallets_description,
+                                Res.string.couldnt_find_nwc_wallets,
+                                Res.string.couldnt_find_nwc_wallets_description,
                             )
                         }
                     },
