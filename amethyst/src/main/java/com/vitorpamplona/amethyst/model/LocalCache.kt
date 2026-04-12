@@ -272,8 +272,8 @@ object LocalCache : ILocalCache, ICacheProvider {
     override val addressables = LargeSoftCache<Address, AddressableNote>()
 
     val chatroomList = LargeCache<HexKey, ChatroomList>()
-    val publicChatChannels = LargeCache<HexKey, PublicChatChannel>()
-    val liveChatChannels = LargeCache<Address, LiveActivitiesChannel>()
+    override val publicChatChannels = LargeCache<HexKey, PublicChatChannel>()
+    override val liveChatChannels = LargeCache<Address, LiveActivitiesChannel>()
     val ephemeralChannels = LargeCache<RoomId, EphemeralChatChannel>()
 
     val paymentTracker = NwcPaymentTracker()

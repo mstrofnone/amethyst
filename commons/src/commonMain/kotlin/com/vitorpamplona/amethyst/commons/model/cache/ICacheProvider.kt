@@ -25,6 +25,7 @@ import com.vitorpamplona.amethyst.commons.model.Channel
 import com.vitorpamplona.amethyst.commons.model.Note
 import com.vitorpamplona.amethyst.commons.model.User
 import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChannel
+import com.vitorpamplona.amethyst.commons.model.nip53LiveActivities.LiveActivitiesChannel
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
@@ -155,57 +156,24 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Filters all notes in cache into a set using a predicate.
-     * Used by feed filters that scan all cached notes.
-     *
-     * @param predicate Filter function applied to each (key, note) pair
-     * @return Set of notes matching the predicate
+     * Public chat channels cache.
+     * Used by discover feed filters to iterate over channels.
      */
-    fun filterNotesIntoSet(predicate: (HexKey, Note) -> Boolean): Set<Note> = emptySet()
+    val publicChatChannels: ICacheOperations<HexKey, PublicChatChannel>
 
     /**
-     * Filters addressable notes by event kind into a set using a predicate.
-     *
-     * @param kind The event kind to filter by
-     * @param predicate Filter function applied to each matching note
-     * @return Set of addressable notes matching the kind and predicate
+     * Live activity channels cache.
+     * Used by discover feed filters to iterate over channels.
      */
-    fun filterAddressablesIntoSet(
-        kind: Int,
-        predicate: (Any, AddressableNote) -> Boolean,
-    ): Set<AddressableNote> = emptySet()
+    val liveChatChannels: ICacheOperations<Address, LiveActivitiesChannel>
 
     /**
-     * Filters addressable notes by multiple event kinds into a set using a predicate.
+     * Gets a PublicChatChannel if it exists in cache.
      *
-     * @param kinds The event kinds to filter by
-     * @param predicate Filter function applied to each matching note
-     * @return Set of addressable notes matching any of the kinds and predicate
+     * @param key The channel's ID in hex format
+     * @return The PublicChatChannel if exists, null otherwise
      */
-    fun filterAddressablesIntoSet(
-        kinds: List<Int>,
-        predicate: (Any, AddressableNote) -> Boolean,
-    ): Set<AddressableNote> {
-        val result = mutableSetOf<AddressableNote>()
-        kinds.forEach { kind ->
-            result.addAll(filterAddressablesIntoSet(kind, predicate))
-        }
-        return result
-    }
-
-    /**
-     * Filters addressable notes by multiple event kinds and author into a set.
-     *
-     * @param kinds The event kinds to filter by
-     * @param pubKey The author's public key hex
-     * @param predicate Filter function applied to each matching note
-     * @return Set of addressable notes matching
-     */
-    fun filterAddressables(
-        kinds: List<Int>,
-        pubKey: HexKey,
-        predicate: (Any, AddressableNote) -> Boolean,
-    ): Set<AddressableNote> = emptySet()
+    fun getPublicChatChannelIfExists(key: String): PublicChatChannel?
 
     /**
      * Gets an AddressableNote if it exists in cache.
@@ -213,5 +181,5 @@ interface ICacheProvider {
      * @param address The addressable note's address
      * @return The AddressableNote if exists, null otherwise
      */
-    fun getAddressableNoteIfExists(address: Address): AddressableNote? = null
+    fun getAddressableNoteIfExists(address: Address): AddressableNote?
 }

@@ -20,6 +20,95 @@
  */
 package com.vitorpamplona.amethyst.ui.dal
 
-// Re-export from commons for backwards compatibility
-typealias FilterByListParams = com.vitorpamplona.amethyst.commons.ui.dal.FilterByListParams
-typealias IFilterByListTopNavFilter = com.vitorpamplona.amethyst.commons.ui.dal.IFilterByListTopNavFilter
+import com.vitorpamplona.amethyst.commons.model.LiveHiddenUsers
+import com.vitorpamplona.amethyst.commons.ui.feeds.IFilterByListParams
+import com.vitorpamplona.amethyst.model.topNavFeeds.IFeedTopNavFilter
+import com.vitorpamplona.amethyst.model.topNavFeeds.global.GlobalTopNavFilter
+import com.vitorpamplona.amethyst.model.topNavFeeds.noteBased.muted.MutedAuthorsByOutboxTopNavFilter
+import com.vitorpamplona.amethyst.model.topNavFeeds.noteBased.muted.MutedAuthorsByProxyTopNavFilter
+import com.vitorpamplona.amethyst.model.topNavFeeds.relay.RelayTopNavFilter
+import com.vitorpamplona.quartz.nip01Core.core.Address
+import com.vitorpamplona.quartz.nip01Core.core.Event
+import com.vitorpamplona.quartz.nip01Core.core.HexKey
+import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.quartz.nip01Core.tags.hashtags.countHashtags
+import com.vitorpamplona.quartz.nip51Lists.muteList.MuteListEvent
+import com.vitorpamplona.quartz.nip51Lists.peopleList.PeopleListEvent
+import com.vitorpamplona.quartz.utils.TimeUtils
+
+class FilterByListParams(
+    override val isHiddenList: Boolean,
+    val followLists: IFeedTopNavFilter?,
+    val hiddenLists: LiveHiddenUsers,
+    val now: Long = TimeUtils.oneMinuteFromNow(),
+) : IFilterByListParams {
+    fun isNotHidden(userHex: String) = !(hiddenLists.hiddenUsers.contains(userHex) || hiddenLists.spammers.contains(userHex))
+
+    fun isNotInTheFuture(noteEvent: Event) = noteEvent.createdAt <= now
+
+    fun hasExcessiveHashtags(noteEvent: Event) = hiddenLists.maxHashtagLimit > 0 && noteEvent.countHashtags() > hiddenLists.maxHashtagLimit
+
+    fun isAuthorInFollows(author: HexKey): Boolean {
+        if (followLists == null) return false
+
+        return followLists.matchAuthor(author)
+    }
+
+    fun isGlobal() = followLists is GlobalTopNavFilter
+
+    private fun applyTopFilter(
+        comingFrom: List<NormalizedRelayUrl>,
+        noteEvent: Event,
+    ): Boolean {
+        if (followLists == null) return false
+
+        return when (followLists) {
+            is RelayTopNavFilter -> comingFrom.contains(followLists.relayUrl)
+            else -> followLists.match(noteEvent)
+        }
+    }
+
+    private fun applyTopFilter(
+        comingFrom: List<NormalizedRelayUrl>,
+        address: Address,
+    ): Boolean {
+        if (followLists == null) return false
+
+        return when (followLists) {
+            is RelayTopNavFilter -> comingFrom.contains(followLists.relayUrl)
+            else -> followLists.matchAuthor(address.pubKeyHex)
+        }
+    }
+
+    override fun match(
+        noteEvent: Event,
+        comingFrom: List<NormalizedRelayUrl>,
+    ) = (applyTopFilter(comingFrom, noteEvent)) &&
+        (isHiddenList || isNotHidden(noteEvent.pubKey)) &&
+        isNotInTheFuture(noteEvent) &&
+        !hasExcessiveHashtags(noteEvent)
+
+    fun match(
+        address: Address?,
+        comingFrom: List<NormalizedRelayUrl>,
+    ) = address != null &&
+        (applyTopFilter(comingFrom, address)) &&
+        (isHiddenList || isNotHidden(address.pubKeyHex))
+
+    companion object {
+        fun showHiddenKey(
+            selectedListName: String,
+            userHex: String,
+        ) = selectedListName == PeopleListEvent.blockListFor(userHex) || selectedListName == MuteListEvent.blockListFor(userHex)
+
+        fun create(
+            followLists: IFeedTopNavFilter?,
+            hiddenUsers: LiveHiddenUsers,
+        ): FilterByListParams =
+            FilterByListParams(
+                isHiddenList = followLists is MutedAuthorsByOutboxTopNavFilter || followLists is MutedAuthorsByProxyTopNavFilter,
+                followLists = followLists,
+                hiddenLists = hiddenUsers,
+            )
+    }
+}

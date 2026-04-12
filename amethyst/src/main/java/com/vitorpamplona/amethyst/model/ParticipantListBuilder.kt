@@ -20,11 +20,11 @@
  */
 package com.vitorpamplona.amethyst.model
 
-import com.vitorpamplona.amethyst.commons.model.participants.ParticipantListBuilder as CommonsParticipantListBuilder
-
 /**
- * Android-side convenience wrapper that creates a ParticipantListBuilder
- * backed by LocalCache's ICacheProvider.
+ * Convenience constructor that creates a ParticipantListBuilder
+ * backed by [LocalCache] for backward compatibility.
  */
 @Suppress("ktlint:standard:function-naming")
-fun ParticipantListBuilder(): CommonsParticipantListBuilder = CommonsParticipantListBuilder(LocalCache)
+fun ParticipantListBuilder() =
+    com.vitorpamplona.amethyst.commons.ui.feeds
+        .ParticipantListBuilder(LocalCache)
