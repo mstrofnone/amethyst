@@ -47,11 +47,11 @@ fun DisplayErrorMessages(
         when (obj) {
             // New StringResource-based types
             is ResourceToastMsg -> {
-                val p = obj.params
-                if (p != null) {
+                val params = obj.params
+                if (params != null) {
                     InformationDialog(
                         stringRes(obj.titleResId),
-                        stringRes(obj.resourceId, *p),
+                        stringRes(obj.resourceId, *params),
                     ) {
                         toastManager.clearToasts()
                     }

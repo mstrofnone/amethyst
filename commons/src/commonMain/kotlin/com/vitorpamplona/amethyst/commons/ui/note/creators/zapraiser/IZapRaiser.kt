@@ -20,12 +20,5 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.note.creators.zapraiser
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.Stable
-
-@Stable
-interface IZapRaiser {
-    val zapRaiserAmount: MutableState<Long?>
-
-    fun updateZapRaiserAmount(newAmount: Long?)
-}
+// Backward compatibility - moved to commons
+typealias IZapRaiser = com.vitorpamplona.amethyst.commons.ui.note.creators.zapraiser.IZapRaiser
