@@ -20,4 +20,10 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.note.creators.messagefield
 
-typealias IMessageField = com.vitorpamplona.amethyst.commons.ui.creators.messagefield.IMessageField
+import androidx.compose.foundation.text.input.TextFieldState
+
+interface IMessageField {
+    val message: TextFieldState
+
+    fun onMessageChanged()
+}

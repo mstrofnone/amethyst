@@ -20,4 +20,7 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.components.toasts
 
-typealias ToastMsg = com.vitorpamplona.amethyst.commons.ui.components.toasts.ToastMsg
+import androidx.compose.runtime.Immutable
+
+@Immutable
+open class ToastMsg

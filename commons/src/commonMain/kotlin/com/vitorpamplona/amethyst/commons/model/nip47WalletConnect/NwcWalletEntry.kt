@@ -20,32 +20,6 @@
  */
 package com.vitorpamplona.amethyst.commons.model.nip47WalletConnect
 
-import com.vitorpamplona.quartz.nip47WalletConnect.Nip47WalletConnect
-import kotlinx.serialization.Serializable
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import com.vitorpamplona.amethyst.commons.ui.note.creators.draftTags.DraftTagState as CommonsDraftTagState
 
-@Serializable
-data class NwcWalletEntry
-    @OptIn(ExperimentalUuidApi::class)
-    constructor(
-        val id: String = Uuid.random().toString(),
-        val name: String,
-        val uri: Nip47WalletConnect.Nip47URI,
-    ) {
-        fun normalize(): NwcWalletEntryNorm? =
-            uri.normalize()?.let {
-                NwcWalletEntryNorm(id, name, it)
-            }
-    }
-
-data class NwcWalletEntryNorm(
-    val id: String,
-    val name: String,
-    val uri: Nip47WalletConnect.Nip47URINorm,
-) {
-    fun denormalize(): NwcWalletEntry? =
-        uri.denormalize()?.let {
-            NwcWalletEntry(id, name, it)
-        }
-}
+typealias DraftTagState = CommonsDraftTagState
