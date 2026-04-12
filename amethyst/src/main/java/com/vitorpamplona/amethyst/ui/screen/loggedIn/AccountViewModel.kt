@@ -46,6 +46,7 @@ import com.vitorpamplona.amethyst.commons.compose.GenericBaseCache
 import com.vitorpamplona.amethyst.commons.compose.GenericBaseCacheAsync
 import com.vitorpamplona.amethyst.commons.model.LiveHiddenUsers
 import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatChannel
+import com.vitorpamplona.amethyst.commons.model.location.LocationResult
 import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChannel
 import com.vitorpamplona.amethyst.commons.model.nip53LiveActivities.LiveActivitiesChannel
 import com.vitorpamplona.amethyst.commons.model.observables.CreatedAtComparator
@@ -60,9 +61,12 @@ import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.model.UiSettingsFlow
 import com.vitorpamplona.amethyst.model.UrlCachedPreviewer
 import com.vitorpamplona.amethyst.model.User
+import com.vitorpamplona.amethyst.model.nip47WalletConnect.NwcSignerState
 import com.vitorpamplona.amethyst.model.privacyOptions.EmptyRoleBasedHttpClientBuilder
 import com.vitorpamplona.amethyst.model.privacyOptions.IRoleBasedHttpClientBuilder
 import com.vitorpamplona.amethyst.model.privacyOptions.RoleBasedHttpClientBuilder
+import com.vitorpamplona.amethyst.model.topNavFeeds.FeedTopNavFilterState
+import com.vitorpamplona.amethyst.model.trustedAssertions.TrustProviderListState
 import com.vitorpamplona.amethyst.service.OnlineChecker
 import com.vitorpamplona.amethyst.service.ZapPaymentHandler
 import com.vitorpamplona.amethyst.service.broadcast.BroadcastTracker
@@ -71,7 +75,6 @@ import com.vitorpamplona.amethyst.service.cashu.CashuToken
 import com.vitorpamplona.amethyst.service.cashu.melt.MeltProcessor
 import com.vitorpamplona.amethyst.service.checkNotInMainThread
 import com.vitorpamplona.amethyst.service.lnurl.LightningAddressResolver
-import com.vitorpamplona.amethyst.service.location.LocationState
 import com.vitorpamplona.amethyst.service.relayClient.reqCommand.RelaySubscriptionsCoordinator
 import com.vitorpamplona.amethyst.service.relayClient.reqCommand.nwc.NWCPaymentFilterAssembler
 import com.vitorpamplona.amethyst.ui.actions.Dao
@@ -84,6 +87,7 @@ import com.vitorpamplona.amethyst.ui.note.ZapraiserStatus
 import com.vitorpamplona.amethyst.ui.note.showAmount
 import com.vitorpamplona.amethyst.ui.note.showAmountInteger
 import com.vitorpamplona.amethyst.ui.screen.UiSettingsState
+import com.vitorpamplona.amethyst.ui.screen.loggedIn.EventProcessor
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.notifications.CombinedZap
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.relays.eventsync.EventSync
 import com.vitorpamplona.amethyst.ui.stringRes
@@ -210,7 +214,7 @@ class AccountViewModel(
         if (callController != null) return
 
         // Wire EventProcessor before creating CallController so events aren't dropped
-        account.newNotesPreProcessor.callManager = callManager
+        (account.newNotesPreProcessor as? EventProcessor)?.callManager = callManager
 
         val controller =
             CallController(
@@ -2011,12 +2015,34 @@ fun mockAccountViewModel(): AccountViewModel {
         Account(
             settings = AccountSettings(keyPair),
             signer = NostrSignerInternal(keyPair),
-            geolocationFlow = { MutableStateFlow<LocationState.LocationResult>(LocationState.LocationResult.Loading) },
+            geolocationFlow = { MutableStateFlow<LocationResult>(LocationResult.Loading) },
             nwcFilterAssembler = { nwcFilters },
             otsResolverBuilder = { EmptyOtsResolverBuilder.build() },
             cache = LocalCache,
             client = client,
             scope = scope,
+            antiSpamMonitor = null,
+            eventProcessorFactory = { account, cacheProvider -> EventProcessor(account as com.vitorpamplona.amethyst.model.Account, cacheProvider as com.vitorpamplona.amethyst.model.LocalCache) },
+            nwcSignerStateFactory = { s, nwcFilter, c, sc, settings ->
+                @Suppress("UNCHECKED_CAST")
+                NwcSignerState(s, nwcFilter as () -> NWCPaymentFilterAssembler, c as com.vitorpamplona.amethyst.model.LocalCache, sc, settings)
+            },
+            trustProviderListStateFactory = { s, c, dc, sc, settings -> TrustProviderListState(s, c as com.vitorpamplona.amethyst.model.LocalCache, dc, sc, settings) },
+            feedTopNavFilterStateFactory = { listName, kind3, allFollows, locFlow, followsRelays, blockedRelays, proxyRelays, relayFeeds, caches, s, sc ->
+                FeedTopNavFilterState(
+                    feedFilterListName = listName,
+                    kind3Follows = kind3,
+                    allFollows = allFollows,
+                    locationFlow = locFlow,
+                    followsRelays = followsRelays,
+                    blockedRelays = blockedRelays,
+                    proxyRelays = proxyRelays,
+                    relayFeeds = relayFeeds,
+                    caches = caches,
+                    signer = s,
+                    scope = sc,
+                ).flow
+            },
         )
 
     return AccountViewModel(
@@ -2062,12 +2088,34 @@ fun mockVitorAccountViewModel(): AccountViewModel {
         Account(
             settings = AccountSettings(keyPair),
             signer = NostrSignerInternal(keyPair),
-            geolocationFlow = { MutableStateFlow<LocationState.LocationResult>(LocationState.LocationResult.Loading) },
+            geolocationFlow = { MutableStateFlow<LocationResult>(LocationResult.Loading) },
             nwcFilterAssembler = { nwcFilters },
             otsResolverBuilder = { EmptyOtsResolverBuilder.build() },
             cache = LocalCache,
             client = EmptyNostrClient(),
             scope = scope,
+            antiSpamMonitor = null,
+            eventProcessorFactory = { account, cacheProvider -> EventProcessor(account as com.vitorpamplona.amethyst.model.Account, cacheProvider as com.vitorpamplona.amethyst.model.LocalCache) },
+            nwcSignerStateFactory = { s, nwcFilter, c, sc, settings ->
+                @Suppress("UNCHECKED_CAST")
+                NwcSignerState(s, nwcFilter as () -> NWCPaymentFilterAssembler, c as com.vitorpamplona.amethyst.model.LocalCache, sc, settings)
+            },
+            trustProviderListStateFactory = { s, c, dc, sc, settings -> TrustProviderListState(s, c as com.vitorpamplona.amethyst.model.LocalCache, dc, sc, settings) },
+            feedTopNavFilterStateFactory = { listName, kind3, allFollows, locFlow, followsRelays, blockedRelays, proxyRelays, relayFeeds, caches, s, sc ->
+                FeedTopNavFilterState(
+                    feedFilterListName = listName,
+                    kind3Follows = kind3,
+                    allFollows = allFollows,
+                    locationFlow = locFlow,
+                    followsRelays = followsRelays,
+                    blockedRelays = blockedRelays,
+                    proxyRelays = proxyRelays,
+                    relayFeeds = relayFeeds,
+                    caches = caches,
+                    signer = s,
+                    scope = sc,
+                ).flow
+            },
         )
 
     return AccountViewModel(

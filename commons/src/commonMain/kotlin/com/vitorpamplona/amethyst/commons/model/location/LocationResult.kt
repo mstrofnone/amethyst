@@ -26,4 +26,6 @@ sealed class LocationResult {
     ) : LocationResult()
 
     data object LackPermission : LocationResult()
+
+    data object Loading : LocationResult()
 }
