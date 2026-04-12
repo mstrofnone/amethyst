@@ -58,30 +58,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.block_only
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_additional_reason_label
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_additional_reason_placeholder
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_block_hide_user_btn
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_blocking_a_user
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_illegal
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_impersonation
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_nudity
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_post_report_btn
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_profanity
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_reminder_public
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_report_btn
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_select_reason_label
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_select_reason_placeholder
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_spam
-import com.vitorpamplona.amethyst.commons.resources.report_dialog_title
-import com.vitorpamplona.amethyst.commons.resources.report_malware
-import com.vitorpamplona.amethyst.commons.resources.violence
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.IAccountViewModel
 import com.vitorpamplona.amethyst.model.Note
 import com.vitorpamplona.amethyst.ui.components.TextSpinner
 import com.vitorpamplona.amethyst.ui.components.TitleExplainer
 import com.vitorpamplona.amethyst.ui.note.ArrowBackIcon
-import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
+import com.vitorpamplona.amethyst.ui.stringRes
 import com.vitorpamplona.amethyst.ui.theme.DividerThickness
 import com.vitorpamplona.amethyst.ui.theme.LightRedColor
 import com.vitorpamplona.quartz.nip56Reports.ReportType
@@ -92,7 +75,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun ReportNoteDialog(
     note: Note,
-    accountViewModel: AccountViewModel,
+    accountViewModel: IAccountViewModel,
     onDismiss: () -> Unit,
 ) {
     val reportTypes =

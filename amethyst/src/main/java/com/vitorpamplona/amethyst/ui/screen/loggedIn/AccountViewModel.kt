@@ -179,7 +179,7 @@ import kotlinx.coroutines.withContext
 @Stable
 class AccountViewModel(
     override val account: Account,
-    override val settings: UiSettingsState,
+    val settings: UiSettingsState,
     val torSettings: TorSettingsFlow,
     val dataSources: RelaySubscriptionsCoordinator,
     val httpClientBuilder: IRoleBasedHttpClientBuilder,
@@ -852,10 +852,10 @@ class AccountViewModel(
         content: String,
     ) = launchSigner { account.report(note, type, content) }
 
-    fun report(
+    override fun report(
         user: User,
         type: ReportType,
-        content: String = "",
+        content: String,
     ) {
         launchSigner {
             account.report(user, type, content)
