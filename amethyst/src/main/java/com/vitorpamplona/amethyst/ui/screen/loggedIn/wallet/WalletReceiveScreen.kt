@@ -66,15 +66,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.back
-import com.vitorpamplona.amethyst.commons.resources.wallet_amount_sats
-import com.vitorpamplona.amethyst.commons.resources.wallet_copy_invoice
-import com.vitorpamplona.amethyst.commons.resources.wallet_create_invoice
-import com.vitorpamplona.amethyst.commons.resources.wallet_creating_invoice
-import com.vitorpamplona.amethyst.commons.resources.wallet_description
-import com.vitorpamplona.amethyst.commons.resources.wallet_receive
-import com.vitorpamplona.amethyst.commons.resources.wallet_sats
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.ui.wallet.ReceiveState
 import com.vitorpamplona.amethyst.ui.navigation.navs.INav
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.qrcode.QrCodeDrawer

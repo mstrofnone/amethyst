@@ -43,21 +43,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.ai_tone_correct
-import com.vitorpamplona.amethyst.commons.resources.ai_tone_elaborate
-import com.vitorpamplona.amethyst.commons.resources.ai_tone_emojify
-import com.vitorpamplona.amethyst.commons.resources.ai_tone_friendly
-import com.vitorpamplona.amethyst.commons.resources.ai_tone_more_direct
-import com.vitorpamplona.amethyst.commons.resources.ai_tone_professional
-import com.vitorpamplona.amethyst.commons.resources.ai_tone_punchy
-import com.vitorpamplona.amethyst.commons.resources.ai_tone_rephrase
-import com.vitorpamplona.amethyst.commons.resources.ai_tone_shorter
-import com.vitorpamplona.amethyst.commons.resources.ai_writing_dismiss
-import com.vitorpamplona.amethyst.commons.resources.ai_writing_use_this
-import com.vitorpamplona.amethyst.service.ai.WritingResult
-import com.vitorpamplona.amethyst.service.ai.WritingTone
-import org.jetbrains.compose.resources.stringResource
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.service.ai.WritingResult
+import com.vitorpamplona.amethyst.commons.service.ai.WritingTone
+import com.vitorpamplona.amethyst.ui.stringRes
 
 @Composable
 fun AiWritingHelpPanel(

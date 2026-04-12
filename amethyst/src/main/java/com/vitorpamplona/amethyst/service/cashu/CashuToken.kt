@@ -20,22 +20,5 @@
  */
 package com.vitorpamplona.amethyst.service.cashu
 
-import androidx.compose.runtime.Immutable
-import kotlinx.serialization.Serializable
-
-@Immutable
-data class CashuToken(
-    val token: String,
-    val mint: String,
-    val totalAmount: Long,
-    val proofs: List<Proof>,
-)
-
-@Serializable
-@Immutable
-class Proof(
-    val amount: Int,
-    val id: String,
-    val secret: String,
-    val C: String,
-)
+typealias CashuToken = com.vitorpamplona.amethyst.commons.data.cashu.CashuToken
+typealias Proof = com.vitorpamplona.amethyst.commons.data.cashu.Proof

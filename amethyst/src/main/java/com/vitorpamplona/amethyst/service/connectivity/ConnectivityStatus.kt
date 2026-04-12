@@ -20,6 +20,4 @@
  */
 package com.vitorpamplona.amethyst.service.connectivity
 
-import com.vitorpamplona.amethyst.commons.service.connectivity.ConnectivityStatus as CommonsConnectivityStatus
-
-typealias ConnectivityStatus = CommonsConnectivityStatus
+typealias ConnectivityStatus = com.vitorpamplona.amethyst.commons.service.connectivity.ConnectivityStatus
