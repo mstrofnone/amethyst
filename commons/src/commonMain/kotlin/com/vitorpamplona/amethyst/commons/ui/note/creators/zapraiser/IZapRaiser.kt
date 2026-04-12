@@ -20,5 +20,12 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.note.creators.zapraiser
 
-// Re-export from commons for backwards compatibility
-typealias ChannelFeedState = com.vitorpamplona.amethyst.commons.ui.feeds.ChannelFeedState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
+
+@Stable
+interface IZapRaiser {
+    val zapRaiserAmount: MutableState<Long?>
+
+    fun updateZapRaiserAmount(newAmount: Long?)
+}

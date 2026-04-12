@@ -20,103 +20,16 @@
  */
 package com.vitorpamplona.amethyst.ui.note.creators.contentWarning
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.add_sensitive_content_description_placeholder
-import com.vitorpamplona.amethyst.commons.resources.add_sensitive_content_explainer
-import com.vitorpamplona.amethyst.commons.resources.add_sensitive_content_label
-import com.vitorpamplona.amethyst.commons.resources.content_warning
-import com.vitorpamplona.amethyst.ui.theme.DividerThickness
-import com.vitorpamplona.amethyst.ui.theme.placeholderText
-import org.jetbrains.compose.resources.stringResource
+import com.vitorpamplona.amethyst.commons.ui.note.creators.contentWarning.ContentSensitivityExplainer as CommonsContentSensitivityExplainer
 
 @Composable
 fun ContentSensitivityExplainer(
     description: String,
     onDescriptionChange: (String) -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth()) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 5.dp),
-        ) {
-            Box(
-                Modifier
-                    .height(20.dp)
-                    .width(25.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.VisibilityOff,
-                    contentDescription = stringResource(Res.string.content_warning),
-                    modifier =
-                        Modifier
-                            .size(18.dp)
-                            .align(Alignment.BottomStart),
-                    tint = Color.Red,
-                )
-                Icon(
-                    imageVector = Icons.Rounded.Warning,
-                    contentDescription = stringResource(Res.string.content_warning),
-                    modifier =
-                        Modifier
-                            .size(10.dp)
-                            .align(Alignment.TopEnd),
-                    tint = Color.Yellow,
-                )
-            }
-
-            Text(
-                text = stringResource(Res.string.add_sensitive_content_label),
-                fontSize = 20.sp,
-                fontWeight = FontWeight.W500,
-                modifier = Modifier.padding(start = 10.dp),
-            )
-        }
-
-        HorizontalDivider(thickness = DividerThickness)
-
-        Text(
-            text = stringResource(Res.string.add_sensitive_content_explainer),
-            color = MaterialTheme.colorScheme.placeholderText,
-            modifier = Modifier.padding(vertical = 10.dp),
-        )
-
-        OutlinedTextField(
-            value = description,
-            onValueChange = onDescriptionChange,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = {
-                Text(
-                    text = stringResource(Res.string.add_sensitive_content_description_placeholder),
-                    color = MaterialTheme.colorScheme.placeholderText,
-                )
-            },
-            singleLine = true,
-        )
-    }
+    CommonsContentSensitivityExplainer(
+        description = description,
+        onDescriptionChange = onDescriptionChange,
+    )
 }

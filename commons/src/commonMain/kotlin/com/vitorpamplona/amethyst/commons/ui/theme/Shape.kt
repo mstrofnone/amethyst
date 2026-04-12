@@ -20,7 +20,18 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.theme
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 val QuoteBorder = RoundedCornerShape(15.dp)
+
+val Size20Modifier = Modifier.size(20.dp)
+
+val DividerThickness = 0.25.dp
+
+val ColorScheme.placeholderText: Color
+    get() = onSurface.copy(alpha = 0.42f)

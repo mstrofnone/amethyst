@@ -20,14 +20,4 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.relays.common
 
-import androidx.compose.runtime.Stable
-import kotlinx.coroutines.flow.Flow
-
-@Stable
-interface IRelaySuggestionState {
-    val results: Flow<List<BasicRelaySetupInfo>>
-
-    fun processInput(input: String)
-
-    fun reset()
-}
+typealias IZapRaiser = com.vitorpamplona.amethyst.commons.ui.note.creators.zapraiser.IZapRaiser
