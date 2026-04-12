@@ -2430,15 +2430,9 @@ object LocalCache : ILocalCache, ICacheProvider {
 
     override fun justConsumeMyOwnEvent(event: Event) = justConsumeAndUpdateIndexes(event, null, true)
 
-    override fun filterNotes(predicate: (HexKey, Note) -> Boolean): Set<Note> = notes.filterIntoSet { k, v -> predicate(k, v) }
+    override fun filterNotes(predicate: (String, Note) -> Boolean): Set<Note> = notes.filterIntoSet { key, note -> predicate(key, note) }
 
-    override fun filterAddressablesByKind(
-        kind: Int,
-        predicate: (Any, Note) -> Boolean,
-    ): Set<Note> {
-        val result: Set<AddressableNote> = addressables.filterIntoSet(kind) { k, v -> predicate(k, v) }
-        return result
-    }
+    override fun filterAddressableNotes(predicate: (AddressableNote) -> Boolean): Set<AddressableNote> = addressables.filterIntoSet { _, note -> predicate(note) }
 
     fun justConsume(
         event: Event,

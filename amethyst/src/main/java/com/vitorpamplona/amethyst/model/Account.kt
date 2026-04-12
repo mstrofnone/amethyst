@@ -2364,6 +2364,8 @@ class Account(
         return limit > 0 && (note.event?.countHashtags() ?: 0) > limit
     }
 
+    override fun liveHiddenUsers(): LiveHiddenUsers = hiddenUsers.flow.value
+
     override fun isAcceptable(note: Note): Boolean {
         return note.author?.let { isAcceptable(it) } ?: true &&
             // if user hasn't hided this author

@@ -20,4 +20,5 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.relay.dal
 
-typealias RelayFeedFilter = com.vitorpamplona.amethyst.commons.ui.feeds.RelayFeedFilter
+// Re-export from commons for backwards compatibility
+typealias RelayFeedFilter = com.vitorpamplona.amethyst.commons.viewmodels.relay.RelayFeedFilter

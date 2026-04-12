@@ -157,20 +157,20 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Gets or creates an AddressableNote from a string address key.
-     * Parses the string to Address, returns null if invalid.
+     * Filters all notes in the cache using the given predicate.
+     * Used by feed filters that need to scan the entire note cache.
      *
-     * @param key The address string to parse and look up
-     * @return The AddressableNote if valid, null otherwise
+     * @param predicate Filter function receiving the note's hex key and the Note
+     * @return Set of notes matching the predicate
      */
-    fun checkGetOrCreateAddressableNote(key: String): AddressableNote? {
-        val addr = Address.parse(key) ?: return null
-        return getOrCreateAddressableNote(addr)
-    }
+    fun filterNotes(predicate: (String, Note) -> Boolean): Set<Note>
 
     /**
-     * Gets the relay hint indexer for looking up relay hints by pubkey or address.
-     * Used by OutboxRelayLoader and CommunityRelayLoader to find relay hints.
+     * Filters addressable notes in the cache using the given predicate.
+     * Used by feed filters that need to scan addressable notes.
+     *
+     * @param predicate Filter function receiving the address and the AddressableNote
+     * @return Set of addressable notes matching the predicate
      */
-    val relayHints: HintIndexer
+    fun filterAddressableNotes(predicate: (AddressableNote) -> Boolean): Set<AddressableNote>
 }

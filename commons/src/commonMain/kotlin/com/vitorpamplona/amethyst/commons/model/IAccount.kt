@@ -154,14 +154,11 @@ interface IAccount {
     /** Marmot MLS group chat list */
     val marmotGroupList: MarmotGroupList
 
-    /** Public chat (NIP-28) list state */
-    val publicChatList: PublicChatListState
-
-    /** Ephemeral chat list state */
-    val ephemeralChatList: EphemeralChatListState
-
-    /** Check if all users in the set are hidden */
-    fun isAllHidden(users: Set<HexKey>): Boolean
+    /**
+     * Current hidden users settings snapshot.
+     * Used by feed filters to check if notes should be hidden.
+     */
+    fun liveHiddenUsers(): LiveHiddenUsers
 
     /** Whether a note is acceptable (not hidden, not blocked, etc.) */
     fun isAcceptable(note: Note): Boolean
