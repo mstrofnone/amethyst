@@ -20,18 +20,17 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.theme
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 val ColorScheme.isLight: Boolean
     get() = primary.luminance() < 0.5f
@@ -40,22 +39,25 @@ val ColorScheme.onBackgroundColorFilter: ColorFilter
     get() = ColorFilter.tint(onBackground)
 
 /**
- * Subtle border color for cards and containers.
- * Uses different alpha for light vs dark to maintain visual contrast.
+ * Placeholder text color (42% alpha onSurface).
  */
-val ColorScheme.subtleBorder: Color
-    get() = if (isLight) onSurface.copy(alpha = 0.05f) else onSurface.copy(alpha = 0.12f)
+val ColorScheme.placeholderText: Color
+    get() = onSurface.copy(alpha = 0.42f)
 
 /**
- * Reply/quote border modifier for embedded note content.
+ * Less important link color (52% alpha primary).
  */
-@Suppress("ModifierFactoryExtensionFunction")
-val ColorScheme.replyModifier: Modifier
-    get() {
-        val borderColor = subtleBorder
-        return Modifier
-            .padding(top = 5.dp)
-            .fillMaxWidth()
-            .clip(shape = QuoteBorder)
-            .border(1.dp, borderColor, QuoteBorder)
-    }
+val ColorScheme.lessImportantLink: Color
+    get() = primary.copy(alpha = 0.52f)
+
+/** Standard font size for secondary text. */
+val Font14SP = 14.sp
+
+/** Half-width start padding modifier. */
+val HalfStartPadding = Modifier.padding(start = 5.dp)
+
+/** Half-width top padding modifier. */
+val HalfTopPadding = Modifier.padding(top = 5.dp)
+
+/** Standard button border shape. */
+val ButtonBorder = RoundedCornerShape(20.dp)
