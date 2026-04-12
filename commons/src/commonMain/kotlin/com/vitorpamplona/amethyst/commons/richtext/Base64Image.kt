@@ -20,7 +20,7 @@
  */
 package com.vitorpamplona.amethyst.commons.richtext
 
-import java.util.Base64
+import com.vitorpamplona.amethyst.commons.platformcompat.base64Decode
 
 object Base64Image {
     val pattern = Patterns.BASE64_IMAGE
@@ -31,7 +31,7 @@ object Base64Image {
         val matcher = pattern.find(content)
         if (matcher != null) {
             val base64String = matcher.groups[2]?.value
-            val byteArray = Base64.getDecoder().decode(base64String)
+            val byteArray = base64Decode(base64String ?: throw Exception("Unable to extract base64 from $content"))
             return byteArray
         }
 
