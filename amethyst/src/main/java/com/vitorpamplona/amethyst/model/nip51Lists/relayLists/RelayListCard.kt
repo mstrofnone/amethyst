@@ -18,8 +18,11 @@
  * AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+@file:Suppress("unused")
+
 package com.vitorpamplona.amethyst.model.nip51Lists.relayLists
 
-typealias RelayListCard = com.vitorpamplona.amethyst.commons.model.nip51Lists.relayLists.RelayListCard
+// Re-export from commons for backward compatibility
+typealias RelayListCard = com.vitorpamplona.amethyst.commons.model.RelayListCard
 
-val EmptyRelayListCard = com.vitorpamplona.amethyst.commons.model.nip51Lists.relayLists.EmptyRelayListCard
+val EmptyRelayListCard = com.vitorpamplona.amethyst.commons.model.EmptyRelayListCard

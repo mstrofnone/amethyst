@@ -20,4 +20,62 @@
  */
 package com.vitorpamplona.amethyst.model.nip51Lists.relayLists
 
-typealias GenericRelayListCache<T> = com.vitorpamplona.amethyst.commons.model.nip51Lists.relayLists.GenericRelayListCache<T>
+import com.vitorpamplona.amethyst.commons.model.EmptyRelayListCard
+import com.vitorpamplona.amethyst.commons.model.IRelayListDecryptionCache
+import com.vitorpamplona.amethyst.commons.model.RelayListCard
+import com.vitorpamplona.amethyst.model.Note
+import com.vitorpamplona.quartz.nip01Core.signers.NostrSigner
+import com.vitorpamplona.quartz.nip51Lists.PrivateTagArrayEvent
+import com.vitorpamplona.quartz.nip51Lists.PrivateTagArrayEventCache
+import com.vitorpamplona.quartz.nip51Lists.relayLists.tags.relaySet
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onStart
+
+open class GenericRelayListCache<T : PrivateTagArrayEvent>(
+    val signer: NostrSigner,
+) : IRelayListDecryptionCache {
+    val cachedPrivateLists = PrivateTagArrayEventCache<T>(signer)
+
+    fun cachedRelays(event: T) = cachedPrivateLists.mergeTagListPrecached(event).relaySet()
+
+    suspend fun relays(event: T) = cachedPrivateLists.mergeTagList(event).relaySet()
+
+    @Suppress("UNCHECKED_CAST")
+    override fun fastStartValueForRelayList(note: Note): RelayListCard {
+        val noteEvent = note.event as? T
+        return if (noteEvent != null) {
+            RelayListCard(cachedRelays(noteEvent).toList())
+        } else {
+            EmptyRelayListCard
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Suppress("UNCHECKED_CAST")
+    override fun observeDecryptedRelayList(note: Note): Flow<RelayListCard> =
+        note
+            .flow()
+            .metadata.stateFlow
+            .mapLatest { noteState ->
+                val event = noteState.note.event as? T
+                RelayListCard(event?.let { relays(it).toList() } ?: emptyList())
+            }.onStart {
+                val event = note.event as? T
+                if (event != null) {
+                    val list = relays(event)
+                    if (list.isNotEmpty()) {
+                        emit(RelayListCard(list.toList()))
+                    } else {
+                        emit(EmptyRelayListCard)
+                    }
+                } else {
+                    emit(EmptyRelayListCard)
+                }
+            }.distinctUntilChanged()
+            .flowOn(Dispatchers.IO)
+}

@@ -23,10 +23,9 @@ package com.vitorpamplona.amethyst.commons.model
 import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatChannel
 import com.vitorpamplona.amethyst.commons.model.marmotGroups.MarmotGroupList
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.BookmarkListState
-import com.vitorpamplona.amethyst.commons.model.nip51Lists.OldBookmarkListState
 import com.vitorpamplona.amethyst.commons.model.privateChats.ChatroomList
-import com.vitorpamplona.quartz.nip01Core.core.Address
-import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.quartz.nip01Core.core.HexKey
+import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
 import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
 import com.vitorpamplona.quartz.nip01Core.signers.NostrSigner
 import com.vitorpamplona.quartz.nip04Dm.messages.PrivateDmEvent
@@ -160,132 +159,60 @@ interface IAccount {
     /** Broadcast pre-created gift wraps (e.g. reactions within group DMs) */
     suspend fun sendGiftWraps(wraps: List<GiftWrapEvent>)
 
-    // =========================================================================
-    // Signer wrapper methods
-    // Non-inline suspend methods that encapsulate common launchSigner patterns.
-    // These enable gradual migration from AccountViewModel.launchSigner { ... }
-    // to direct IAccount method calls, supporting KMP/iOS usage.
-    // =========================================================================
+    // ── Follow / relationship queries ──────────────────────────────
 
-    // -- Follow / Unfollow --
+    /** Whether the account follows the given user */
+    fun isFollowing(user: User): Boolean
 
-    /** Follow a single user */
-    suspend fun follow(user: User)
+    /** Whether the account follows the user identified by hex pubkey */
+    fun isFollowing(hex: HexKey): Boolean
 
-    /** Follow multiple users */
-    suspend fun follow(users: List<User>)
+    // ── Bookmark & pin state ──────────────────────────────────────
 
-    /** Unfollow a user */
-    suspend fun unfollow(user: User)
+    /** Bookmark list state (NIP-51 bookmarks) */
+    val bookmarkState: BookmarkListState
 
-    /** Follow a community */
-    suspend fun follow(community: AddressableNote)
+    /** Pin list state (NIP-51 pin lists) */
+    val pinState: IPinListState
 
-    /** Unfollow a community */
-    suspend fun unfollow(community: AddressableNote)
+    // ── Follow / content lists ───────────────────────────────────
 
-    /** Follow a public chat channel */
-    suspend fun follow(channel: PublicChatChannel)
+    /** Merged state of all follow lists (kind-3 + people + hashtag + geohash + community) */
+    val allFollows: IAllFollowsState
 
-    /** Unfollow a public chat channel */
-    suspend fun unfollow(channel: PublicChatChannel)
+    /** Merged set of all trusted relay URLs */
+    val trustedRelays: ITrustedRelayListsState
 
-    /** Follow an ephemeral chat channel */
-    suspend fun follow(channel: EphemeralChatChannel)
+    // ── Hidden users ─────────────────────────────────────────────
 
-    /** Unfollow an ephemeral chat channel */
-    suspend fun unfollow(channel: EphemeralChatChannel)
+    /** Reactive hidden-users state (mute lists + transient spammers) */
+    val hiddenUsers: IHiddenUsersState
 
-    /** Follow a hashtag */
-    suspend fun followHashtag(tag: String)
+    // ── Relay list decryption caches ─────────────────────────────
 
-    /** Unfollow a hashtag */
-    suspend fun unfollowHashtag(tag: String)
+    /** Decryption cache for search relay lists */
+    val searchRelayListDecryptionCache: IRelayListDecryptionCache
 
-    /** Follow a geohash */
-    suspend fun followGeohash(geohash: String)
+    /** Decryption cache for trusted relay lists */
+    val trustedRelayListDecryptionCache: IRelayListDecryptionCache
 
-    /** Unfollow a geohash */
-    suspend fun unfollowGeohash(geohash: String)
+    /** Decryption cache for proxy relay lists */
+    val proxyRelayListDecryptionCache: IRelayListDecryptionCache
 
-    /** Follow a relay feed */
-    suspend fun followRelayFeed(url: NormalizedRelayUrl)
+    /** Decryption cache for broadcast relay lists */
+    val broadcastRelayListDecryptionCache: IRelayListDecryptionCache
 
-    /** Unfollow a relay feed */
-    suspend fun unfollowRelayFeed(url: NormalizedRelayUrl)
+    /** Decryption cache for indexer relay lists */
+    val indexerRelayListDecryptionCache: IRelayListDecryptionCache
 
-    // -- Notes: React, Boost, Delete, Broadcast --
+    /** Decryption cache for relay feed lists */
+    val relayFeedsListDecryptionCache: IRelayListDecryptionCache
 
-    /** React to a note with the given reaction string */
-    suspend fun reactTo(
-        note: Note,
-        reaction: String,
-    )
+    /** Decryption cache for blocked relay lists */
+    val blockedRelayListDecryptionCache: IRelayListDecryptionCache
 
-    /** Boost (repost) a note */
-    suspend fun boost(note: Note)
+    // ── Nostr client ─────────────────────────────────────────────
 
-    /** Delete a single note */
-    suspend fun delete(note: Note)
-
-    /** Delete multiple notes */
-    suspend fun delete(notes: List<Note>)
-
-    /** Broadcast a note to relays */
-    suspend fun broadcast(note: Note)
-
-    // -- Reporting --
-
-    /** Report a note */
-    suspend fun report(
-        note: Note,
-        type: ReportType,
-        content: String = "",
-    )
-
-    /** Report a user */
-    suspend fun report(
-        user: User,
-        type: ReportType,
-        content: String = "",
-    )
-
-    // -- Bookmarks --
-
-    /** Add a note to bookmarks */
-    suspend fun addBookmark(
-        note: Note,
-        isPrivate: Boolean,
-    )
-
-    /** Remove a note from bookmarks (specific privacy) */
-    suspend fun removeBookmark(
-        note: Note,
-        isPrivate: Boolean,
-    )
-
-    /** Remove a note from bookmarks (both public and private) */
-    suspend fun removeBookmark(note: Note)
-
-    // -- Pins --
-
-    /** Pin a note */
-    suspend fun addPin(note: Note)
-
-    /** Unpin a note */
-    suspend fun removePin(note: Note)
-
-    // -- Mute / Block --
-
-    /** Hide a word from content */
-    suspend fun hideWord(word: String)
-
-    /** Show a previously hidden word */
-    suspend fun showWord(word: String)
-
-    /** Hide a user by pubkey */
-    suspend fun hideUser(pubkeyHex: String)
-
-    /** Show a previously hidden user */
-    suspend fun showUser(pubkeyHex: String)
+    /** Nostr relay client for broadcasting events */
+    val client: INostrClient
 }
