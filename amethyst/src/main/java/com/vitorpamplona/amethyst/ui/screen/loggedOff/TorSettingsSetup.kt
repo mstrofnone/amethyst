@@ -31,10 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.connect_via_tor1
-import com.vitorpamplona.amethyst.commons.resources.connect_via_tor2
-import com.vitorpamplona.amethyst.ui.components.appendLink
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.ui.components.appendLink
+import com.vitorpamplona.amethyst.ui.stringRes
 import com.vitorpamplona.amethyst.ui.tor.ConnectTorDialog
 import com.vitorpamplona.amethyst.ui.tor.TorSettingsFlow
 import org.jetbrains.compose.resources.stringResource

@@ -43,9 +43,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.and_more
-import com.vitorpamplona.amethyst.commons.resources.relay_reorder
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.relays.common.RelayCountResult
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.relays.common.RelayDragState
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.relays.common.draggableRelayItem
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.relays.common.relayDragHandle
 import com.vitorpamplona.amethyst.model.nip11RelayInfo.Nip11CachedRetriever
 import com.vitorpamplona.amethyst.model.nip11RelayInfo.loadRelayInfo
 import com.vitorpamplona.amethyst.ui.components.util.setText

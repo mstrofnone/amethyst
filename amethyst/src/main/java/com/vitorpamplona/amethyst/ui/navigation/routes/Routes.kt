@@ -23,7 +23,11 @@ package com.vitorpamplona.amethyst.ui.navigation.routes
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.toRoute
-import com.vitorpamplona.amethyst.commons.navigation.routes.Route
+import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.bookmarkgroups.BookmarkType
+import com.vitorpamplona.quartz.nip01Core.core.Address
+import com.vitorpamplona.quartz.nip01Core.core.HexKey
+import com.vitorpamplona.quartz.nip17Dm.base.ChatroomKey
+import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
 inline fun <reified T : Route> isBaseRoute(navController: NavHostController): Boolean = navController.currentBackStackEntry?.destination?.hasRoute<T>() == true

@@ -31,13 +31,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vitorpamplona.amethyst.Amethyst
 import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChannel
-import com.vitorpamplona.amethyst.commons.platform.StringResolver
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.failed_to_upload_media_no_details
-import com.vitorpamplona.amethyst.commons.resources.login_with_a_private_key_to_be_able_to_upload
-import com.vitorpamplona.amethyst.commons.resources.metadata_strip_failed_title
-import com.vitorpamplona.amethyst.commons.resources.metadata_strip_failed_upload_cancelled
-import com.vitorpamplona.amethyst.commons.resources.server_did_not_provide_a_url_after_uploading
+import com.vitorpamplona.amethyst.commons.ui.actions.mediaServers.ServerType
 import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.model.LocalCache
 import com.vitorpamplona.amethyst.service.uploads.CompressorQuality
@@ -45,7 +39,6 @@ import com.vitorpamplona.amethyst.service.uploads.MediaCompressor
 import com.vitorpamplona.amethyst.service.uploads.MetadataStripper
 import com.vitorpamplona.amethyst.service.uploads.blossom.BlossomUploader
 import com.vitorpamplona.amethyst.service.uploads.nip96.Nip96Uploader
-import com.vitorpamplona.amethyst.ui.actions.mediaServers.ServerType
 import com.vitorpamplona.amethyst.ui.actions.uploads.SelectedMedia
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.relays.common.BasicRelaySetupInfo
