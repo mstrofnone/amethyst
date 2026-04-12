@@ -20,4 +20,12 @@
  */
 package com.vitorpamplona.amethyst.model.topNavFeeds
 
-typealias IFeedTopNavFilter = com.vitorpamplona.amethyst.commons.model.topNavFeeds.IFeedTopNavFilter
+import com.vitorpamplona.amethyst.commons.model.ITopNavFilter
+import com.vitorpamplona.amethyst.model.LocalCache
+import kotlinx.coroutines.flow.Flow
+
+interface IFeedTopNavFilter : ITopNavFilter {
+    fun toPerRelayFlow(cache: LocalCache): Flow<IFeedTopNavPerRelayFilterSet>
+
+    fun startValue(cache: LocalCache): IFeedTopNavPerRelayFilterSet
+}
