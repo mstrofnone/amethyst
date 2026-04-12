@@ -26,8 +26,9 @@ import androidx.compose.runtime.DisposableEffect
 import com.google.zxing.client.android.Intents
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import com.vitorpamplona.amethyst.R
-import com.vitorpamplona.amethyst.commons.navigation.routes.Route
+import com.vitorpamplona.amethyst.commons.resources.Res
+import com.vitorpamplona.amethyst.commons.resources.point_to_the_qr_code
+import com.vitorpamplona.amethyst.ui.navigation.routes.Route
 import com.vitorpamplona.amethyst.ui.screen.loggedIn.AccountViewModel
 import com.vitorpamplona.amethyst.ui.uriToRoute
 import com.vitorpamplona.quartz.utils.Log

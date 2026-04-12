@@ -21,11 +21,20 @@
 package com.vitorpamplona.amethyst.ui.note.elements
 
 import androidx.compose.runtime.Composable
-import com.vitorpamplona.amethyst.R
-import com.vitorpamplona.amethyst.ui.stringRes
-import com.vitorpamplona.amethyst.commons.ui.note.elements.BoostedMark as CommonsBoostedMark
+import androidx.compose.ui.text.font.FontWeight
+import com.vitorpamplona.amethyst.commons.resources.Res
+import com.vitorpamplona.amethyst.commons.resources.boosted
+import com.vitorpamplona.amethyst.ui.theme.HalfStartPadding
+import com.vitorpamplona.amethyst.ui.theme.placeholderText
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BoostedMark() {
-    CommonsBoostedMark(text = stringRes(id = R.string.boosted))
+    Text(
+        stringResource(Res.string.boosted),
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.placeholderText,
+        maxLines = 1,
+        modifier = HalfStartPadding,
+    )
 }
