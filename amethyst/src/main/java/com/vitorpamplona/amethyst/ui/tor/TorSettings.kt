@@ -20,7 +20,21 @@
  */
 package com.vitorpamplona.amethyst.ui.tor
 
-import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.resources.Res
+import com.vitorpamplona.amethyst.commons.resources.tor_custom
+import com.vitorpamplona.amethyst.commons.resources.tor_custom_explainer
+import com.vitorpamplona.amethyst.commons.resources.tor_default
+import com.vitorpamplona.amethyst.commons.resources.tor_default_explainer
+import com.vitorpamplona.amethyst.commons.resources.tor_external
+import com.vitorpamplona.amethyst.commons.resources.tor_full_privacy
+import com.vitorpamplona.amethyst.commons.resources.tor_full_privacy_explainer
+import com.vitorpamplona.amethyst.commons.resources.tor_internal
+import com.vitorpamplona.amethyst.commons.resources.tor_off
+import com.vitorpamplona.amethyst.commons.resources.tor_small_payloads
+import com.vitorpamplona.amethyst.commons.resources.tor_small_payloads_explainer
+import com.vitorpamplona.amethyst.commons.resources.tor_when_needed
+import com.vitorpamplona.amethyst.commons.resources.tor_when_needed_explainer
+import org.jetbrains.compose.resources.StringResource
 
 // Re-export commons types for backward compatibility
 typealias TorSettings = com.vitorpamplona.amethyst.commons.tor.TorSettings
@@ -28,19 +42,30 @@ typealias TorType = com.vitorpamplona.amethyst.commons.tor.TorType
 typealias TorPresetType = com.vitorpamplona.amethyst.commons.tor.TorPresetType
 typealias TorDialogViewModel = com.vitorpamplona.amethyst.commons.tor.TorDialogViewModel
 
-// Re-export top-level functions and vals
-val torOnlyWhenNeededPreset get() = com.vitorpamplona.amethyst.commons.tor.torOnlyWhenNeededPreset
-val torDefaultPreset get() = com.vitorpamplona.amethyst.commons.tor.torDefaultPreset
-val torSmallPayloadsPreset get() = com.vitorpamplona.amethyst.commons.tor.torSmallPayloadsPreset
-val torFullyPrivate get() = com.vitorpamplona.amethyst.commons.tor.torFullyPrivate
+enum class TorType(
+    val screenCode: Int,
+    val resourceId: StringResource,
+) {
+    OFF(0, Res.string.tor_off),
+    INTERNAL(1, Res.string.tor_internal),
+    EXTERNAL(2, Res.string.tor_external),
+}
 
 fun parseTorType(code: Int?): com.vitorpamplona.amethyst.commons.tor.TorType =
     com.vitorpamplona.amethyst.commons.tor
         .parseTorType(code)
 
-fun parseTorPresetType(code: Int?): com.vitorpamplona.amethyst.commons.tor.TorPresetType =
-    com.vitorpamplona.amethyst.commons.tor
-        .parseTorPresetType(code)
+enum class TorPresetType(
+    val screenCode: Int,
+    val resourceId: StringResource,
+    val explainerId: StringResource,
+) {
+    ONLY_WHEN_NEEDED(0, Res.string.tor_when_needed, Res.string.tor_when_needed_explainer),
+    DEFAULT(1, Res.string.tor_default, Res.string.tor_default_explainer),
+    SMALL_PAYLOADS(2, Res.string.tor_small_payloads, Res.string.tor_small_payloads_explainer),
+    FULL_PRIVACY(3, Res.string.tor_full_privacy, Res.string.tor_full_privacy_explainer),
+    CUSTOM(4, Res.string.tor_custom, Res.string.tor_custom_explainer),
+}
 
 fun whichPreset(torSettings: TorSettings): com.vitorpamplona.amethyst.commons.tor.TorPresetType =
     com.vitorpamplona.amethyst.commons.tor
