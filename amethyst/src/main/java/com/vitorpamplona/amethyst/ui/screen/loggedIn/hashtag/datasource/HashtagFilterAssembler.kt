@@ -20,21 +20,6 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.hashtag.datasource
 
-import com.vitorpamplona.amethyst.commons.relayClient.composeSubscriptionManagers.ComposeSubscriptionManager
-import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.hashtag.datasource.HashtagQueryState
-import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
-
-class HashtagFilterAssembler(
-    client: INostrClient,
-) : ComposeSubscriptionManager<HashtagQueryState>() {
-    val group =
-        listOf(
-            HashtagFeedFilterSubAssembler(client, ::allKeys),
-        )
-
-    override fun invalidateKeys() = invalidateFilters()
-
-    override fun invalidateFilters() = group.forEach { it.invalidateFilters() }
-
-    override fun destroy() = group.forEach { it.destroy() }
-}
+// Re-export from commons for backwards compatibility
+typealias HashtagQueryState = com.vitorpamplona.amethyst.commons.relayClient.assemblers.hashtag.HashtagQueryState
+typealias HashtagFilterAssembler = com.vitorpamplona.amethyst.commons.relayClient.assemblers.hashtag.HashtagFilterAssembler

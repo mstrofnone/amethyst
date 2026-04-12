@@ -20,26 +20,6 @@
  */
 package com.vitorpamplona.amethyst.ui.screen.loggedIn.geohash.datasource
 
-import androidx.compose.runtime.Stable
-import com.vitorpamplona.amethyst.commons.relayClient.composeSubscriptionManagers.ComposeSubscriptionManager
-import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.geohash.datasource.GeohashQueryState
-import com.vitorpamplona.quartz.nip01Core.relay.client.INostrClient
-
-/**
- * Creates a filter for multiple geohashes at the same time.
- */
-@Stable
-class GeoHashFilterAssembler(
-    client: INostrClient,
-) : ComposeSubscriptionManager<GeohashQueryState>() {
-    val group =
-        listOf(
-            GeoHashFeedFilterSubAssembler(client, ::allKeys),
-        )
-
-    override fun invalidateKeys() = invalidateFilters()
-
-    override fun invalidateFilters() = group.forEach { it.invalidateFilters() }
-
-    override fun destroy() = group.forEach { it.destroy() }
-}
+// Re-export from commons for backwards compatibility
+typealias GeohashQueryState = com.vitorpamplona.amethyst.commons.relayClient.assemblers.geohash.GeohashQueryState
+typealias GeoHashFilterAssembler = com.vitorpamplona.amethyst.commons.relayClient.assemblers.geohash.GeoHashFilterAssembler
