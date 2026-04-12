@@ -20,16 +20,15 @@
  */
 package com.vitorpamplona.amethyst.commons.model.topNavFeeds
 
-import com.vitorpamplona.amethyst.commons.model.ITopNavFilter
 import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
 import kotlinx.coroutines.flow.Flow
 
-interface IFeedTopNavFilter : ITopNavFilter {
-    override fun matchAuthor(pubkey: HexKey): Boolean
+interface IFeedTopNavFilter {
+    fun matchAuthor(pubkey: HexKey): Boolean
 
-    override fun match(noteEvent: Event): Boolean
+    fun match(noteEvent: Event): Boolean
 
     fun toPerRelayFlow(cache: ICacheProvider): Flow<IFeedTopNavPerRelayFilterSet>
 
