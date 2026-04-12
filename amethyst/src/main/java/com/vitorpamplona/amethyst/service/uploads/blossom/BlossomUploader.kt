@@ -25,12 +25,9 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
-import com.vitorpamplona.amethyst.commons.platform.StringResolver
-import com.vitorpamplona.amethyst.commons.resources.Res
-import com.vitorpamplona.amethyst.commons.resources.failed_to_delete_with_message
-import com.vitorpamplona.amethyst.commons.resources.failed_to_upload_to_server_with_message
+import com.vitorpamplona.amethyst.R
+import com.vitorpamplona.amethyst.commons.threading.checkNotInMainThread
 import com.vitorpamplona.amethyst.service.HttpStatusMessages
-import com.vitorpamplona.amethyst.service.checkNotInMainThread
 import com.vitorpamplona.amethyst.service.uploads.BlurhashMetadataCalculator
 import com.vitorpamplona.amethyst.service.uploads.MediaUploadResult
 import com.vitorpamplona.amethyst.ui.stringRes
