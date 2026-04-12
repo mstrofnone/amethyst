@@ -47,8 +47,6 @@ fun kindEnd(kind: Int) = kindEnd(kind, END_KEY)
 
 val ACCEPT_ALL_FILTER = CacheCollectors.BiFilter<Address, AddressableNote> { _, _ -> true }
 
-// -- filter --
-
 fun ICacheOperations<Address, AddressableNote>.filter(
     kind: Int,
     consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
@@ -83,8 +81,6 @@ fun ICacheOperations<Address, AddressableNote>.filter(
     return set
 }
 
-// -- filterIntoSet --
-
 fun ICacheOperations<Address, AddressableNote>.filterIntoSet(
     kind: Int,
     consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
@@ -107,8 +103,6 @@ fun ICacheOperations<Address, AddressableNote>.filterIntoSet(
     consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
 ): Set<AddressableNote> = filterIntoSet(kindStart(kind, pubKey), kindEnd(kind, pubKey), consumer)
 
-// -- mapNotNullIntoSet --
-
 fun <R> ICacheOperations<Address, AddressableNote>.mapNotNullIntoSet(
     kind: Int,
     consumer: CacheCollectors.BiMapper<Address, AddressableNote, R?>,
@@ -119,10 +113,3 @@ fun <R> ICacheOperations<Address, AddressableNote>.mapNotNullIntoSet(
     pubKey: HexKey,
     consumer: CacheCollectors.BiMapper<Address, AddressableNote, R?>,
 ): Set<R> = mapNotNullIntoSet(kindStart(kind, pubKey), kindEnd(kind, pubKey), consumer)
-
-// -- mapFlattenIntoSet --
-
-fun <R> ICacheOperations<Address, AddressableNote>.mapFlattenIntoSet(
-    kind: Int,
-    consumer: CacheCollectors.BiMapper<Address, AddressableNote, Collection<R>?>,
-): Set<R> = mapFlattenIntoSet(kindStart(kind), kindEnd(kind), consumer)

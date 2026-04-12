@@ -141,14 +141,14 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Provides cache operations over all Note objects.
-     * Used by DAL FeedFilter subclasses for filtering and querying notes.
+     * Access to the notes cache for bulk filtering operations.
+     * Used by DAL FeedFilter subclasses for filterIntoSet/mapFlattenIntoSet queries.
      */
     val notes: ICacheOperations<HexKey, Note>
 
     /**
-     * Provides cache operations over all AddressableNote objects.
-     * Used by DAL FeedFilter subclasses for filtering and querying addressable notes.
+     * Access to the addressable notes cache for bulk filtering operations.
+     * Used by DAL FeedFilter subclasses for filterIntoSet/mapFlattenIntoSet queries by kind.
      */
     val addressables: ICacheOperations<Address, AddressableNote>
 }
