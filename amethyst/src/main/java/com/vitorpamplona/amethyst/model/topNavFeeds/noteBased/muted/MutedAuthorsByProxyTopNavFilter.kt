@@ -35,7 +35,7 @@ class MutedAuthorsByProxyTopNavFilter(
     val authors: Set<String>,
     val proxyRelays: Set<NormalizedRelayUrl>,
 ) : IFeedTopNavFilter {
-    override val isMutedList: Boolean get() = true
+    override val isMutedFilter: Boolean get() = true
 
     override fun matchAuthor(pubkey: HexKey) = pubkey in authors
 

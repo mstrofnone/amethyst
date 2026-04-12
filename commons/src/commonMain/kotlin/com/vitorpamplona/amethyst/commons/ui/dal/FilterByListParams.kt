@@ -20,18 +20,19 @@
  */
 package com.vitorpamplona.amethyst.commons.ui.dal
 
-import com.vitorpamplona.amethyst.commons.model.IFollowListFilter
 import com.vitorpamplona.amethyst.commons.model.LiveHiddenUsers
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
 import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
 import com.vitorpamplona.quartz.nip01Core.tags.hashtags.countHashtags
+import com.vitorpamplona.quartz.nip51Lists.muteList.MuteListEvent
+import com.vitorpamplona.quartz.nip51Lists.peopleList.PeopleListEvent
 import com.vitorpamplona.quartz.utils.TimeUtils
 
 class FilterByListParams(
     val isHiddenList: Boolean,
-    val followLists: IFollowListFilter?,
+    val followLists: IFilterByListTopNavFilter?,
     val hiddenLists: LiveHiddenUsers,
     val now: Long = TimeUtils.oneMinuteFromNow(),
 ) {
@@ -55,9 +56,9 @@ class FilterByListParams(
     ): Boolean {
         if (followLists == null) return false
 
-        val relayUrl = followLists.relayUrl
-        return if (relayUrl != null) {
-            comingFrom.contains(relayUrl)
+        val relay = followLists.relayUrl
+        return if (relay != null) {
+            comingFrom.contains(relay)
         } else {
             followLists.match(noteEvent)
         }
@@ -69,9 +70,9 @@ class FilterByListParams(
     ): Boolean {
         if (followLists == null) return false
 
-        val relayUrl = followLists.relayUrl
-        return if (relayUrl != null) {
-            comingFrom.contains(relayUrl)
+        val relay = followLists.relayUrl
+        return if (relay != null) {
+            comingFrom.contains(relay)
         } else {
             followLists.matchAuthor(address.pubKeyHex)
         }
@@ -93,12 +94,17 @@ class FilterByListParams(
         (isHiddenList || isNotHidden(address.pubKeyHex))
 
     companion object {
+        fun showHiddenKey(
+            selectedListName: String,
+            userHex: String,
+        ) = selectedListName == PeopleListEvent.blockListFor(userHex) || selectedListName == MuteListEvent.blockListFor(userHex)
+
         fun create(
-            followLists: IFollowListFilter?,
+            followLists: IFilterByListTopNavFilter?,
             hiddenUsers: LiveHiddenUsers,
         ): FilterByListParams =
             FilterByListParams(
-                isHiddenList = followLists?.isMutedList == true,
+                isHiddenList = followLists?.isMutedFilter == true,
                 followLists = followLists,
                 hiddenLists = hiddenUsers,
             )

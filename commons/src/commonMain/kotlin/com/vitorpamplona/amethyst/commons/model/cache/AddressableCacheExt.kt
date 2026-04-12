@@ -26,69 +26,30 @@ import com.vitorpamplona.quartz.nip01Core.core.HexKey
 import com.vitorpamplona.quartz.utils.cache.CacheCollectors
 import com.vitorpamplona.quartz.utils.cache.ICacheOperations
 
-const val START_KEY = "0000000000000000000000000000000000000000000000000000000000000000"
-const val END_KEY = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-const val START_D_TAG = ""
-const val END_D_TAG = "\uFFFF\uFFFF\uFFFF\uFFFF"
+private const val START_KEY = "0000000000000000000000000000000000000000000000000000000000000000"
+private const val END_KEY = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+private const val END_D_TAG = "\uFFFF\uFFFF\uFFFF\uFFFF"
 
-fun kindStart(
+private fun kindStart(
     kind: Int,
-    pubKey: HexKey,
+    pubKey: HexKey = START_KEY,
 ) = Address(kind, pubKey, "")
 
-fun kindEnd(
+private fun kindEnd(
     kind: Int,
-    pubKey: HexKey,
+    pubKey: HexKey = END_KEY,
 ) = Address(kind, pubKey, END_D_TAG)
 
-fun kindStart(kind: Int) = kindStart(kind, START_KEY)
-
-fun kindEnd(kind: Int) = kindEnd(kind, END_KEY)
-
-val ACCEPT_ALL_FILTER = CacheCollectors.BiFilter<Address, AddressableNote> { _, _ -> true }
-
-fun ICacheOperations<Address, AddressableNote>.filter(
-    kind: Int,
-    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
-): List<AddressableNote> = filter(kindStart(kind), kindEnd(kind), consumer)
-
-fun ICacheOperations<Address, AddressableNote>.filter(
-    kinds: List<Int>,
-    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
-): List<AddressableNote> {
-    val set = mutableSetOf<AddressableNote>()
-    kinds.forEach {
-        set.addAll(filter(kindStart(it), kindEnd(it), consumer))
-    }
-    return set.toList()
-}
-
-fun ICacheOperations<Address, AddressableNote>.filter(
-    kind: Int,
-    pubKey: HexKey,
-    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
-): List<AddressableNote> = filter(kindStart(kind, pubKey), kindEnd(kind, pubKey), consumer)
-
-fun ICacheOperations<Address, AddressableNote>.filter(
-    kinds: List<Int>,
-    pubKey: HexKey,
-    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
-): Set<AddressableNote> {
-    val set = mutableSetOf<AddressableNote>()
-    kinds.forEach {
-        set.addAll(filterIntoSet(kindStart(it, pubKey), kindEnd(it, pubKey), consumer))
-    }
-    return set
-}
+private val ACCEPT_ALL = CacheCollectors.BiFilter<Address, AddressableNote> { _, _ -> true }
 
 fun ICacheOperations<Address, AddressableNote>.filterIntoSet(
     kind: Int,
-    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
+    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL,
 ): Set<AddressableNote> = filterIntoSet(kindStart(kind), kindEnd(kind), consumer)
 
 fun ICacheOperations<Address, AddressableNote>.filterIntoSet(
     kinds: List<Int>,
-    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
+    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL,
 ): Set<AddressableNote> {
     val set = mutableSetOf<AddressableNote>()
     kinds.forEach {
@@ -97,19 +58,7 @@ fun ICacheOperations<Address, AddressableNote>.filterIntoSet(
     return set
 }
 
-fun ICacheOperations<Address, AddressableNote>.filterIntoSet(
-    kind: Int,
-    pubKey: HexKey,
-    consumer: CacheCollectors.BiFilter<Address, AddressableNote> = ACCEPT_ALL_FILTER,
-): Set<AddressableNote> = filterIntoSet(kindStart(kind, pubKey), kindEnd(kind, pubKey), consumer)
-
 fun <R> ICacheOperations<Address, AddressableNote>.mapNotNullIntoSet(
     kind: Int,
     consumer: CacheCollectors.BiMapper<Address, AddressableNote, R?>,
 ): Set<R> = mapNotNullIntoSet(kindStart(kind), kindEnd(kind), consumer)
-
-fun <R> ICacheOperations<Address, AddressableNote>.mapNotNullIntoSet(
-    kind: Int,
-    pubKey: HexKey,
-    consumer: CacheCollectors.BiMapper<Address, AddressableNote, R?>,
-): Set<R> = mapNotNullIntoSet(kindStart(kind, pubKey), kindEnd(kind, pubKey), consumer)

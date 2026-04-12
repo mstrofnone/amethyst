@@ -28,7 +28,7 @@ import com.vitorpamplona.amethyst.commons.model.nip28PublicChats.PublicChatChann
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
-import com.vitorpamplona.quartz.utils.cache.CacheCollectors
+import com.vitorpamplona.quartz.utils.cache.ICacheOperations
 
 /**
  * Cache provider interface for accessing cached Notes, Users, and Channels.
@@ -143,24 +143,14 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Filters all notes in cache matching a predicate.
-     * Used by feed filters to scan the note cache.
-     *
-     * @param predicate Filter function receiving (hexKey, note)
-     * @return Set of matching notes
+     * Access to the notes cache for scanning/filtering operations.
+     * Used by DAL feed filters that need to iterate over all notes.
      */
-    fun filterNotes(predicate: (HexKey, Note) -> Boolean): Set<Note>
+    val notes: ICacheOperations<HexKey, Note>
 
     /**
-     * Filters addressable notes by kind matching a predicate.
-     * Used by feed filters to scan addressable notes of a specific kind.
-     *
-     * @param kind The event kind to filter by
-     * @param predicate Filter function receiving (key, note)
-     * @return Set of matching notes
+     * Access to the addressable notes cache for scanning/filtering operations.
+     * Used by DAL feed filters that need to iterate over addressable events.
      */
-    fun filterAddressablesByKind(
-        kind: Int,
-        predicate: (Any, Note) -> Boolean,
-    ): Set<Note>
+    val addressables: ICacheOperations<Address, AddressableNote>
 }

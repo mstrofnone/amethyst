@@ -23,18 +23,16 @@ package com.vitorpamplona.amethyst.commons.model
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Interface for account settings needed by DAL feed filters in commons.
- * Abstracts Android-specific AccountSettings for use in KMP modules.
- *
- * DAL filters access settings.defaultXxxFollowList.value to determine
- * which follow list to use for each feed type.
+ * Minimal interface for account settings needed by commons feed filters.
+ * Provides follow-list selection codes used for feed keys.
  */
 interface IAccountSettings {
-    val defaultHomeFollowList: StateFlow<TopFilter>
-    val defaultStoriesFollowList: StateFlow<TopFilter>
-    val defaultNotificationFollowList: StateFlow<TopFilter>
-    val defaultPollsFollowList: StateFlow<TopFilter>
-    val defaultPicturesFollowList: StateFlow<TopFilter>
-    val defaultShortsFollowList: StateFlow<TopFilter>
-    val defaultLongsFollowList: StateFlow<TopFilter>
+    /** Code identifying the selected home follow list (e.g. " Global ", " All Follows ", or an address) */
+    val defaultHomeFollowListCode: StateFlow<String>
+
+    /** Code identifying the selected stories/video follow list */
+    val defaultStoriesFollowListCode: StateFlow<String>
+
+    /** Code identifying the selected discovery follow list */
+    val defaultDiscoveryFollowListCode: StateFlow<String>
 }

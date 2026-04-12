@@ -26,7 +26,7 @@ import com.vitorpamplona.amethyst.LocalPreferences
 import com.vitorpamplona.amethyst.commons.marmot.MarmotManager
 import com.vitorpamplona.amethyst.commons.model.FeedType
 import com.vitorpamplona.amethyst.commons.model.IAccount
-import com.vitorpamplona.amethyst.commons.model.IFollowListFilter
+import com.vitorpamplona.amethyst.commons.model.IAccountSettings
 import com.vitorpamplona.amethyst.commons.model.LiveHiddenUsers
 import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatChannel
 import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatListDecryptionCache
@@ -40,6 +40,7 @@ import com.vitorpamplona.amethyst.commons.model.nip30CustomEmojis.EmojiPackState
 import com.vitorpamplona.amethyst.commons.model.nip38UserStatuses.UserStatusAction
 import com.vitorpamplona.amethyst.commons.model.nip56Reports.ReportAction
 import com.vitorpamplona.amethyst.commons.richtext.RichTextParser
+import com.vitorpamplona.amethyst.commons.ui.dal.IFilterByListTopNavFilter
 import com.vitorpamplona.amethyst.logTime
 import com.vitorpamplona.amethyst.model.edits.PrivateStorageRelayListDecryptionCache
 import com.vitorpamplona.amethyst.model.edits.PrivateStorageRelayListState
@@ -278,6 +279,36 @@ class Account(
     override fun isKnown(user: String): Boolean = user in allFollows.flow.value.authors
 
     override fun pinnedNotesList(): List<Note> = pinState.pinnedNotesList.value
+
+    // IAccountSettings adapter wrapping AccountSettings TopFilter codes
+    override val accountSettings: IAccountSettings by lazy {
+        val homeCode = MutableStateFlow(settings.defaultHomeFollowList.value.code)
+        val storiesCode = MutableStateFlow(settings.defaultStoriesFollowList.value.code)
+        val discoveryCode = MutableStateFlow(settings.defaultDiscoveryFollowList.value.code)
+        scope.launch {
+            settings.defaultHomeFollowList.collect { homeCode.value = it.code }
+        }
+        scope.launch {
+            settings.defaultStoriesFollowList.collect { storiesCode.value = it.code }
+        }
+        scope.launch {
+            settings.defaultDiscoveryFollowList.collect { discoveryCode.value = it.code }
+        }
+        object : IAccountSettings {
+            override val defaultHomeFollowListCode: StateFlow<String> = homeCode
+            override val defaultStoriesFollowListCode: StateFlow<String> = storiesCode
+            override val defaultDiscoveryFollowListCode: StateFlow<String> = discoveryCode
+        }
+    }
+
+    // IAccount feed list accessors
+    override fun getHomeFollowList(): IFilterByListTopNavFilter? = liveHomeFollowLists.value
+
+    override fun getStoriesFollowList(): IFilterByListTopNavFilter? = liveStoriesFollowLists.value
+
+    override fun getDiscoveryFollowList(): IFilterByListTopNavFilter? = liveDiscoveryFollowLists.value
+
+    override fun getLiveHiddenUsers(): LiveHiddenUsers = hiddenUsers.flow.value
 
     val userMetadata = UserMetadataState(signer, cache, scope, settings)
 

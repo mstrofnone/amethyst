@@ -25,9 +25,7 @@ import com.vitorpamplona.amethyst.commons.model.marmotGroups.MarmotGroupList
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.BookmarkListState
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.OldBookmarkListState
 import com.vitorpamplona.amethyst.commons.model.privateChats.ChatroomList
-import com.vitorpamplona.amethyst.commons.model.topNavFeeds.IFeedTopNavFilter
-import com.vitorpamplona.quartz.nip01Core.core.Address
-import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.amethyst.commons.ui.dal.IFilterByListTopNavFilter
 import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
 import com.vitorpamplona.quartz.nip01Core.signers.NostrSigner
 import com.vitorpamplona.quartz.nip04Dm.messages.PrivateDmEvent
@@ -135,6 +133,21 @@ interface IAccount {
     fun followingKeySet(): Set<String>
 
     fun isHidden(user: User): Boolean
+
+    /** Account settings for feed list selections */
+    val accountSettings: IAccountSettings
+
+    /** Current live follow list filter for home feed */
+    fun getHomeFollowList(): IFilterByListTopNavFilter?
+
+    /** Current live follow list filter for stories/video feed */
+    fun getStoriesFollowList(): IFilterByListTopNavFilter?
+
+    /** Current live follow list filter for discovery feed */
+    fun getDiscoveryFollowList(): IFilterByListTopNavFilter?
+
+    /** Current hidden users state for feed filtering */
+    fun getLiveHiddenUsers(): LiveHiddenUsers
 
     /** Chatroom list for private DM conversations */
     val chatroomList: ChatroomList
