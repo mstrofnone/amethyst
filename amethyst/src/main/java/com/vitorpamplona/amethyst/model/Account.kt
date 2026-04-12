@@ -26,7 +26,6 @@ import com.vitorpamplona.amethyst.LocalPreferences
 import com.vitorpamplona.amethyst.commons.marmot.MarmotManager
 import com.vitorpamplona.amethyst.commons.model.FeedType
 import com.vitorpamplona.amethyst.commons.model.IAccount
-import com.vitorpamplona.amethyst.commons.model.IAccountSettings
 import com.vitorpamplona.amethyst.commons.model.LiveHiddenUsers
 import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatChannel
 import com.vitorpamplona.amethyst.commons.model.emphChat.EphemeralChatListDecryptionCache
@@ -137,6 +136,7 @@ import com.vitorpamplona.quartz.experimental.profileGallery.mimeType
 import com.vitorpamplona.quartz.marmot.mip00KeyPackages.KeyPackageEvent
 import com.vitorpamplona.quartz.marmot.mip00KeyPackages.KeyPackageUtils
 import com.vitorpamplona.quartz.marmot.mls.group.MlsGroupStateStore
+import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.AddressableEvent
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
@@ -2282,7 +2282,7 @@ class Account(
 
     override fun isHidden(user: User) = isHidden(user.pubkeyHex)
 
-    fun isHidden(userHex: String): Boolean = hiddenUsers.flow.value.isUserHidden(userHex)
+    override fun isHidden(pubkeyHex: String): Boolean = hiddenUsers.flow.value.isUserHidden(pubkeyHex)
 
     override fun followingKeySet(): Set<HexKey> = kind3FollowList.flow.value.authors
 
@@ -2322,7 +2322,7 @@ class Account(
             note.countReportAuthorsBy(followingKeySet()) < 5 // if it has 5 reports by reliable users
     }
 
-    fun isDecryptedContentHidden(noteEvent: PrivateDmEvent): Boolean =
+    override fun isDecryptedContentHidden(noteEvent: PrivateDmEvent): Boolean =
         if (hiddenUsers.flow.value.hiddenWordsCase
                 .isNotEmpty()
         ) {
@@ -2331,6 +2331,67 @@ class Account(
         } else {
             false
         }
+
+    override fun getBlockListAddress(): Address? = blockPeopleList.getBlockListAddress()
+
+    override val liveHiddenUsers: LiveHiddenUsers
+        get() = hiddenUsers.flow.value
+
+    override fun getLiveFollowLists(feedType: String): com.vitorpamplona.amethyst.commons.model.IFeedTopNavFilter? {
+        val filter =
+            when (feedType) {
+                "notification" -> liveNotificationFollowLists.value
+                "shorts" -> liveShortsFollowLists.value
+                "longs" -> liveLongsFollowLists.value
+                "stories" -> liveStoriesFollowLists.value
+                "home" -> liveHomeFollowLists.value
+                else -> return null
+            }
+        return com.vitorpamplona.amethyst.model.commons
+            .FeedTopNavFilterAdapter(filter)
+    }
+
+    override fun getDefaultFollowListCode(feedType: String): String =
+        when (feedType) {
+            "notification" -> settings.defaultNotificationFollowList.value.code
+            "shorts" -> settings.defaultShortsFollowList.value.code
+            "longs" -> settings.defaultLongsFollowList.value.code
+            "stories" -> settings.defaultStoriesFollowList.value.code
+            "home" -> settings.defaultHomeFollowList.value.code
+            else -> ""
+        }
+
+    override fun isFollowListShowingHidden(feedType: String): Boolean {
+        val topFilter =
+            when (feedType) {
+                "notification" -> settings.defaultNotificationFollowList.value
+                "shorts" -> settings.defaultShortsFollowList.value
+                "longs" -> settings.defaultLongsFollowList.value
+                "stories" -> settings.defaultStoriesFollowList.value
+                "home" -> settings.defaultHomeFollowList.value
+                else -> return false
+            }
+        return topFilter is TopFilter.MuteList ||
+            (topFilter is TopFilter.PeopleList && topFilter.address == blockPeopleList.getBlockListAddress())
+    }
+
+    override fun createFollowListFilter(authors: Set<String>): com.vitorpamplona.amethyst.commons.model.IFeedTopNavFilter? {
+        val filter =
+            if (proxyRelayList.flow.value.isEmpty()) {
+                com.vitorpamplona.amethyst.model.topNavFeeds.allUserFollows.AllUserFollowsByOutboxTopNavFilter(
+                    authors = authors,
+                    defaultRelays = defaultGlobalRelays.flow,
+                    blockedRelays = blockedRelayList.flow,
+                )
+            } else {
+                com.vitorpamplona.amethyst.model.topNavFeeds.allUserFollows.AllUserFollowsByProxyTopNavFilter(
+                    authors = authors,
+                    proxyRelays = proxyRelayList.flow.value,
+                )
+            }
+        return com.vitorpamplona.amethyst.model.commons
+            .FeedTopNavFilterAdapter(filter)
+    }
 
     fun isFollowing(user: User): Boolean = user.pubkeyHex in followingKeySet()
 

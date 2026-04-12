@@ -25,7 +25,7 @@ import com.vitorpamplona.amethyst.commons.model.marmotGroups.MarmotGroupList
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.BookmarkListState
 import com.vitorpamplona.amethyst.commons.model.nip51Lists.OldBookmarkListState
 import com.vitorpamplona.amethyst.commons.model.privateChats.ChatroomList
-import com.vitorpamplona.amethyst.commons.ui.dal.IFilterByListTopNavFilter
+import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.signers.EventTemplate
 import com.vitorpamplona.quartz.nip01Core.signers.NostrSigner
 import com.vitorpamplona.quartz.nip04Dm.messages.PrivateDmEvent
@@ -170,17 +170,42 @@ interface IAccount {
     /** Whether a note is acceptable (not hidden, not blocked, etc.) */
     fun isAcceptable(note: Note): Boolean
 
-    /** Bookmark list state (NIP-51 bookmark lists) */
-    val bookmarkState: BookmarkListState
+    /** Whether a specific pubkey is hidden */
+    fun isHidden(pubkeyHex: String): Boolean
 
-    /** Old bookmark list state (legacy NIP-51 bookmarks) */
-    val oldBookmarkState: OldBookmarkListState
+    /** Whether decrypted DM content should be hidden */
+    fun isDecryptedContentHidden(event: PrivateDmEvent): Boolean = false
 
-    /** Set of transiently-hidden (spammer) user pubkeys */
-    val transientHiddenUsers: Set<String>
+    /** The block list address for this account */
+    fun getBlockListAddress(): Address?
 
-    /** Cache provider for resolving notes/users */
-    val cacheProvider: ICacheProvider
+    /** Live hidden users state for filter params */
+    val liveHiddenUsers: LiveHiddenUsers
+
+    /**
+     * Live follow list filters, keyed by feed type.
+     * Feed types: "notification", "shorts", "longs", "stories", "home"
+     * Returns the IFeedTopNavFilter for building FilterByListParams.
+     */
+    fun getLiveFollowLists(feedType: String): IFeedTopNavFilter? = null
+
+    /**
+     * Default follow list code for the given feed type.
+     * Used for feedKey() generation.
+     */
+    fun getDefaultFollowListCode(feedType: String): String = ""
+
+    /**
+     * Whether the current follow list selection for the given feed type
+     * represents a mute/block list (showing hidden content).
+     */
+    fun isFollowListShowingHidden(feedType: String): Boolean = false
+
+    /**
+     * Creates an IFeedTopNavFilter for a custom set of followed authors.
+     * Used by FollowPack filters to build filter params for arbitrary follow sets.
+     */
+    fun createFollowListFilter(authors: Set<String>): IFeedTopNavFilter? = null
 
     /** Send a NIP-04 encrypted direct message */
     suspend fun sendNip04PrivateMessage(eventTemplate: EventTemplate<PrivateDmEvent>)

@@ -24,13 +24,13 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
+import com.vitorpamplona.amethyst.commons.model.IAccount
 import com.vitorpamplona.amethyst.commons.ui.feeds.InvalidatableContent
 import com.vitorpamplona.amethyst.commons.ui.feeds.LoadedFeedState
 import com.vitorpamplona.amethyst.commons.ui.notifications.Card
 import com.vitorpamplona.amethyst.commons.ui.notifications.CardFeedState
 import com.vitorpamplona.amethyst.commons.ui.screen.loggedIn.notifications.equalImmutableLists
 import com.vitorpamplona.amethyst.logTime
-import com.vitorpamplona.amethyst.model.Account
 import com.vitorpamplona.amethyst.model.LocalCache
 import com.vitorpamplona.amethyst.model.LocalCache.getNoteIfExists
 import com.vitorpamplona.amethyst.model.Note
@@ -83,7 +83,7 @@ class CardFeedContentState(
 
     val lastNoteCreatedAtWhenFullyLoaded = MutableStateFlow<Long?>(null)
 
-    private var lastAccount: Account? = null
+    private var lastAccount: IAccount? = null
     private var lastNotes: Set<Note>? = null
 
     fun sendToTop() {
