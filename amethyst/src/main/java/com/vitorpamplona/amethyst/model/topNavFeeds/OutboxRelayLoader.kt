@@ -20,4 +20,92 @@
  */
 package com.vitorpamplona.amethyst.model.topNavFeeds
 
-typealias OutboxRelayLoader = com.vitorpamplona.amethyst.commons.model.topNavFeeds.OutboxRelayLoader
+import com.vitorpamplona.amethyst.commons.model.AddressableNote
+import com.vitorpamplona.amethyst.commons.model.NoteState
+import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
+import com.vitorpamplona.amethyst.model.Constants
+import com.vitorpamplona.quartz.nip01Core.core.HexKey
+import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.quartz.nip65RelayList.AdvertisedRelayListEvent
+import com.vitorpamplona.quartz.utils.mapOfSet
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+
+class OutboxRelayLoader(
+    val rawOutboxRelays: Boolean = false,
+) {
+    fun authorsPerRelay(
+        outboxRelayNotes: Array<NoteState>,
+        cache: ICacheProvider,
+    ): Map<NormalizedRelayUrl, Set<HexKey>> =
+        mapOfSet {
+            outboxRelayNotes.forEach { outboxNote ->
+                val note = outboxNote.note
+
+                val authorHex =
+                    if (note is AddressableNote) {
+                        note.address.pubKeyHex
+                    } else {
+                        note.author?.pubkeyHex
+                    }
+
+                if (authorHex != null) {
+                    val relays =
+                        if (rawOutboxRelays) {
+                            (outboxNote.note.event as? AdvertisedRelayListEvent)?.writeRelaysNorm() ?: emptySet()
+                        } else {
+                            (outboxNote.note.event as? AdvertisedRelayListEvent)?.writeRelaysNorm()
+                                ?: cache.relayHints.hintsForKey(authorHex).ifEmpty { null }
+                                ?: Constants.eventFinderRelays
+                        }
+
+                    relays.forEach {
+                        if (!it.url.startsWith("wss://feeds.nostr.band") &&
+                            !it.url.startsWith("wss://filter.nostr.wine") &&
+                            !it.url.startsWith("wss://nwc.primal.net") &&
+                            !it.url.startsWith("wss://relay.getalby.com")
+                        ) {
+                            add(it, authorHex)
+                        }
+                    }
+                }
+            }
+        }
+
+    fun <T> authorsPerRelaySnapshot(
+        authors: Set<HexKey>,
+        cache: ICacheProvider,
+        transformation: (Map<NormalizedRelayUrl, Set<HexKey>>) -> T,
+    ): T {
+        val noteMetadata =
+            authors
+                .map { pubkeyHex ->
+                    cache
+                        .getOrCreateAddressableNote(AdvertisedRelayListEvent.createAddress(pubkeyHex))
+                        .flow()
+                        .metadata.stateFlow.value
+                }.toTypedArray()
+        return transformation(authorsPerRelay(noteMetadata, cache))
+    }
+
+    fun <T> toAuthorsPerRelayFlow(
+        authors: Set<HexKey>,
+        cache: ICacheProvider,
+        transformation: (Map<NormalizedRelayUrl, Set<HexKey>>) -> T,
+    ): Flow<T> {
+        val noteMetadataFlows =
+            authors.map { pubkeyHex ->
+                val note = cache.getOrCreateAddressableNote(AdvertisedRelayListEvent.createAddress(pubkeyHex))
+                note.flow().metadata.stateFlow
+            }
+
+        return if (noteMetadataFlows.isEmpty()) {
+            MutableStateFlow(transformation(emptyMap()))
+        } else {
+            combine(noteMetadataFlows) { outboxRelays ->
+                transformation(authorsPerRelay(outboxRelays, cache))
+            }
+        }
+    }
+}

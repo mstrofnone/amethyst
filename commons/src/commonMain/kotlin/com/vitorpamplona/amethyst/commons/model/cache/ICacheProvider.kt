@@ -30,7 +30,7 @@ import com.vitorpamplona.quartz.experimental.ephemChat.chat.RoomId
 import com.vitorpamplona.quartz.nip01Core.core.Address
 import com.vitorpamplona.quartz.nip01Core.core.Event
 import com.vitorpamplona.quartz.nip01Core.core.HexKey
-import com.vitorpamplona.quartz.utils.cache.ICacheOperations
+import com.vitorpamplona.quartz.nip01Core.hints.HintIndexer
 
 /**
  * Cache provider interface for accessing cached Notes, Users, and Channels.
@@ -157,20 +157,20 @@ interface ICacheProvider {
     fun justConsumeMyOwnEvent(event: Event): Boolean
 
     /**
-     * Gets or creates a PublicChatChannel by event ID.
-     * Used for resolving NIP-28 public chat channels.
+     * Gets or creates an AddressableNote from a string address key.
+     * Parses the string to Address, returns null if invalid.
      *
-     * @param key The channel event ID in hex format
-     * @return The PublicChatChannel (existing or newly created)
+     * @param key The address string to parse and look up
+     * @return The AddressableNote if valid, null otherwise
      */
-    fun getOrCreatePublicChatChannel(key: HexKey): PublicChatChannel
+    fun checkGetOrCreateAddressableNote(key: String): AddressableNote? {
+        val addr = Address.parse(key) ?: return null
+        return getOrCreateAddressableNote(addr)
+    }
 
     /**
-     * Gets or creates an EphemeralChatChannel by room ID.
-     * Used for resolving ephemeral chat channels.
-     *
-     * @param key The room ID
-     * @return The EphemeralChatChannel (existing or newly created)
+     * Gets the relay hint indexer for looking up relay hints by pubkey or address.
+     * Used by OutboxRelayLoader and CommunityRelayLoader to find relay hints.
      */
-    fun getOrCreateEphemeralChannel(key: RoomId): EphemeralChatChannel
+    val relayHints: HintIndexer
 }

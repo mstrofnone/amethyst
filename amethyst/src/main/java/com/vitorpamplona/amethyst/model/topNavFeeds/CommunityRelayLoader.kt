@@ -20,4 +20,75 @@
  */
 package com.vitorpamplona.amethyst.model.topNavFeeds
 
-typealias CommunityRelayLoader = com.vitorpamplona.amethyst.commons.model.topNavFeeds.CommunityRelayLoader
+import com.vitorpamplona.amethyst.commons.model.NoteState
+import com.vitorpamplona.amethyst.commons.model.cache.ICacheProvider
+import com.vitorpamplona.quartz.nip01Core.core.HexKey
+import com.vitorpamplona.quartz.nip01Core.relay.normalizer.NormalizedRelayUrl
+import com.vitorpamplona.quartz.nip72ModCommunities.definition.CommunityDefinitionEvent
+import com.vitorpamplona.quartz.utils.mapOfSet
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+
+class CommunityRelayLoader {
+    companion object {
+        fun communitiesPerRelay(
+            communityNotes: Array<NoteState>,
+            cache: ICacheProvider,
+        ): Map<NormalizedRelayUrl, Set<HexKey>> =
+            mapOfSet {
+                communityNotes.forEach { communityNote ->
+                    val relays =
+                        (communityNote.note.event as? CommunityDefinitionEvent)
+                            ?.relayUrls()
+                            ?.ifEmpty { null }
+                            ?: cache.relayHints.hintsForAddress(communityNote.note.idHex)
+
+                    relays.forEach {
+                        add(it, communityNote.note.idHex)
+                    }
+                }
+            }
+
+        fun <T> communitiesPerRelaySnapshot(
+            communities: Set<HexKey>,
+            cache: ICacheProvider,
+            transformation: (Map<NormalizedRelayUrl, Set<HexKey>>) -> T,
+        ): T {
+            val noteMetadata =
+                communities
+                    .mapNotNull { addressId ->
+                        cache
+                            .checkGetOrCreateAddressableNote(addressId)
+                            ?.flow()
+                            ?.metadata
+                            ?.stateFlow
+                            ?.value
+                    }.toTypedArray()
+            return transformation(communitiesPerRelay(noteMetadata, cache))
+        }
+
+        fun <T> toCommunitiesPerRelayFlow(
+            communities: Set<HexKey>,
+            cache: ICacheProvider,
+            transformation: (Map<NormalizedRelayUrl, Set<HexKey>>) -> T,
+        ): Flow<T> {
+            val noteMetadataFlows =
+                communities.mapNotNull { addressId ->
+                    cache
+                        .checkGetOrCreateAddressableNote(addressId)
+                        ?.flow()
+                        ?.metadata
+                        ?.stateFlow
+                }
+
+            return if (noteMetadataFlows.isEmpty()) {
+                MutableStateFlow(transformation(emptyMap()))
+            } else {
+                combine(noteMetadataFlows) { communityNotes ->
+                    transformation(communitiesPerRelay(communityNotes, cache))
+                }
+            }
+        }
+    }
+}
