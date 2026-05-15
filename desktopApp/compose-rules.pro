@@ -19,6 +19,74 @@
 # and the JVM failed to launch.
 
 # ============================================================================
+# JNI callback targets — native libraries that call back into Java by name
+# ============================================================================
+# Several desktop dependencies ship a native shared library (.dylib/.so/.dll)
+# that performs JNI callbacks into Java via `FindClass` / `GetMethodID`
+# /`GetStaticMethodID`. Those JNI lookups use fully-qualified class names and
+# method signatures, so ProGuard must NOT optimize, shrink, rename, or
+# remove anything in those classes — the native code on the other side has
+# no way to follow ProGuard's mapping file.
+#
+# Each `-keep class ... { *; }` rule below corresponds to a jar in the
+# packaged distribution that contains an actual native library (verified via
+# `unzip -l` on the post-package jar layout). Stripping any of these crashes
+# the desktop app the first time the relevant feature is used.
+#
+# Symptoms seen in v1.09.1 release before these rules were added:
+#
+# - secp256k1-kmp (signing, every account flow):
+#     IllegalStateException: Could not load native Secp256k1 JNI library.
+#     Did you add the JNI dependency?
+#       at fr.acinq.secp256k1.Secp256k1JvmKt.getSecpk256k1(Secp256k1Jvm.kt:35)
+#       at com.vitorpamplona.quartz.utils.Secp256k1Instance.<clinit>
+#       at com.vitorpamplona.quartz.nip01Core.crypto.KeyPair.<init>
+#   Triggers on the first "Generate New" / nsec login / event signing call.
+#
+# - androidx.sqlite (the bundled SQLite driver used by Quartz EventStore):
+#     NoSuchMethodError: Method 'int androidx.sqlite.driver.bundled
+#                                     .BundledSQLiteDriverKt.nativeThreadSafeMode()'
+#         name or signature does not match
+#       at androidx.sqlite.driver.bundled.NativeLibraryLoader.loadLibrary
+#       at com.vitorpamplona.quartz.nip01Core.store.sqlite.SQLiteEventStore.count
+#   Triggers on first relay-store query (LocalRelayStore.refreshStats).
+#   ProGuard stripped the `native` declarations because no Kotlin code calls
+#   them directly — only the bundled `libsqliteJni.dylib` does, via JNI.
+#
+# - jkeychain (macOS Keychain integration for nsec storage):
+#     UnsatisfiedLinkError on OSXKeychain._addGenericPassword / _find* / etc.
+#
+# - VLCj / JNA (already handled below) followed the same pattern: native
+#   code calls back into stripped Java classes and the bundled lookup fails.
+
+# secp256k1-kmp — signing, key generation, schnorr/ecdsa
+# `fr.acinq.secp256k1.Secp256k1JvmKt.getSecpk256k1()` reflectively loads
+# `fr.acinq.secp256k1.jni.NativeSecp256k1JvmLoader` (Android variant
+# `NativeSecp256k1AndroidLoader`) which then calls into `NativeSecp256k1`,
+# which holds the actual `native` method declarations.
+-keep class fr.acinq.secp256k1.** { *; }
+-keepclassmembers class fr.acinq.secp256k1.** {
+    native <methods>;
+}
+
+# androidx.sqlite (sqlite-bundled-jvm) — used by Quartz EventStore
+# The bundled `libsqliteJni.dylib` calls back into Java by name to read
+# config (`nativeThreadSafeMode`, `nativeOpen`, statement helpers, etc.).
+-keep class androidx.sqlite.** { *; }
+-keepclassmembers class androidx.sqlite.** {
+    native <methods>;
+    static <methods>;
+}
+
+# jkeychain — macOS Keychain integration for storing nsec / API tokens
+# `osxkeychain.dylib` JNI-calls back into `pt.davidafsilva.apple.OSXKeychain`
+# (4 private native methods) and constructs `OSXKeychainException`.
+-keep class pt.davidafsilva.apple.** { *; }
+-keepclassmembers class pt.davidafsilva.apple.** {
+    native <methods>;
+}
+
+# ============================================================================
 # Jackson — required to keep app launchable
 # ============================================================================
 # Jackson uses reflection extensively at construction time (ObjectMapper,
