@@ -130,13 +130,30 @@ compose.desktop {
             }
         }
 
-        // Compose Multiplatform 1.11.0 tightened the default ProGuard rules so
-        // unresolved references in transitive deps (Jackson kotlin-module value
-        // classes, okhttp's optional TLS adapters, JNA cleaner internals) now
-        // fail `proguardReleaseJars`. Project-level rules below add the missing
-        // `-dontwarn` directives.
+        // Compose Multiplatform 1.11.0 wired ProGuard 7.7.0 into the release
+        // build. ProGuard's optimize and obfuscate passes both broke Amethyst:
+        //
+        //  - obfuscate stripped JNI callback methods on secp256k1-kmp,
+        //    sqlite-bundled, jkeychain, VLCj and others because no Kotlin
+        //    caller referenced them by name (the native shared libraries did,
+        //    via JNI `FindClass`/`GetMethodID`).
+        //  - obfuscate also dropped `values()`/`valueOf()` on Jackson's
+        //    feature enums, so `Class.getEnumConstants()` returned null and
+        //    `ObjectMapper` failed to initialise.
+        //  - optimize rewrote bytecode in ways the JVM verifier rejected,
+        //    e.g. okio's `Okio__OkioKt.buffer$5ae116e` declared a return type
+        //    of `RealBufferedSource` but returned the `BufferedSource`
+        //    super-interface, producing `VerifyError: Bad return type` on
+        //    every okhttp connection attempt.
+        //
+        // We keep the shrink pass (which removes whole unused classes and
+        // doesn't rewrite or rename anything) because that is the only part
+        // worth running on a desktop bundle. Project-level rules in
+        // `compose-rules.pro` still keep reflection-heavy libraries intact.
         buildTypes.release.proguard {
             configurationFiles.from(project.file("compose-rules.pro"))
+            optimize.set(false)
+            obfuscate.set(false)
         }
     }
 }
