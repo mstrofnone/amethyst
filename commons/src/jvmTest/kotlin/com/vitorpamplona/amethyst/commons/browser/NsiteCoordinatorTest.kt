@@ -45,6 +45,10 @@ class NsiteCoordinatorTest {
             assertEquals(root, assertIs<NsiteOutcome.Success>(rootOutcome).event)
             assertEquals("Root site", assertIs<NsiteOutcome.Success>(rootOutcome).launch.title)
 
+            val rootAddressTarget = target(NAddress.create(RootSiteEvent.KIND, signer.pubKey, "", null))
+            val rootAddressOutcome = NsiteCoordinator { root }.resolve(rootAddressTarget)
+            assertEquals(root, assertIs<NsiteOutcome.Success>(rootAddressOutcome).event)
+
             val named = named(title = "Named site")
             val namedTarget = target(NAddress.create(NamedSiteEvent.KIND, signer.pubKey, "blog", null))
             val namedOutcome = NsiteCoordinator { named }.resolve(namedTarget)
@@ -79,6 +83,10 @@ class NsiteCoordinatorTest {
             val namedTarget = target(NAddress.create(NamedSiteEvent.KIND, signer.pubKey, "other", null))
             val namedOutcome = NsiteCoordinator { named() }.resolve(namedTarget)
             assertEquals(NsiteFailure.WRONG_EVENT, assertIs<NsiteOutcome.Failure>(namedOutcome).reason)
+
+            val rootAddressTarget = target(NAddress.create(RootSiteEvent.KIND, signer.pubKey, "", null))
+            val rootAddressOutcome = NsiteCoordinator { named() }.resolve(rootAddressTarget)
+            assertEquals(NsiteFailure.WRONG_EVENT, assertIs<NsiteOutcome.Failure>(rootAddressOutcome).reason)
         }
 
     @Test

@@ -37,6 +37,8 @@ class NsiteTargetTest {
     private val author = "ab".repeat(32)
     private val id = "cd".repeat(32)
     private val hint = RelayUrlNormalizer.normalizeOrNull("wss://relay.example.com")!!
+    private val rootNaddr =
+        "naddr1qvzqqqpmrqpzqfngzhsvjggdlgeycm96x4emzjlwf8dyyzdfg4hefp89zpkdgz99qythwumn8ghj7un9d3shjtn90psk6urvv5hxxmmdqqqqk9fgz7"
 
     @Test
     fun authorIdentifiersSelectTheRootManifest() {
@@ -56,6 +58,17 @@ class NsiteTargetTest {
         val named = assertIs<NsiteTargetParseResult.Parsed>(NsiteTarget.parse(NAddress.create(NamedSiteEvent.KIND, author, "blog", hint))).target
         assertEquals("blog", assertIs<NAddress>(named.entity).dTag)
         assertEquals(listOf(hint), assertIs<NAddress>(named.entity).relay)
+    }
+
+    @Test
+    fun rootAddressSelectsTheCurrentRootManifest() {
+        val root = assertIs<NsiteTargetParseResult.Parsed>(NsiteTarget.parse(rootNaddr)).target
+        val address = assertIs<NAddress>(root.entity)
+
+        assertEquals("266815e0c9210dfa324c6cba3573b14bee49da4209a9456f9484e5106cd408a5", address.author)
+        assertEquals(RootSiteEvent.KIND, address.kind)
+        assertEquals("", address.dTag)
+        assertEquals(listOf(hint), address.relay)
     }
 
     @Test
@@ -85,7 +98,7 @@ class NsiteTargetTest {
                 "nostr:npub1bad",
                 NPub.create(author) + "trailing",
                 NAddress.create(30023, author, "article", hint),
-                NAddress.create(RootSiteEvent.KIND, author, "", hint),
+                NAddress.create(30023, author, "", hint),
                 NAddress.create(RootSiteEvent.KIND, author, "not-root", hint),
                 NAddress.create(NamedSiteEvent.KIND, author, "", hint),
                 NEvent.create(id, author, 5128, hint),

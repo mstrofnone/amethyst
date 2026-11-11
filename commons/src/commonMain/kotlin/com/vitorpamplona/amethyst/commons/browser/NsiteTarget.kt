@@ -51,7 +51,13 @@ class NsiteTarget private constructor(
         when (val ref = entity) {
             is NPub -> event is RootSiteEvent && event.pubKey == ref.hex
             is NProfile -> event is RootSiteEvent && event.pubKey == ref.hex
-            is NAddress -> event is NamedSiteEvent && event.pubKey == ref.author && event.identifier() == ref.dTag
+            is NAddress ->
+                event.pubKey == ref.author &&
+                    when (ref.kind) {
+                        RootSiteEvent.KIND -> ref.dTag.isEmpty() && event is RootSiteEvent
+                        NamedSiteEvent.KIND -> ref.dTag.isNotEmpty() && event is NamedSiteEvent && event.identifier() == ref.dTag
+                        else -> false
+                    }
             is NEvent ->
                 event.id == ref.hex &&
                     (ref.author == null || event.pubKey == ref.author) &&
@@ -80,7 +86,12 @@ class NsiteTarget private constructor(
                 when (val entity = route.entity) {
                     is NPub, is NProfile, is NNote -> true
                     is NEvent -> entity.kind == null || entity.kind == RootSiteEvent.KIND || entity.kind == NamedSiteEvent.KIND
-                    is NAddress -> entity.kind == NamedSiteEvent.KIND && entity.dTag.isNotEmpty()
+                    is NAddress ->
+                        when (entity.kind) {
+                            RootSiteEvent.KIND -> entity.dTag.isEmpty()
+                            NamedSiteEvent.KIND -> entity.dTag.isNotEmpty()
+                            else -> false
+                        }
                     else -> false
                 }
             return if (supported) NsiteTargetParseResult.Parsed(NsiteTarget(original, route.entity)) else NsiteTargetParseResult.Invalid
