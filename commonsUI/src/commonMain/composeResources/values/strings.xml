@@ -9451,4 +9451,16 @@
     <string name="media_kind_audio">Audio</string>
     <string name="media_kind_pdf">PDF</string>
     <string name="media_type_and_size">%1$s · %2$s</string>
+    <string name="nsite_event_omnibox_open">Open nSite manifest event</string>
+    <string name="nsite_event_invalid_title">Invalid nSite identifier</string>
+    <string name="nsite_event_resolving_title">Load nSite event</string>
+    <string name="nsite_event_resolving_message">Retrieving the requested signed nSite manifest event from your relays.</string>
+    <string name="nsite_event_cancel">Cancel</string>
+    <string name="nsite_event_retry">Retry</string>
+    <string name="nsite_event_failure_title">nSite could not be opened</string>
+    <string name="nsite_event_failure_invalid_identifier">Use an npub or nprofile for a root site, a kind 35128 naddr for a named site, or a nevent or note for a root or named manifest event.</string>
+    <string name="nsite_event_failure_fetch">The requested nSite manifest event could not be retrieved from your relays.</string>
+    <string name="nsite_event_failure_timeout">The nSite manifest event request timed out.</string>
+    <string name="nsite_event_failure_wrong_event">The retrieved event does not match the requested root or named nSite manifest.</string>
+    <string name="nsite_event_failure_invalid_site">The manifest event failed signature or nSite content validation.</string>
 </resources>

@@ -58,6 +58,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,10 +94,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.vitorpamplona.amethyst.commons.browser.BrowserHistoryEntry
 import com.vitorpamplona.amethyst.commons.browser.DefaultWebClients
+import com.vitorpamplona.amethyst.commons.browser.NsiteCoordinator
+import com.vitorpamplona.amethyst.commons.browser.NsiteFailure
+import com.vitorpamplona.amethyst.commons.browser.NsiteManifestLoader
+import com.vitorpamplona.amethyst.commons.browser.NsiteOutcome
+import com.vitorpamplona.amethyst.commons.browser.NsiteTarget
+import com.vitorpamplona.amethyst.commons.browser.NsiteTargetParseResult
 import com.vitorpamplona.amethyst.commons.browser.OmniboxInput
 import com.vitorpamplona.amethyst.commons.browser.OmniboxSuggestions
 import com.vitorpamplona.amethyst.commons.browser.SearchEngines
 import com.vitorpamplona.amethyst.commons.browser.SuggestedWebApp
+import com.vitorpamplona.amethyst.commons.browser.ui.NsiteNavigationDialog
 import com.vitorpamplona.amethyst.commons.favorites.FavoriteApp
 import com.vitorpamplona.amethyst.commons.favorites.FavoriteAppIcon
 import com.vitorpamplona.amethyst.commons.favorites.PreloadFavoriteNostrApps
@@ -128,6 +136,8 @@ import com.vitorpamplona.amethyst.commons.resources.favorite_app_add
 import com.vitorpamplona.amethyst.commons.resources.favorite_app_recent
 import com.vitorpamplona.amethyst.commons.resources.favorite_app_remove
 import com.vitorpamplona.amethyst.commons.resources.favorite_app_still_loading
+import com.vitorpamplona.amethyst.commons.resources.nsite_event_invalid_title
+import com.vitorpamplona.amethyst.commons.resources.nsite_event_omnibox_open
 import com.vitorpamplona.amethyst.commons.ui.components.util.getText
 import com.vitorpamplona.amethyst.commons.ui.components.util.hasText
 import com.vitorpamplona.amethyst.commons.ui.navigation.navs.INav
@@ -150,12 +160,15 @@ import com.vitorpamplona.quartz.nip5dNapplets.root.RootNappletEvent
 import com.vitorpamplona.quartz.utils.TimeUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 
 /** How many of the most recent history entries the idle browser home surfaces under "Recent". */
 private const val RECENTS_LIMIT = 12
+private const val NSITE_NAVIGATION_TIMEOUT_MS = 45_000L
 
 /**
  * The Browser tab — a **launcher**, not a content surface. The user types a URL here and each opened
@@ -214,6 +227,19 @@ private fun BrowserLauncher(
     val focusManager = LocalFocusManager.current
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
+
+    val nsiteJob = remember { arrayOfNulls<Job>(1) }
+    var nsiteRequestId by remember { mutableStateOf(0L) }
+    var nsiteResolving by remember { mutableStateOf<String?>(null) }
+    var nsiteOutcome by remember { mutableStateOf<NsiteOutcome?>(null) }
+    val nsiteCoordinator =
+        remember(accountViewModel) {
+            val account = accountViewModel.account
+            NsiteCoordinator(NsiteManifestLoader(account.cache, accountViewModel.dataSources(), account)::load)
+        }
+    DisposableEffect(Unit) {
+        onDispose { nsiteJob[0]?.cancel() }
+    }
 
     // Checked from the clipboard's metadata whenever the field gains focus or the window comes back (the
     // user may have left to copy a link), so "Paste and go" is only offered when there is something to
@@ -289,14 +315,63 @@ private fun BrowserLauncher(
 
     val suggestions = remember(typed, candidates) { ranked(typed) }
 
-    fun open(text: String) {
-        val target = OmniboxInput.resolve(text, searchEngine.queryPrefix) ?: return
-        appLauncher.launchUrl(target.url, target.forceTor)
-        // The site opens in its own window: coming back should land on a fresh launcher, not on the
-        // half-typed address and its suggestions.
+    fun clearAddress() {
         field = TextFieldValue("")
         ghost = null
         focusManager.clearFocus()
+    }
+
+    fun dismissNsiteNavigation() {
+        nsiteRequestId++
+        nsiteJob[0]?.cancel()
+        nsiteJob[0] = null
+        nsiteResolving = null
+        nsiteOutcome = null
+    }
+
+    fun openNsite(target: NsiteTarget) {
+        nsiteJob[0]?.cancel()
+        val requestId = ++nsiteRequestId
+        nsiteOutcome = null
+        nsiteResolving = target.original
+        nsiteJob[0] =
+            scope.launch {
+                val outcome =
+                    withTimeoutOrNull(NSITE_NAVIGATION_TIMEOUT_MS) { nsiteCoordinator.resolve(target) }
+                        ?: NsiteOutcome.Failure(target.original, NsiteFailure.TIMEOUT)
+                if (requestId != nsiteRequestId) return@launch
+                nsiteResolving = null
+                when (outcome) {
+                    is NsiteOutcome.Success -> {
+                        nsiteOutcome = null
+                        appLauncher.openSite(outcome.event)
+                        clearAddress()
+                    }
+                    is NsiteOutcome.Failure -> nsiteOutcome = outcome
+                }
+            }
+    }
+
+    fun open(text: String) {
+        when (val parsed = NsiteTarget.parse(text)) {
+            is NsiteTargetParseResult.Parsed -> {
+                openNsite(parsed.target)
+                return
+            }
+            NsiteTargetParseResult.Invalid -> {
+                dismissNsiteNavigation()
+                nsiteOutcome = NsiteOutcome.Failure(text.trim(), NsiteFailure.INVALID_IDENTIFIER)
+                return
+            }
+            NsiteTargetParseResult.NotNsite -> Unit
+        }
+
+        val target = OmniboxInput.resolve(text, searchEngine.queryPrefix) ?: return
+        dismissNsiteNavigation()
+        appLauncher.launchUrl(target.url, target.forceTor)
+        // The site opens in its own window: coming back should land on a fresh launcher, not on the
+        // half-typed address and its suggestions.
+        clearAddress()
     }
 
     // Pin/unpin a plain web URL by its favorite id. Shared by the suggestion list and the Recent rows.
@@ -411,6 +486,13 @@ private fun BrowserLauncher(
             }
         }
     }
+
+    NsiteNavigationDialog(
+        resolving = nsiteResolving,
+        outcome = nsiteOutcome,
+        onDismiss = ::dismissNsiteNavigation,
+        onRetry = ::open,
+    )
 }
 
 /**
@@ -436,7 +518,7 @@ private fun OmniBar(
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val colors = MaterialTheme.colorScheme
-    val isAddress = OmniboxInput.isAddress(field.text)
+    val isAddress = NsiteTarget.parse(field.text) !is NsiteTargetParseResult.NotNsite || OmniboxInput.isAddress(field.text)
 
     Row(
         modifier =
@@ -560,15 +642,26 @@ private fun EnteredRow(
     searchEngine: SearchEngines.SearchEngine,
     onClick: () -> Unit,
 ) {
-    val target = OmniboxInput.resolve(entered, searchEngine.queryPrefix) ?: return
-    val isAddress = !target.isSearch
+    val nsiteTarget = NsiteTarget.parse(entered)
+    val target = OmniboxInput.resolve(entered, searchEngine.queryPrefix)
+    if (nsiteTarget is NsiteTargetParseResult.NotNsite && target == null) return
+    val isAddress = nsiteTarget !is NsiteTargetParseResult.NotNsite || target?.isSearch == false
     val title =
-        if (isAddress) {
-            stringRes(Res.string.browser_omnibox_go_to, target.url.removePrefix("https://"))
-        } else {
-            stringRes(Res.string.browser_omnibox_search_for, entered.trim())
+        when (nsiteTarget) {
+            is NsiteTargetParseResult.Parsed -> stringRes(Res.string.nsite_event_omnibox_open)
+            NsiteTargetParseResult.Invalid -> stringRes(Res.string.nsite_event_invalid_title)
+            NsiteTargetParseResult.NotNsite ->
+                if (target?.isSearch == false) {
+                    stringRes(Res.string.browser_omnibox_go_to, target.url.removePrefix("https://"))
+                } else {
+                    stringRes(Res.string.browser_omnibox_search_for, entered.trim())
+                }
         }
-    val subtitle = if (isAddress) null else searchEngine.name
+    val subtitle =
+        when (nsiteTarget) {
+            is NsiteTargetParseResult.Parsed, NsiteTargetParseResult.Invalid -> entered.trim()
+            NsiteTargetParseResult.NotNsite -> if (target?.isSearch != false) searchEngine.name else null
+        }
     Row(
         modifier =
             Modifier
