@@ -1,0 +1,19 @@
+PASS self-signed-rejected-result-visible.json: ElectrumX TLS handshake was rejected
+PASS self-signed-pinned-result.json: Connected
+PASS self-signed-pinned-result.json: (1/1 OK)
+PASS pin-restart-success-visible.json: Connected
+PASS pin-restart-success-visible.json: (1/1 OK)
+PASS local-fixture-name-not-found.json: No record for d/testls on Namecoin.
+PASS direct-d-testls-result.json: Vitor Pamplona, Namecoin, d/testls
+PASS direct-nip05-result.json: v, Namecoin, m@testls.bit
+PASS direct-live-name-not-found.json: No record for d/openclaw-missing-20261128 on Namecoin.
+PASS tor-d-testls-result.json: Vitor Pamplona, Namecoin, d/testls
+PASS tor-nip05-result.json: v, Namecoin, m@testls.bit
+PASS tor-connection-drawer.json: Connected to Tor
+PASS onion-fail-closed-visible.json: All ElectrumX servers unreachable
+PASS onion-fail-closed-visible.json: 0ms
+PASS defaults-restored.json: DEFAULT
+PASS tor-off-before-live-lookups.json: Off Selected
+PASS privacy-tor-nip05-enabled.json: Internal Selected
+PASS privacy-final-direct.json: Off Selected
+All final runtime evidence assertions passed.
